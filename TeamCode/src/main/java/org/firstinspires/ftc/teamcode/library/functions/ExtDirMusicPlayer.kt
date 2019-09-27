@@ -40,6 +40,6 @@ class ExtDirMusicPlayer {
 
 enum class ExtMusicFile(@JvmField val fileName: String) {
     UNITY("unity.mp3"),
-    MEGALOUNITY("megalounity.mp3")
-
+    MEGALOUNITY("megalounity.mp3"),
+    BRADTHECHEMIST("bradthechemist.mp3")
 }
