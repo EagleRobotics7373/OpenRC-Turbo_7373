@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
+<Robot type="FirstInspires-FTC">
+    <LynxUsbDevice name="Expansion Hub Portal 1" serialNumber="DQ1O33NE" parentModuleAddress="2">
+        <LynxModule name="Expansion Hub 1" port="1">
+            <!--motors-->
+            <Matrix12vMotor name="hangingScrew" port="0" />
+            <RevRoboticsCoreHexMotor name="collectorMotor" port="1"/>
+            <RevRoboticsCoreHexMotor name="backLeftMotor" port="2" />
+            <RevRoboticsCoreHexMotor name="frontLeftMotor" port="3" />
+            <!--analog input devices-->
+            <AnalogInput name="potentiometer" port="2" />
+            <!--i2c bus 0-->
+            <LynxEmbeddedIMU name="imuA" port="0" bus="0" />
+        </LynxModule>
+        <LynxModule name="Expansion Hub 2" port="2">
+            <!--motors-->
+            <RevRoboticsCoreHexMotor name="backRightMotor" port="0" />
+            <RevRoboticsCoreHexMotor name="frontRightMotor" port="1" />
+            <Matrix12vMotor name="intakeArmPivotMotor" port="2" />
+            <RevRoboticsCoreHexMotor name="intakeArmExtensionMotor" port="3"/>
+            <!--servos-->
+            <Servo name="collectionBoxPivotServo" port="0" />
+            <Servo name="outputDirectionSwitcherServo" port="1" />
+            <!--<Servo name="collectorServo" port="2" />-->
+            <RevBlinkinLedDriver name="blinkin" port="3"/>
+            <Servo name="teamMarkerServo" port="5" />
+            <!--i2c bus 0-->
+            <LynxEmbeddedIMU name="imuB" port="0" bus="0" />
+            <LynxColorSensor name="leftColorSensor" port="1" bus="0" />
+            <!--i2c bus 1-->
+            <LynxColorSensor name="rightColorSensor" port="0" bus="1" />
+        </LynxModule>
+    </LynxUsbDevice>
+    <Webcam name="Webcam 1" serialNumber="63A4BA9F" />
+</Robot>

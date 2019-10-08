@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.library.robot.systems;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.teamcode.library.functions.MathOperations;
 
@@ -29,13 +30,22 @@ public class Holonomic extends Drivetrain {
         TICKS_PER_INCH = TICKS_PER_REVOLUTION / WHEEL_CIRCUMFERENCE;
     }
 
-    public Holonomic(DcMotor frontLeftMotor, DcMotor backLeftMotor, DcMotor frontRightMotor, DcMotor backRightMotor) {
+    public Holonomic(DcMotor frontLeftMotor, DcMotor backLeftMotor, DcMotor frontRightMotor, DcMotor backRightMotor, Chassis chassis) {
         super.frontLeftMotor = frontLeftMotor;
         super.frontRightMotor = frontRightMotor;
         super.backLeftMotor = backLeftMotor;
         super.backRightMotor = backRightMotor;
 
+        if (chassis == Chassis.SSGOBILDA) {
+            frontLeftMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+            frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+            backLeftMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+            backRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        }
+    }
 
+    public Holonomic(DcMotor frontLeftMotor, DcMotor backLeftMotor, DcMotor frontRightMotor, DcMotor backRightMotor) {
+        this(frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor, Chassis.RR27373REV);
     }
 
     private void run(double x, double y, double z) {
@@ -56,6 +66,34 @@ public class Holonomic extends Drivetrain {
         ((DcMotorEx)backLeftMotor).setTargetPositionTolerance(TARGET_POSITION_TOLERANCE);
         ((DcMotorEx)frontRightMotor).setTargetPositionTolerance(TARGET_POSITION_TOLERANCE);
         ((DcMotorEx)backRightMotor).setTargetPositionTolerance(TARGET_POSITION_TOLERANCE);
+    }
+
+    public void runWithoutEncoderVectored(double x, double y, double z, double offsetTheta) {
+
+        double theta;
+        double axisConversionAngle = Math.PI/4;
+        double xPrime;
+        double yPrime;
+
+        // calculate r
+        double r = Math.sqrt(Math.pow(x,2)+ Math.pow(y,2));
+        // calculate theta
+        if (x == 0) x = 0.00001;
+        theta = Math.atan(y / x);
+        if (x < 0) theta += Math.PI;
+        theta += offsetTheta;
+        // calculate x and y prime
+        xPrime = r * Math.cos(theta - axisConversionAngle);
+        yPrime = r * Math.sin(theta - axisConversionAngle);
+
+        // set motors mode
+        setMotorsMode(RUN_WITHOUT_ENCODER);
+
+        // set motor powers
+        frontLeftMotor.setPower(xPrime+z);
+        backLeftMotor.setPower(yPrime+z);
+        backRightMotor.setPower(-xPrime+z);
+        frontRightMotor.setPower(-yPrime+z);
     }
 
     public void runWithoutEncoder(double x, double y, double z) {
