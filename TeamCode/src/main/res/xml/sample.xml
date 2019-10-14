@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
+<Robot type="FirstInspires-FTC">
+    <LynxUsbDevice name="Expansion Hub Portal 1" serialNumber="DQ2D63TT" parentModuleAddress="2">
+        <LynxModule name="Expansion Hub 1" port="1">
+            <Matrix12vMotor name="ma" port="0" />
+            <NeveRest20Gearmotor name="nr20" port="1" />
+            <RevRoboticsCoreHexMotor name="revc" port="2" />
+            <Servo name="s" port="0" />
+            <ContinuousRotationServo name="cs" port="1" />
+            <RevBlinkinLedDriver name="blink" port="2" />
+            <AnalogInput name="analoginput" port="0" />
+            <OpticalDistanceSensor name="mr-ods" port="1" />
+            <RevTouchSensor name="ts" port="0" />
+            <LynxEmbeddedIMU name="imu" port="0" bus="0" />
+            <REV_VL53L0X_RANGE_SENSOR name="rev2mds" port="1" bus="0" />
+            <LynxColorSensor name="revCS" port="2" bus="0" />
+            <RevColorSensorV3 name="revCS v3" port="0" bus="1" />
+        </LynxModule>
+        <LynxModule name="Expansion Hub 2" port="2">
+            <LynxEmbeddedIMU name="imu 1" port="0" bus="0" />
+        </LynxModule>
+    </LynxUsbDevice>
+</Robot>

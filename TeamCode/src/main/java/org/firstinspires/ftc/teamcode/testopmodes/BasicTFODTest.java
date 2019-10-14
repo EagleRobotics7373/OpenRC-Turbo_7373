@@ -27,8 +27,6 @@ public class BasicTFODTest extends LinearOpMode {
 private ExtDirMusicPlayer musicPlayer;
     @Override
     public void runOpMode() {
-        musicPlayer = new ExtDirMusicPlayer();
-        musicPlayer.play(ExtMusicFile.MEGALOUNITY);
         // The TFObjectDetector uses the camera frames from the VuforiaLocalizer, so we create that
         // first.
         initVuforia();

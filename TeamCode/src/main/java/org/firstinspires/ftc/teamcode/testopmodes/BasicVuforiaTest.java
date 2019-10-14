@@ -145,8 +145,7 @@ public class BasicVuforiaTest extends LinearOpMode {
          */
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
-        ExtDirMusicPlayer player = new ExtDirMusicPlayer();
-        player.play(ExtMusicFile.BRADTHECHEMIST);
+
         // VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
 
         parameters.vuforiaLicenseKey = VUFORIA_KEY;
@@ -357,6 +356,5 @@ public class BasicVuforiaTest extends LinearOpMode {
 
         // Disable Tracking when we are done;
         targetsSkyStone.deactivate();
-        player.stop();
     }
 }

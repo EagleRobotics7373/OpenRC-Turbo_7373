@@ -16,7 +16,7 @@ public class AllMotorsFWOpMode extends OpMode {
     @Override
     public void init() {
         robot = new BasicRobot(hardwareMap);
-        player = new ExtDirMusicPlayer();
+        player = new ExtDirMusicPlayer(ExtMusicFile.MEGALOUNITY);
     }
 
     @Override
@@ -47,20 +47,20 @@ public class AllMotorsFWOpMode extends OpMode {
 
 
         if (gamepad1.y) {
-            player.play(ExtMusicFile.UNITY);
+            player.play();
         } else if (gamepad1.x) player.pause();
         if (gamepad1.dpad_up) {
             robot.frontLeftMotor.setDirection(DcMotorSimple.Direction.FORWARD);
             robot.frontRightMotor.setDirection(DcMotorSimple.Direction.FORWARD);
             robot.backLeftMotor.setDirection(DcMotorSimple.Direction.FORWARD);
-            robot.frontRightMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+            robot.backRightMotor.setDirection(DcMotorSimple.Direction.FORWARD);
             fw = true;
         }
         else if (gamepad1.dpad_down) {
             robot.frontLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
             robot.frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
             robot.backLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-            robot.frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+            robot.backRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
             fw = false;
         }
         telemetry.addData("Direction", fw?"Forward":"Reverse");

@@ -4,20 +4,20 @@ import android.media.MediaPlayer
 import com.qualcomm.robotcore.hardware.HardwareMap
 import org.firstinspires.ftc.teamcode.R
 
-class ExtDirMusicPlayer {
+class ExtDirMusicPlayer(extMusicFile: ExtMusicFile) {
 
     private val mediaPlayer: MediaPlayer = MediaPlayer()
 
     init {
         mediaPlayer.isLooping = true
+        mediaPlayer.setDataSource("/sdcard/FIRST/music/"+extMusicFile.fileName)
+        mediaPlayer.prepare()
         mediaPlayer.seekTo(0)
     }
 
-    fun play(extMusicFile: ExtMusicFile): Boolean {
+    fun play(): Boolean {
         try {
             if (!mediaPlayer.isPlaying) {
-                mediaPlayer.setDataSource("/sdcard/FIRST/music/"+extMusicFile.fileName)
-                mediaPlayer.prepare()
                 mediaPlayer.start()
             }
         } catch (e : Exception) {

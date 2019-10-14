@@ -16,6 +16,7 @@ open class TeleOpRD : OpMode() {
 
     override fun loop() {
         controlDrivetrain()
+        controlFoundationGrabbers()
     }
 
     protected open fun controlDrivetrain() {
@@ -24,6 +25,11 @@ open class TeleOpRD : OpMode() {
         val z = -gamepad1.right_stick_x.toDouble().rangeBuffer(-0.1, 0.1, 0.0)
 
         robot.holonomic.runWithoutEncoderVectored(x, y, z, 0.0)
+    }
+
+    private fun controlFoundationGrabbers() {
+        if (gamepad2.dpad_down) robot.foundationGrabbers.lock()
+        else if (gamepad2.dpad_up) robot.foundationGrabbers.unlock()
     }
 
     private fun controlMusic() {

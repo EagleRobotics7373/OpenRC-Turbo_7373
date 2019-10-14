@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.library.robot.robotcore
 
 import com.qualcomm.robotcore.hardware.*
+import org.firstinspires.ftc.teamcode.library.robot.systems.FoundationGrabbers
 import org.firstinspires.ftc.teamcode.library.robot.systems.Holonomic
 
 class BasicRobot(private val hardwareMap: HardwareMap) {
@@ -11,8 +12,8 @@ class BasicRobot(private val hardwareMap: HardwareMap) {
      @JvmField val backRightMotor          : DcMotor               = hwInit("backRightMotor")
 
     // Servo Variables
-//     @JvmField val teamMarkerServo         : Servo                 = hwInit("teamMarkerServo")
-
+     private   val backLeftFoundationServo : Servo                 = hwInit("backLeftFoundationServo")
+     private   val backRightFoundationServo: Servo                 = hwInit("backRightFoundationServo")
 
     // IMU Variables
 //     @JvmField val imuA                    : BNO055IMU             = hwInit("imuA")
@@ -25,7 +26,8 @@ class BasicRobot(private val hardwareMap: HardwareMap) {
 
 
     // Robot Systems Variables
-     @JvmField val holonomic               : Holonomic = Holonomic(frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor)
-//     @JvmField val blinkin                 : RevBlinkinLedDriver   = hwInit("blinkin")
+     @JvmField val holonomic               : Holonomic              = Holonomic(frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor)
+     @JvmField val foundationGrabbers      : FoundationGrabbers     = FoundationGrabbers(backLeftFoundationServo, backRightFoundationServo)
+    //     @JvmField val blinkin                 : RevBlinkinLedDriver   = hwInit("blinkin")
     private inline fun <reified T> hwInit(name:String): T = hardwareMap.get(T::class.java, name)
 }

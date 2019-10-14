@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.teamcode.library.functions.ExtDirMusicPlayer;
+import org.firstinspires.ftc.teamcode.library.functions.ExtMusicFile;
 import org.firstinspires.ftc.teamcode.library.functions.MathExtensionsKt;
 import org.firstinspires.ftc.teamcode.library.robot.robotcore.BasicRobot;
 import org.firstinspires.ftc.teamcode.library.robot.robotcore.IMUController;
@@ -20,7 +21,6 @@ public class Autonomous extends LinearOpMode {
         robot = new BasicRobot(hardwareMap);
         imuController = new IMUController(hardwareMap, AxesOrder.XYZ);
         AutoParamMenu menu = new AutoParamMenu(telemetry);
-        ExtDirMusicPlayer player = new ExtDirMusicPlayer();
 
 
         /*
@@ -45,7 +45,8 @@ public class Autonomous extends LinearOpMode {
         /*
                 RoboSpotify
          */
-        player.play(menu.getMusicFile());
+        ExtDirMusicPlayer player = new ExtDirMusicPlayer(menu.getMusicFile());
+        player.play();
 
 
         /*

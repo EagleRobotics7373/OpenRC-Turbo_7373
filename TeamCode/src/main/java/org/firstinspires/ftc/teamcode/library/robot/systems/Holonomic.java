@@ -37,15 +37,15 @@ public class Holonomic extends Drivetrain {
         super.backRightMotor = backRightMotor;
 
         if (chassis == Chassis.SSGOBILDA) {
-            frontLeftMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+            frontLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
             frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-            backLeftMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+            backLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
             backRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         }
     }
 
     public Holonomic(DcMotor frontLeftMotor, DcMotor backLeftMotor, DcMotor frontRightMotor, DcMotor backRightMotor) {
-        this(frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor, Chassis.RR27373REV);
+        this(frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor, Chassis.SSGOBILDA);
     }
 
     private void run(double x, double y, double z) {
