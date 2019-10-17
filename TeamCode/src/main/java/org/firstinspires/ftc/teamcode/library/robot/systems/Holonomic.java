@@ -14,7 +14,7 @@ public class Holonomic extends Drivetrain {
 
     private static final double WHEEL_DIAMETER = 4;
     private static final double WHEEL_CIRCUMFERENCE;
-    private static final double TICKS_PER_REVOLUTION = 288;
+    private static final double TICKS_PER_REVOLUTION = 537.6;
     private static final double TICKS_PER_INCH;
     private static final double DIAGONAL_BETWEEN_WHEELS = Math.sqrt(2) * 14.5;
 
@@ -168,10 +168,10 @@ public class Holonomic extends Drivetrain {
         frontRightMotor.setTargetPosition((int)(RFDistanceIN * TICKS_PER_INCH));
 
         // program motor power targets
-        frontLeftMotor.setPower(LFPower);
-        backLeftMotor.setPower(LRPower);
-        backRightMotor.setPower(RRPower);
-        frontRightMotor.setPower(RFPower);
+        frontLeftMotor.setPower(-LFPower);
+        backLeftMotor.setPower(-LRPower);
+        backRightMotor.setPower(-RRPower);
+        frontRightMotor.setPower(-RFPower);
 
         // set motors mode
         setMotorsMode(RUN_TO_POSITION);
@@ -192,7 +192,7 @@ public class Holonomic extends Drivetrain {
     }
 
     public boolean motorsAreBusy() {
-        if (frontLeftMotor.isBusy() & frontLeftMotor.isBusy() & backLeftMotor.isBusy() & backRightMotor.isBusy())
+        if (frontLeftMotor.isBusy() & frontRightMotor.isBusy() & backLeftMotor.isBusy() & backRightMotor.isBusy())
             return true;
         else return false;
     }

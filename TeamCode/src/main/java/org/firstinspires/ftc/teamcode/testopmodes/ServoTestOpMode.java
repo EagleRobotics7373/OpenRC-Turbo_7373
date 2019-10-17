@@ -7,18 +7,18 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.library.functions.MathExtensionsKt;
 
-@TeleOp(name="CRServo Test", group="Test")
+@TeleOp(name="Servo Test", group="Test")
 public class ServoTestOpMode extends OpMode {
-    CRServo servo;
+    Servo servo;
 
     @Override
     public void init() {
-        servo = hardwareMap.get(CRServo.class, "crservo");
+        servo = hardwareMap.get(Servo.class, "servo");
     }
 
     @Override
     public void loop() {
-        servo.setPower(MathExtensionsKt.rangeClip(gamepad1.left_stick_y, -0.9, 0.9));
-        telemetry.addData("power", gamepad1.left_stick_y);
+        servo.setPosition(gamepad1.left_trigger);
+        telemetry.addData("power", gamepad1.left_trigger);
     }
 }

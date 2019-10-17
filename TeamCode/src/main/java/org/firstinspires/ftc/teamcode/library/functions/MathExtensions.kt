@@ -22,11 +22,26 @@ fun Double.rangeBuffer(lowerBound: Double, upperBound: Double, defaultValue: Dou
     return if (this in lowerBound..upperBound) defaultValue else this
 }
 
-val ColorSensor.hue : Double
+val ColorSensor.rhue : Double
+    get() {
+        return this.hsv[0].toDouble()
+    }
+
+val ColorSensor.rsaturation : Double
+    get() {
+        return this.hsv[1].toDouble()
+    }
+
+val ColorSensor.rvalue : Double
+    get() {
+        return this.hsv[2].toDouble()
+    }
+
+val ColorSensor.hsv : FloatArray
     get() {
         val SCALE_FACTOR = 255
         var hsvValues = FloatArray(3)
         Color.RGBToHSV(this.red()*SCALE_FACTOR, this.green()*SCALE_FACTOR, this.blue()*SCALE_FACTOR, hsvValues)
-        return hsvValues[0].toDouble()
+        return hsvValues
     }
 

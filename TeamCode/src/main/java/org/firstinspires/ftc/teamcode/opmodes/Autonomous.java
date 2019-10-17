@@ -41,25 +41,40 @@ public class Autonomous extends LinearOpMode {
                while (gamepad1.dpad_right && opModeIsActive()) ;
            }
         }
-
+        waitForStart();
         /*
                 RoboSpotify
          */
-        ExtDirMusicPlayer player = new ExtDirMusicPlayer(menu.getMusicFile());
-        player.play();
+//        ExtDirMusicPlayer player = new ExtDirMusicPlayer(menu.getMusicFile());
+//        player.play();
 
 
         /*
                 Robot Actions
          */
-        imuPIRotate(90);
+        robot.holonomic.runWithoutEncoder(0,1,0);
+        sleep(800);
+        robot.holonomic.stop();
+        robot.foundationGrabbers.lock();
+        sleep(1500);
+        robot.holonomic.runWithoutEncoder(0,-1,0);
+        sleep(2000);
+        robot.holonomic.stop();
+        robot.foundationGrabbers.unlock();
+        sleep(1500);
+        drive(0,-3, 1);
+        drive(-36, 0, 1);
+        drive(0, -48, 1);
+        drive(36, 0, 1);
+        robot.holonomic.runWithoutEncoder(0, -1, 0);
         sleep(1000);
+        robot.holonomic.stop();
 
 
         /*
                 End of OpMode - close resources
          */
-        player.stop();
+//        player.stop();
     }
 
     public void imuPIRotate(double angle) {
@@ -106,6 +121,13 @@ public class Autonomous extends LinearOpMode {
             robot.backRightMotor.setPower(power);
             robot.frontLeftMotor.setPower(power);
             robot.frontRightMotor.setPower(power);
+        }
+    }
+
+    private void drive(double x, double y, double power) {
+        robot.holonomic.runUsingEncoder(x, y, power);
+        while (opModeIsActive() && robot.holonomic.motorsAreBusy()) {
+
         }
     }
 

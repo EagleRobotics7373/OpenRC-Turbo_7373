@@ -10,6 +10,7 @@ class AutoParamMenu(telemetry: Telemetry) {
 
     @JvmField val menu = DelegatedTelemetryMenu(telemetry)
     var musicFile : ExtMusicFile by MenuItemEnumDelegate(menu, "Music",ExtMusicFile.NONE, ExtMusicFile.UNITY, ExtMusicFile.MEGALOUNITY)
-    var angle : Int by MenuItemIntDelegate(menu, "Angle", 0, 0, 180, 30)
+//    var angle : Int by MenuItemIntDelegate(menu, "Angle", 0, 0, 180, 30)
+    var driveTime : Int by MenuItemIntDelegate(menu, "time", 0,0, 5000, 500)
 
 }
