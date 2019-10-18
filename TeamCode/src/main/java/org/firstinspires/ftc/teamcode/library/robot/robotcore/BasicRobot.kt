@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.library.robot.robotcore
 
+import com.qualcomm.hardware.rev.Rev2mDistanceSensor
 import com.qualcomm.robotcore.hardware.*
 import org.firstinspires.ftc.teamcode.library.robot.systems.FoundationGrabbers
 import org.firstinspires.ftc.teamcode.library.robot.systems.Holonomic
@@ -29,6 +30,9 @@ class BasicRobot(private val hardwareMap: HardwareMap) {
     // Color/Distance Sensor Variables
      @JvmField val intakeBlockCSensor      : ColorSensor           = hwInit("intakeBlockSensor")
      @JvmField val intakeBlockDSensor      : DistanceSensor        = hwInit("intakeBlockSensor")
+     @JvmField val distanceSensor_backLeft : Rev2mDistanceSensor   = hwInit("ds_backleft")
+     @JvmField val distanceSensor_backRight: Rev2mDistanceSensor   = hwInit("ds_backright")
+     @JvmField val distanceSensor_side     : Rev2mDistanceSensor   = hwInit("ds_side")
 
     // Robot Systems Variables
      @JvmField val holonomic               : Holonomic              = Holonomic(frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor)

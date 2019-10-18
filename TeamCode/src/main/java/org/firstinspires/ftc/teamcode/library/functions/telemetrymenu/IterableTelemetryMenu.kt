@@ -5,7 +5,7 @@ import org.firstinspires.ftc.teamcode.library.functions.Position
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KProperty
 
-class IterableTelemetryMenu private constructor(val telemetry: Telemetry, vararg items: MenuItem) {
+class IterableTelemetryMenu constructor(val telemetry: Telemetry, vararg items: MenuItem) {
     private val list = items.toList()
     var current = list[0]
     fun refresh() {
@@ -15,14 +15,29 @@ class IterableTelemetryMenu private constructor(val telemetry: Telemetry, vararg
                             + it
                             + if (it.canIterateForward()) " >> " else "")
         }
+        telemetry.update()
 
     }
 
     fun nextItem() {
-
+        val currentNum = list.indexOf(current)
+        if (currentNum < list.size-1) current = list[currentNum+1]
+        refresh()
     }
     fun previousItem() {
-
+        val currentNum = list.indexOf(current)
+        if (currentNum > 0) current = list[currentNum-1]
+        refresh()
+    }
+    fun iterateCurrentItemForward() {
+        if (current.canIterateForward())
+            current.iterateForward()
+        refresh()
+    }
+    fun iterateCurrentItemBackward() {
+        if (current.canIterateBackward())
+            current.iterateBackward()
+        refresh()
     }
 }
 

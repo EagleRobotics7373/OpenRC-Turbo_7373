@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.opmodes;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.library.functions.ExtDirMusicPlayer;
 import org.firstinspires.ftc.teamcode.library.functions.ExtMusicFile;
 import org.firstinspires.ftc.teamcode.library.functions.MathExtensionsKt;
@@ -20,61 +21,79 @@ public class Autonomous extends LinearOpMode {
          */
         robot = new BasicRobot(hardwareMap);
         imuController = new IMUController(hardwareMap, AxesOrder.XYZ);
-        AutoParamMenu menu = new AutoParamMenu(telemetry);
+//        AutoMenuControllerIterative menuController = new AutoMenuControllerIterative(telemetry);
 
 
         /*
                 Operate telemetry menu
          */
-        while (opModeIsActive() && !isStarted()) {
-           if (gamepad1.dpad_up) {
-               menu.menu.previousItem();
-               while (gamepad1.dpad_up && opModeIsActive());
-           } else if (gamepad1.dpad_down) {
-               menu.menu.nextItem();
-               while (gamepad1.dpad_down && opModeIsActive());
-           } else if (gamepad1.dpad_left) {
-                menu.menu.iterateCurrentItemBackward();
-                while (gamepad1.dpad_left && opModeIsActive());
-           } else if (gamepad1.dpad_right) {
-               menu.menu.iterateCurrentItemForward();
-               while (gamepad1.dpad_right && opModeIsActive()) ;
-           }
-        }
+//        while (opModeIsActive() && !isStarted()) {
+//           if (gamepad1.dpad_up) {
+//               menuController.menu.previousItem();
+//               while (gamepad1.dpad_up && opModeIsActive());
+//           } else if (gamepad1.dpad_down) {
+//               menuController.menu.nextItem();
+//               while (gamepad1.dpad_down && opModeIsActive());
+//           } else if (gamepad1.dpad_left) {
+//                menuController.menu.iterateCurrentItemBackward();
+//                while (gamepad1.dpad_left && opModeIsActive());
+//           } else if (gamepad1.dpad_right) {
+//               menuController.menu.iterateCurrentItemForward();
+//               while (gamepad1.dpad_right && opModeIsActive()) ;
+//           }
+//        }
         waitForStart();
         /*
                 RoboSpotify
          */
-//        ExtDirMusicPlayer player = new ExtDirMusicPlayer(menu.getMusicFile());
-//        player.play();
+        ExtDirMusicPlayer player = new ExtDirMusicPlayer(ExtMusicFile.MEGALOUNITY);
+        player.play();
 
 
         /*
                 Robot Actions
          */
-        robot.holonomic.runWithoutEncoder(0,1,0);
-        sleep(800);
+//        robot.holonomic.runWithoutEncoder(0,1,0);
+//        sleep(800);
+//        robot.holonomic.stop();
+//        robot.foundationGrabbers.lock();
+//        sleep(1500);
+//        robot.holonomic.runWithoutEncoder(0,-1,0);
+//        sleep(2000);
+//        robot.holonomic.stop();
+//        robot.foundationGrabbers.unlock();
+//        sleep(1500);
+//        drive(0,-3, 1);
+//        drive(-36, 0, 1);
+//        drive(0, -48, 1);
+//        drive(36, 0, 1);
+//        robot.holonomic.runWithoutEncoder(0, -1, 0);
+//        sleep(1000);
+//        robot.holonomic.stop();
+
+        robot.holonomic.runWithoutEncoder(0,0.6, 0);
+        double v;
+        while ((v = robot.distanceSensor_backRight.getDistance(DistanceUnit.INCH))>3 && opModeIsActive()){
+            telemetry.addData("dist", v);
+            telemetry.update();
+        }
         robot.holonomic.stop();
         robot.foundationGrabbers.lock();
-        sleep(1500);
-        robot.holonomic.runWithoutEncoder(0,-1,0);
+        sleep(2000);
+        robot.holonomic.runWithoutEncoder(0,-0.8, 0);
         sleep(2000);
         robot.holonomic.stop();
         robot.foundationGrabbers.unlock();
-        sleep(1500);
-        drive(0,-3, 1);
-        drive(-36, 0, 1);
-        drive(0, -48, 1);
-        drive(36, 0, 1);
-        robot.holonomic.runWithoutEncoder(0, -1, 0);
-        sleep(1000);
+        sleep(2000);
+        robot.holonomic.runWithoutEncoder(-1, 0, 0);
+        sleep(750);
         robot.holonomic.stop();
 
 
         /*
                 End of OpMode - close resources
          */
-//        player.stop();
+        player.stop();
     }
 
     public void imuPIRotate(double angle) {
