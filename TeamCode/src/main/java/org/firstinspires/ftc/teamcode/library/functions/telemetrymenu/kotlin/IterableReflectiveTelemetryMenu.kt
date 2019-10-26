@@ -1,11 +1,9 @@
-package org.firstinspires.ftc.teamcode.library.functions.telemetrymenu
+package org.firstinspires.ftc.teamcode.library.functions.telemetrymenu.kotlin
 
 import org.firstinspires.ftc.robotcore.external.Telemetry
-import org.firstinspires.ftc.teamcode.library.functions.Position
 import kotlin.reflect.KMutableProperty
-import kotlin.reflect.KProperty
 
-class IterableTelemetryMenu constructor(val telemetry: Telemetry, vararg items: MenuItem) {
+class IterableReflectiveTelemetryMenu constructor(val telemetry: Telemetry, vararg items: MenuItem) {
     private val list = items.toList()
     var current = list[0]
     fun refresh() {

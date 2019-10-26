@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.library.functions.telemetrymenu
+package org.firstinspires.ftc.teamcode.library.functions.telemetrymenu.kotlin
 
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import kotlin.properties.Delegates
@@ -42,9 +42,9 @@ class DelegatedTelemetryMenu constructor(private val telemetry: Telemetry) {
 
 }
 
-abstract class MenuItemDelegate<T>(     menu : DelegatedTelemetryMenu,
-                                    val description : String,
-                                    var value: T) : ReadWriteProperty<Any?, T> {
+abstract class MenuItemDelegate<T>(menu : DelegatedTelemetryMenu,
+                                   val description : String,
+                                   var value: T) : ReadWriteProperty<Any?, T> {
     override fun getValue(thisRef: Any?, property: KProperty<*>): T {
         return value
     }
@@ -55,9 +55,9 @@ abstract class MenuItemDelegate<T>(     menu : DelegatedTelemetryMenu,
     abstract fun canIterateBackward(): Boolean
 }
 
-class MenuItemIntDelegate(    menu: DelegatedTelemetryMenu,
-                              description: String,
-                              startingValue: Int,
+class MenuItemIntDelegate(menu: DelegatedTelemetryMenu,
+                          description: String,
+                          startingValue: Int,
                           private val lowerLimit: Int,
                           private val upperLimit: Int,
                           private val incrementBy: Int = 1)
@@ -90,9 +90,9 @@ class MenuItemIntDelegate(    menu: DelegatedTelemetryMenu,
     }
 }
 
-class MenuItemBooleanDelegate(    menu: DelegatedTelemetryMenu,
-                                  description: String,
-                                  startingValue: Boolean)
+class MenuItemBooleanDelegate(menu: DelegatedTelemetryMenu,
+                              description: String,
+                              startingValue: Boolean)
     : MenuItemDelegate<Boolean>(menu, description, startingValue) {
 
     override fun iterateForward() {
@@ -116,7 +116,7 @@ class MenuItemBooleanDelegate(    menu: DelegatedTelemetryMenu,
 }
 class MenuItemEnumDelegate<T>(menu: DelegatedTelemetryMenu,
                               description: String,
-           private vararg val values: T)
+                              private vararg val values: T)
     : MenuItemDelegate<T>(menu, description, values[0]) {
     override fun iterateForward() {
         if (canIterateForward()) value = values[values.indexOf(value)+1]

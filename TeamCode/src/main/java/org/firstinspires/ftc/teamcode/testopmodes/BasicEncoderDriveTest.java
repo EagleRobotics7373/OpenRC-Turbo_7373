@@ -11,7 +11,7 @@ public class BasicEncoderDriveTest extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         BasicRobot robot = new BasicRobot(hardwareMap);
         waitForStart();
-        robot.holonomic.runUsingEncoder(10,10,1);
+        robot.holonomic.turnUsingEncoder(90, 0.6);
         do {
             telemetry.addData("FL target", robot.frontLeftMotor.getTargetPosition());
             telemetry.addData("FL ticks", robot.frontLeftMotor.getCurrentPosition());

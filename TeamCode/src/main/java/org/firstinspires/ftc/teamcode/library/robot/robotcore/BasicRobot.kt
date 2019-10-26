@@ -30,8 +30,8 @@ class BasicRobot(private val hardwareMap: HardwareMap) {
     // Color/Distance Sensor Variables
      @JvmField val intakeBlockCSensor      : ColorSensor           = hwInit("intakeBlockSensor")
      @JvmField val intakeBlockDSensor      : DistanceSensor        = hwInit("intakeBlockSensor")
-     @JvmField val distanceSensor_backLeft : Rev2mDistanceSensor   = hwInit("ds_backleft")
-     @JvmField val distanceSensor_backRight: Rev2mDistanceSensor   = hwInit("ds_backright")
+     @JvmField val distanceSensor_rear     : Rev2mDistanceSensor   = hwInit("ds_rear")
+     @JvmField val distanceSensor_front    : Rev2mDistanceSensor   = hwInit("ds_front")
      @JvmField val distanceSensor_side     : Rev2mDistanceSensor   = hwInit("ds_side")
 
     // Robot Systems Variables

@@ -12,7 +12,8 @@ import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import static org.firstinspires.ftc.teamcode.library.vision.skystone.VisionConstants.*;
 public class VisionInitializer {
     public static VuforiaLocalizer createVuforia(CameraType cameraType, HardwareMap hardwareMap) {
-        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
         parameters.vuforiaLicenseKey = "AVsEI0//////AAABmfbnDsRuiEqQsFcH7Lyqo3QuISqpJopGJxX15CNQ6JRwa6IhhZMdS346pkBRyp94aOkulPOzR+MQZ84lQbPclj/UW9I95nliTUyCT+Ie8Bw9qNN5X5Cv4sBkIAyNJpUXfxMjUf/5Hw098czCJ1HTiVoqUVB+AGNgZ6tLD4AGqbv/ftucrrA/nnzT045vPyCZCKujFStiBc1Hkab9Y96FE5wHPrfBeCrq8nYd0T+mB3eaCO3kUahLaqyjhFAyQnQCpa1oOzsqbDARsc5FuIcACzdzOFSG+LAEOj+Bgb7Nm+jJQHn8rYsCJi94aoSptfsgXSR0N2pTwhM3eQZEf9g6m1fbUJH18eCFJWwS1FVr3U+6";
         switch (cameraType) {
             case PHONE_REAR:
@@ -37,7 +38,7 @@ public class VisionInitializer {
         return tfod;
     }
 
-    enum CameraType {
+    public enum CameraType {
         WEBCAM, PHONE_REAR, PHONE_FRONT
     }
 }

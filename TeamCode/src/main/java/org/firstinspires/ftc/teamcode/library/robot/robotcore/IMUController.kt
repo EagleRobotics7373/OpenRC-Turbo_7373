@@ -11,7 +11,7 @@ class IMUController(hardwareMap: HardwareMap, private val axesOrder: AxesOrder =
     init {
         fun initImu(imu: BNO055IMU, id:Char) {
             val parameters = BNO055IMU.Parameters()
-            parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES
+            parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS
             parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC
             parameters.calibrationDataFile = "IMU_${id}_CalibrationData.json" // see the calibration sample opmode
             parameters.loggingEnabled = true

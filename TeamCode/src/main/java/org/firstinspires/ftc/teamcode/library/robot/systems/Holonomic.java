@@ -14,16 +14,16 @@ public class Holonomic extends Drivetrain {
 
     private static final double WHEEL_DIAMETER = 4;
     private static final double WHEEL_CIRCUMFERENCE;
-    private static final double TICKS_PER_REVOLUTION = 10000;
-    private static final double TICKS_PER_INCH;
-    private static final double DIAGONAL_BETWEEN_WHEELS = Math.sqrt(2) * 14.5;
+    private static final double TICKS_PER_REVOLUTION = 1688.06;
+    private static final double TICKS_PER_INCH /* 134.4*/;
+    private static final double DIAGONAL_BETWEEN_WHEELS = 23;
 
     private static final double ANGLE_LEFT_FRONT = 315;
     private static final double ANGLE_LEFT_REAR = 45;
     private static final double ANGLE_RIGHT_REAR = 135;
     private static final double ANGLE_RIGHT_FRONT = 225;
 
-    private static final int TARGET_POSITION_TOLERANCE = 15;
+    private static final int TARGET_POSITION_TOLERANCE = 30;
 
     static {
         WHEEL_CIRCUMFERENCE = (WHEEL_DIAMETER * Math.PI);
@@ -43,13 +43,20 @@ public class Holonomic extends Drivetrain {
         super.frontRightMotor = frontRightMotor;
         super.backLeftMotor = backLeftMotor;
         super.backRightMotor = backRightMotor;
-
-        if (chassis == Chassis.SSGOBILDA) {
-            frontLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-            frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-            backLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-            backRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        }
+        super.frontLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        super.frontRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        super.backLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        super.backRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        ((DcMotorEx)frontLeftMotor).setTargetPositionTolerance(TARGET_POSITION_TOLERANCE);
+        ((DcMotorEx)backLeftMotor).setTargetPositionTolerance(TARGET_POSITION_TOLERANCE);
+        ((DcMotorEx)frontRightMotor).setTargetPositionTolerance(TARGET_POSITION_TOLERANCE);
+        ((DcMotorEx)backRightMotor).setTargetPositionTolerance(TARGET_POSITION_TOLERANCE);
+        //        if (chassis == Chassis.SSGOBILDA) {
+//            frontLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+//            frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+//            backLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+//            backRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+//        }
     }
 
     /**
@@ -85,10 +92,7 @@ public class Holonomic extends Drivetrain {
         frontRightMotor.setPower(rightFrontPower);
         backRightMotor.setPower(rightRearPower);
 
-        ((DcMotorEx)frontLeftMotor).setTargetPositionTolerance(TARGET_POSITION_TOLERANCE);
-        ((DcMotorEx)backLeftMotor).setTargetPositionTolerance(TARGET_POSITION_TOLERANCE);
-        ((DcMotorEx)frontRightMotor).setTargetPositionTolerance(TARGET_POSITION_TOLERANCE);
-        ((DcMotorEx)backRightMotor).setTargetPositionTolerance(TARGET_POSITION_TOLERANCE);
+
     }
 
     /**
@@ -182,7 +186,10 @@ public class Holonomic extends Drivetrain {
         double RFPower;
 
         // set motors mode
-        setMotorsMode(STOP_AND_RESET_ENCODER);
+        frontLeftMotor.setMode(STOP_AND_RESET_ENCODER);
+        frontRightMotor.setMode(STOP_AND_RESET_ENCODER);
+        backLeftMotor.setMode(STOP_AND_RESET_ENCODER);
+        backRightMotor.setMode(STOP_AND_RESET_ENCODER);
 
         // calculate r
         r = Math.sqrt(Math.pow(xTarget,2)+ Math.pow(yTarget,2));
@@ -216,19 +223,23 @@ public class Holonomic extends Drivetrain {
         RFPower = -yPower;
 
         // program encoder targets
-        frontLeftMotor.setTargetPosition((int)(LFDistanceIN * TICKS_PER_INCH));
-        backLeftMotor.setTargetPosition((int)(LRDistanceIN * TICKS_PER_INCH));
-        backRightMotor.setTargetPosition((int)(RRDistanceIN * TICKS_PER_INCH));
-        frontRightMotor.setTargetPosition((int)(RFDistanceIN * TICKS_PER_INCH));
+        frontLeftMotor.setTargetPosition(frontLeftMotor.getCurrentPosition() +(int)(LFDistanceIN * TICKS_PER_INCH));
+        backLeftMotor.setTargetPosition(frontRightMotor.getCurrentPosition() + (int)(LRDistanceIN * TICKS_PER_INCH));
+        backRightMotor.setTargetPosition(backRightMotor.getCurrentPosition() + (int)(RRDistanceIN * TICKS_PER_INCH));
+        frontRightMotor.setTargetPosition(frontRightMotor.getCurrentPosition() + (int)(RFDistanceIN * TICKS_PER_INCH));
 
-        // program motor power targets
-        frontLeftMotor.setPower(-LFPower);
-        backLeftMotor.setPower(-LRPower);
-        backRightMotor.setPower(-RRPower);
-        frontRightMotor.setPower(-RFPower);
 
         // set motors mode
-        setMotorsMode(RUN_TO_POSITION);
+        frontLeftMotor.setMode(RUN_TO_POSITION);
+        frontRightMotor.setMode(RUN_TO_POSITION);
+        backLeftMotor.setMode(RUN_TO_POSITION);
+        backRightMotor.setMode(RUN_TO_POSITION);
+
+        // program motor power targets
+        frontLeftMotor.setPower(LFPower);
+        backLeftMotor.setPower(LRPower);
+        backRightMotor.setPower(RRPower);
+        frontRightMotor.setPower(RFPower);
     }
 
     /**
@@ -257,9 +268,12 @@ public class Holonomic extends Drivetrain {
      * @return true if all four motors are busy
      */
     public boolean motorsAreBusy() {
-        if (frontLeftMotor.isBusy() & frontRightMotor.isBusy() & backLeftMotor.isBusy() & backRightMotor.isBusy())
-            return true;
-        else return false;
+        int numBusy = 0;
+        if (frontLeftMotor.isBusy()) numBusy++;
+        if (frontLeftMotor.isBusy()) numBusy++;
+        if (frontLeftMotor.isBusy()) numBusy++;
+        if (frontLeftMotor.isBusy()) numBusy++;
+        return (numBusy > 1);
     }
 
     /**

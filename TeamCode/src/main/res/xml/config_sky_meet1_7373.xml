@@ -6,8 +6,8 @@
             <Matrix12vMotor name="backLeftMotor" port="2" />
             <Matrix12vMotor name="frontRightMotor" port="0" />
             <Matrix12vMotor name="backRightMotor" port="1" />
-            <REV_VL53L0X_RANGE_SENSOR name="ds_backleft" port="1" bus="0" />
-            <REV_VL53L0X_RANGE_SENSOR name="ds_backright" port="1" bus="1" />
+            <REV_VL53L0X_RANGE_SENSOR name="ds_rear" port="1" bus="0" />
+            <REV_VL53L0X_RANGE_SENSOR name="ds_front" port="1" bus="1" />
             <!--<Servo name="backRightFoundationServo" port="1" />-->
             <LynxEmbeddedIMU name="imuA" port="0" bus="0" />
         </LynxModule>

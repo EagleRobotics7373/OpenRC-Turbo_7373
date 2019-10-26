@@ -22,6 +22,10 @@ fun Double.rangeBuffer(lowerBound: Double, upperBound: Double, defaultValue: Dou
     return if (this in lowerBound..upperBound) defaultValue else this
 }
 
+fun Double.upperLimit(limitAt: Double) = if (this > limitAt) limitAt else this
+
+fun Double.withinRange(target: Double, range: Double) = this in target-range..target+range
+
 val ColorSensor.rhue : Double
     get() {
         return this.hsv[0].toDouble()
