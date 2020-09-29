@@ -10,21 +10,32 @@ import java.io.File
 @TeleOp(group = "Test")
 class SoundPlayerTest : LinearOpMode() {
     override fun runOpMode() {
-
-        waitForStart()
-
         val context = hardwareMap.appContext
         val player = SoundPlayer.getInstance()
-        val musicFile = ExtMusicFile.BADPIGGIES
+        val musicFile = ExtMusicFile.CREEPER_AWMAN
+        val musicFileName = "/sdcard/FIRST/music/${musicFile.fileName}"
         val playingParams = SoundPlayer.PlaySoundParams().also {
             it.volume = 1.0f
-            it.loopControl = -1
+            it.loopControl = 0
             it.rate = 1.0f
         }
+        player.preload(context, File(musicFileName))
+        telemetry.addLine("Waiting for start")
+        telemetry.update()
+        waitForStart()
+
+
+
+//        player.startPlaying(context, File(musicFileName), playingParams, null, null)
+
+        player.play(context, File(musicFileName), playingParams.volume, playingParams.loopControl, playingParams.rate)
 
         while (opModeIsActive()) {
-            player.play(context, File(musicFile.fileName), 100.0f, -1, 1.0f)
-            player.startPlaying(context, File(musicFile.fileName), playingParams, null, null)
+            telemetry.addData("Runtime", this.runtime)
+            telemetry.addData("Local Sound On", player.isLocalSoundOn)
+            telemetry.update()
         }
+        player.stopPlayingLoops()
+        player.stopPlayingAll()
     }
 }

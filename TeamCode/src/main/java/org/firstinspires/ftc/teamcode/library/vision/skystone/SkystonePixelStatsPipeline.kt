@@ -1,20 +1,19 @@
-package org.firstinspires.ftc.teamcode.library.vision.skystone.opencv
+package org.firstinspires.ftc.teamcode.library.vision.skystone
 
 import org.firstinspires.ftc.teamcode.library.functions.Position
-import org.firstinspires.ftc.teamcode.library.vision.skystone.ImageResolution
+import org.firstinspires.ftc.teamcode.library.vision.base.ImageResolution
+import org.firstinspires.ftc.teamcode.library.vision.base.ResolutionPipeline
 import org.opencv.imgproc.Imgproc
-import org.openftc.easyopencv.OpenCvPipeline
 
-import org.firstinspires.ftc.teamcode.library.vision.skystone.VisionConstants.HS_FIRST_STONE_PT
-import org.firstinspires.ftc.teamcode.library.vision.skystone.VisionConstants.HS_STONE_GAP
-import org.firstinspires.ftc.teamcode.library.vision.skystone.VisionConstants.HS_STONE_WIDTH
+import org.firstinspires.ftc.teamcode.library.vision.skystone.SkystoneVisionConstants.HS_FIRST_STONE_PT
+import org.firstinspires.ftc.teamcode.library.vision.skystone.SkystoneVisionConstants.HS_STONE_GAP
+import org.firstinspires.ftc.teamcode.library.vision.skystone.SkystoneVisionConstants.HS_STONE_WIDTH
 import org.opencv.core.*
 import org.opencv.imgproc.Imgproc.*
 import kotlin.math.pow
 
-class PixelStatsPipeline(var detector: StatsDetector) : OpenCvPipeline() {
-    var alwaysTrack = false
-    var tracking : Boolean = false
+class SkystonePixelStatsPipeline(var detector: StatsDetector) : ResolutionPipeline() {
+
 
     var skystonePos : Position? = null
         private set
@@ -23,7 +22,7 @@ class PixelStatsPipeline(var detector: StatsDetector) : OpenCvPipeline() {
     lateinit var rgbMat: Mat
     lateinit var hueMat: Mat
 
-    var resolution : ImageResolution = ImageResolution.R_720x480
+    override var resolution : ImageResolution = ImageResolution.R_720x480
 
     override fun processFrame(input: Mat): Mat {
         if (tracking) {
@@ -68,7 +67,7 @@ class PixelStatsPipeline(var detector: StatsDetector) : OpenCvPipeline() {
                     Point(10.0 * resolution.scale, hueMat.rows()*0.98), FONT_HERSHEY_DUPLEX, 0.6*resolution.scale, Scalar(0.0), 1)
 
 //            Imgcodecs.imwrite("/sdcard/FIRST/cvtrials/cvtrial_${resolution}_${System.currentTimeMillis()}_", hueMat)
-            if (!alwaysTrack) tracking = false
+            if (!shouldKeepTracking) tracking = false
             return hueMat
 
         } else return input

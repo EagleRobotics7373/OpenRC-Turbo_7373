@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.library.vision.skystone;
+package org.firstinspires.ftc.teamcode.library.vision.base;
 
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -7,15 +7,14 @@ import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
-import org.firstinspires.ftc.teamcode.library.vision.skystone.opencv.OpenCvContainer;
+import org.firstinspires.ftc.teamcode.library.vision.ultimategoal.UltimateGoalVisionConstants;
 import org.jetbrains.annotations.NotNull;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvInternalCamera;
-import org.openftc.easyopencv.OpenCvPipeline;
 
-import static org.firstinspires.ftc.teamcode.library.vision.skystone.VisionConstants.*;
+import static org.firstinspires.ftc.teamcode.library.vision.skystone.SkystoneVisionConstants.*;
 public class VisionFactory {
 
     static String webcamName = "Webcam 720p";
@@ -40,13 +39,12 @@ public class VisionFactory {
         int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
                 "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
-        tfodParameters.minimumConfidence = 0.8;
         TFObjectDetector tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
         tfod.loadModelFromFile(TFOD_MODEL_ASSET_EXT, TFOD_LABEL_STONE, TFOD_LABEL_SKYSTONE);
         return tfod;
     }
 
-    public static <Pipeline extends OpenCvPipeline> OpenCvContainer<Pipeline> createOpenCv(CameraType cameraType, HardwareMap hardwareMap, @NotNull Pipeline pipeline) {
+    public static <Pipeline extends ResolutionPipeline> OpenCvContainer<Pipeline> createOpenCv(CameraType cameraType, HardwareMap hardwareMap, @NotNull Pipeline pipeline) {
         OpenCvCamera camera;
         ImageResolution resolution = ImageResolution.R_1280x720;
         OpenCvCameraRotation rotation = OpenCvCameraRotation.UPRIGHT;
@@ -56,14 +54,14 @@ public class VisionFactory {
                     OpenCvCameraFactory.getInstance().createWebcam(
                             hardwareMap.get(WebcamName.class, webcamName),
                             getCameraMonitorViewId(hardwareMap));
-            resolution = ImageResolution.R_640x480;
+            resolution = UltimateGoalVisionConstants.resolution;
         }
         else  {
             camera =
                     OpenCvCameraFactory.getInstance().createInternalCamera(
                             (cameraType==CameraType.PHONE_FRONT)? OpenCvInternalCamera.CameraDirection.FRONT : OpenCvInternalCamera.CameraDirection.BACK,
                             getCameraMonitorViewId(hardwareMap));
-            rotation = OpenCvCameraRotation.SIDEWAYS_RIGHT;
+//            rotation = OpenCvCameraRotation.UPRIGHT;
         }
 
         return new OpenCvContainer<Pipeline>(camera, pipeline, resolution, rotation);

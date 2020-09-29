@@ -3,24 +3,24 @@ package org.firstinspires.ftc.teamcode.testopmodes.visiontests
 import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import org.firstinspires.ftc.teamcode.library.functions.Position
-import org.firstinspires.ftc.teamcode.library.vision.skystone.VisionFactory
-import org.firstinspires.ftc.teamcode.library.vision.skystone.opencv.PixelStatsPipeline
-import org.firstinspires.ftc.teamcode.library.vision.skystone.opencv.OpenCvContainer
+import org.firstinspires.ftc.teamcode.library.vision.base.VisionFactory
+import org.firstinspires.ftc.teamcode.library.vision.skystone.SkystonePixelStatsPipeline
+import org.firstinspires.ftc.teamcode.library.vision.base.OpenCvContainer
 
 @TeleOp(group="Test")
-class OpenCvTest : OpMode() {
+class SkystoneOpenCvTest : OpMode() {
 
-    lateinit var container : OpenCvContainer<PixelStatsPipeline>
+    lateinit var container : OpenCvContainer<SkystonePixelStatsPipeline>
 
     var cameraType = VisionFactory.CameraType.PHONE_REAR
     var currentlyTracking = false
     var visionResult: Position? = null
 
     val detectorOptions = arrayOf(
-            PixelStatsPipeline.StatsDetector.DETECTOR_HUE_AVG,
-            PixelStatsPipeline.StatsDetector.DETECTOR_HUE_STDDEV,
-            PixelStatsPipeline.StatsDetector.DETECTOR_VALUE_AVG,
-            PixelStatsPipeline.StatsDetector.DETECTOR_VALUE_STDDEV
+            SkystonePixelStatsPipeline.StatsDetector.DETECTOR_HUE_AVG,
+            SkystonePixelStatsPipeline.StatsDetector.DETECTOR_HUE_STDDEV,
+            SkystonePixelStatsPipeline.StatsDetector.DETECTOR_VALUE_AVG,
+            SkystonePixelStatsPipeline.StatsDetector.DETECTOR_VALUE_STDDEV
             )
     var detectorNum = 0
 
@@ -37,8 +37,8 @@ class OpenCvTest : OpMode() {
     }
 
     override fun start() {
-        container = VisionFactory.createOpenCv(cameraType, hardwareMap, PixelStatsPipeline(PixelStatsPipeline.StatsDetector.DETECTOR_HUE_AVG))
-        container.pipeline.alwaysTrack = true
+        container = VisionFactory.createOpenCv(cameraType, hardwareMap, SkystonePixelStatsPipeline(SkystonePixelStatsPipeline.StatsDetector.DETECTOR_HUE_AVG))
+        container.pipeline.shouldKeepTracking = true
         container.pipeline.tracking = true
     }
 
@@ -48,7 +48,7 @@ class OpenCvTest : OpMode() {
             if (gamepad1.y) {
                 container.pipeline.tracking = true
                 currentlyTracking = true
-                while (gamepad1.y);
+//                while (gamepad1.y);
             }
         }
         else {

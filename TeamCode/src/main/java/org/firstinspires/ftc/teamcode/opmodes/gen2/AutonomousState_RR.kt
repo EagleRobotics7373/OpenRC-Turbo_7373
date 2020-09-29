@@ -21,11 +21,10 @@ import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.Dri
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.DriveConstantsTunedMisumi
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.RobotConstantsAccessor
 import org.firstinspires.ftc.teamcode.library.robot.systems.wrappedservos.AutoBlockIntake
-import org.firstinspires.ftc.teamcode.library.vision.skystone.VisionFactory
-import org.firstinspires.ftc.teamcode.library.vision.skystone.opencv.OpenCvContainer
-import org.firstinspires.ftc.teamcode.library.vision.skystone.opencv.PixelStatsPipeline
+import org.firstinspires.ftc.teamcode.library.vision.base.VisionFactory
+import org.firstinspires.ftc.teamcode.library.vision.base.OpenCvContainer
+import org.firstinspires.ftc.teamcode.library.vision.skystone.SkystonePixelStatsPipeline
 import org.firstinspires.ftc.teamcode.opmodes.gen2.AutonomousConstants.*
-import java.util.*
 
 @com.qualcomm.robotcore.eventloop.opmode.Autonomous(name = "Autonomous State (Kotlin + RR)", group = "Main")
 class AutonomousState_RR : LinearOpMode() {
@@ -39,7 +38,7 @@ class AutonomousState_RR : LinearOpMode() {
     private          val telem           : MultipleTelemetry = MultipleTelemetry(telemetry, FtcDashboard.getInstance().telemetry)
     private lateinit var elapsedTime     : ElapsedTime
 
-    private lateinit var cvContainer     : OpenCvContainer<PixelStatsPipeline>
+    private lateinit var cvContainer     : OpenCvContainer<SkystonePixelStatsPipeline>
 
     private lateinit var player          : ExtDirMusicPlayer
 
@@ -52,7 +51,7 @@ class AutonomousState_RR : LinearOpMode() {
     var driveClass                              = _driveClass
     var musicFile                           = _musicFile
     var parkOnly                            = _parkOnly
-    var visionDetector                      = PixelStatsPipeline.StatsDetector.DETECTOR_VALUE_STDDEV
+    var visionDetector                      = SkystonePixelStatsPipeline.StatsDetector.DETECTOR_VALUE_STDDEV
     var delayBeforeParking                  = _delayBeforeParking
 //    var foundationSwivel                    = _foundationSwivel
     var doFoundationPull                    = _doFoundationPull
@@ -71,7 +70,7 @@ class AutonomousState_RR : LinearOpMode() {
         cvContainer = VisionFactory.createOpenCv(
                 VisionFactory.CameraType.WEBCAM,
                 hardwareMap,
-                PixelStatsPipeline(PixelStatsPipeline.StatsDetector.DETECTOR_VALUE_STDDEV))
+                SkystonePixelStatsPipeline(SkystonePixelStatsPipeline.StatsDetector.DETECTOR_VALUE_STDDEV))
 
 
         robot.autoBlockIntakeRear.pivotIn18()

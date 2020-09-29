@@ -5,7 +5,7 @@ import com.acmerobotics.dashboard.config.Config;
 import org.opencv.core.Point;
 
 @Config
-public class VisionConstants {
+public class SkystoneVisionConstants {
     //TensorFlow Constants
     public static final String  TFOD_LABEL_SKYSTONE      = "Skystone";
     public static final String  TFOD_LABEL_STONE         = "Stone";
