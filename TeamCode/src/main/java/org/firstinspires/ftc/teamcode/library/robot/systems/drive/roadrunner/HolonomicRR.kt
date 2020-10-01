@@ -43,6 +43,7 @@ import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.Rob
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.RobotConstantsAccessor.kF
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.RobotConstantsAccessor.motorVelocityPID
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.RobotConstantsAccessor.runUsingEncoder
+import kotlin.math.tan
 
 
 class HolonomicRR
@@ -324,7 +325,8 @@ constructor (
         driveConstraints = MecanumConstraints(baseConstraints, trackWidth)
     }
 
-    @JvmOverloads fun trajectoryBuilder(_driveConstraints : DriveConstraints = driveConstraints) = TrajectoryBuilder(poseEstimate, _driveConstraints)
+    @JvmOverloads fun trajectoryBuilder(tangent : Double, _driveConstraints : DriveConstraints = driveConstraints) = TrajectoryBuilder(poseEstimate.copy(heading = tangent), startHeading = poseEstimate.heading, constraints = _driveConstraints)
+    @JvmOverloads fun trajectoryBuilder(_driveConstraints : DriveConstraints = driveConstraints) = TrajectoryBuilder(poseEstimate, constraints = _driveConstraints)
 
 
 }

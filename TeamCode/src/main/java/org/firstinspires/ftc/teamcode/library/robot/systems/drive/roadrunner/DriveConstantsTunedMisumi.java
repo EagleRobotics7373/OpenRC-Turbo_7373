@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.control.PIDCoefficients;
 import com.acmerobotics.roadrunner.trajectory.constraints.DriveConstraints;
+import com.acmerobotics.roadrunner.trajectory.constraints.MecanumConstraints;
 
 @Config
 public class DriveConstantsTunedMisumi {
@@ -23,11 +24,18 @@ public class DriveConstantsTunedMisumi {
     public static PIDCoefficients MOTOR_VELO_PID = new PIDCoefficients(50, 0.7, 30);
 
     public static DriveConstraints BASE_CONSTRAINTS =
-            new DriveConstraints(
-//                    50.0, 30.0, 40.0,
+//            new DriveConstraints(
+////                    50.0, 30.0, 40.0,
+//                    65.0, 58.0, 40.0,
+//                    Math.PI, Math.PI, 0.0
+//            );
+            new MecanumConstraints(
+                  new DriveConstraints(
                     65.0, 58.0, 40.0,
                     Math.PI, Math.PI, 0.0
+                ),15.0
             );
+
 
     public static PIDCoefficients TRANSLATIONAL_X_PID =
             new PIDCoefficients(6.0, 0.08, 0.52);

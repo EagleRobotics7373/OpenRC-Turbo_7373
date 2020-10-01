@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.util.ElapsedTime
 import org.firstinspires.ftc.teamcode.library.functions.*
 import org.firstinspires.ftc.teamcode.library.robot.robotcore.ExtMisumiRobot
+import kotlin.math.absoluteValue
 
 @TeleOp(name="TeleOp RD Gen2", group="Gen2 Basic")
 open class TeleOpRD : OpMode() {
@@ -150,13 +151,21 @@ open class TeleOpRD : OpMode() {
         // control intake arm up/down
         // This variable is being set by a Kotlin expression -
         //   meaning the variable will be set to last value in an if/else/when branch
-        var inputSpoolPower = -gamepad2.left_stick_y.toDouble()
+        var inputSpoolPower =
+                if (gamepad2.left_stick_y.absoluteValue > 0.05)
+                    -gamepad2.left_stick_y.toDouble()
+                else if (gamepad1.left_trigger > 0.05)
+                    -gamepad1.left_trigger.toDouble()
+                else if (gamepad1.right_trigger > 0.05)
+                    gamepad1.right_trigger.toDouble()
+                else
+                    0.0
 
         val intakeLiftCurrent = robot.intakeLiftRight.currentPosition
 
         if (reverseIntakeLift) inputSpoolPower *= -1.0
 
-        if (intakeLiftCurrent < -2000) inputSpoolPower += 0.13
+        if (intakeLiftCurrent < -800) inputSpoolPower += 0.13
 
         if (watch_gamepad2_buttonB.call()) reverseIntakeLift = !reverseIntakeLift
 
@@ -164,15 +173,15 @@ open class TeleOpRD : OpMode() {
 
         val inputSpoolPowerMod =
                 if (inputSpoolPower < 0.0 && !gamepad2.left_bumper)
-                    if (intakeLiftCurrent > intakeLiftBaseline) {
+                    (if (intakeLiftCurrent > intakeLiftBaseline) {
                         0.0
                     }
-                    else if (intakeLiftCurrent + 75 > intakeLiftBaseline) 0.20
-                    else if (intakeLiftCurrent + 500 > intakeLiftBaseline) 0.45
-                    else if (intakeLiftCurrent + 800 > intakeLiftBaseline) 0.45
-                    else if (intakeLiftCurrent + 1200 > intakeLiftBaseline) 0.60
-                    else if (intakeLiftCurrent + 2000 > intakeLiftBaseline) 0.75
-                    else 1.0
+                    else if (intakeLiftCurrent + 75 > intakeLiftBaseline) 0.15
+                    else if (intakeLiftCurrent + 500 > intakeLiftBaseline) 0.25
+                    else if (intakeLiftCurrent + 800 > intakeLiftBaseline) 0.30
+                    else if (intakeLiftCurrent + 1200 > intakeLiftBaseline) 0.35
+                    else if (intakeLiftCurrent + 2000 > intakeLiftBaseline) 0.45
+                    else 1.0)
                 else 1.0
 
 
@@ -202,6 +211,7 @@ open class TeleOpRD : OpMode() {
         val modifiedPosition = intakePivotCurrent - intakePivotBaseline
 
         telemetry.addData("intake pivot current", intakePivotCurrent)
+        telemetry.addData("intake lift baseline", intakeLiftBaseline)
         telemetry.addData("modified pivot pos", modifiedPosition)
 
         if (inputIntakePivotPower != 0.0 || robot.intakePivot.mode == DcMotor.RunMode.RUN_WITHOUT_ENCODER) {

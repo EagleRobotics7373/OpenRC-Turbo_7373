@@ -7,7 +7,7 @@ import java.lang.reflect.InvocationTargetException;
 
 @Config
 public class RobotProvider {
-    public static RobotType selectedRobot = RobotType.PUSHBOT;
+    public static RobotType selectedRobot = RobotType.MISUMI;
     public static boolean useTwoWheelOdometry = true;
 
     public static BaseRobot providePresetRobot(HardwareMap hardwareMap) {

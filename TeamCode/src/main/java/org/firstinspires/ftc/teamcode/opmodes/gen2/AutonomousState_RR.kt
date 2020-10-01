@@ -5,6 +5,7 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry
 import com.acmerobotics.roadrunner.geometry.Pose2d
 import com.acmerobotics.roadrunner.geometry.Vector2d
 import com.acmerobotics.roadrunner.trajectory.BaseTrajectoryBuilder
+import com.acmerobotics.roadrunner.trajectory.TrajectoryBuilder
 import com.acmerobotics.roadrunner.trajectory.constraints.DriveConstraints
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.hardware.DcMotor
@@ -26,6 +27,7 @@ import org.firstinspires.ftc.teamcode.library.vision.skystone.opencv.OpenCvConta
 import org.firstinspires.ftc.teamcode.library.vision.skystone.opencv.PixelStatsPipeline
 import org.firstinspires.ftc.teamcode.opmodes.gen2.AutonomousConstants.*
 import java.util.*
+import kotlin.math.PI
 
 @com.qualcomm.robotcore.eventloop.opmode.Autonomous(name = "Autonomous State (Kotlin + RR)", group = "Main")
 class AutonomousState_RR : LinearOpMode() {
@@ -239,11 +241,11 @@ class AutonomousState_RR : LinearOpMode() {
 
         robot.holonomicRR.poseEstimate =
                 if (allianceColor == BLUE) Pose2d(-38.5, 63.0, 0.0)
-                                      else Pose2d(-39.25, -62.0, 180.0.toRadians())
+                                      else Pose2d(-39.25, -62.0, PI)
 
-        builder()
-                .strafeTo(Vector2d(stonePositionsFromWall[stonesOrder[0]], nextToStonePosY))
-                .buildAndRun(Pair(0.3) { neededBlockGrabber.pivotMid(); neededBlockGrabber.grabberMid(); })
+        builder(PI)
+                .splineToConstantHeading(Pose2d(stonePositionsFromWall[stonesOrder[0]], nextToStonePosY, PI/-2))
+                .buildAndRun(Pair(0.30) { neededBlockGrabber.pivotMid(); neededBlockGrabber.grabberMid(); })
         doBlockGrab(neededBlockGrabber)
 
         builder()
@@ -252,28 +254,28 @@ class AutonomousState_RR : LinearOpMode() {
 
         if (doLiftLower) doIntakeDrop()
 
-        builder()
-                .strafeTo(Vector2d(RR_PAST_BRIDGE_X, drivingAgainstBridgePosY))
-                .strafeTo(Vector2d(foundationPlacementPositions[0], againstFoundationY))
-                .buildAndRun(Pair(0.6) { neededBlockGrabber.pivotMid(); })
+        builder(0.0)
+                .splineToConstantHeading(Pose2d(RR_PAST_BRIDGE_X, drivingAgainstBridgePosY))
+                .splineToConstantHeading(Pose2d(foundationPlacementPositions[0], againstFoundationY))
+                .buildAndRun(Pair(0.60) { neededBlockGrabber.pivotMid(); })
 
         for (i in stonesOrder.indices) {
 
             doBlockRelease(neededBlockGrabber)
 
             if (i < stonesOrder.size - 1) {
-                builder()
-                        .strafeTo(Vector2d(18.0, drivingAgainstBridgePosY))
-                        .strafeTo(Vector2d(-16.0, drivingAgainstBridgePosY))
-                        .strafeTo(Vector2d(stonePositionsFromWall[stonesOrder[i + 1]], nextToStonePosY))
-                        .buildAndRun(Pair(0.6) { neededBlockGrabber.pivotMid(); neededBlockGrabber.grabberMid(); })
+                builder(PI)
+                        .splineToConstantHeading(Pose2d(18.0, drivingAgainstBridgePosY, PI))
+                        .splineToConstantHeading(Pose2d(-16.0, drivingAgainstBridgePosY, PI))
+                        .splineToConstantHeading(Pose2d(stonePositionsFromWall[stonesOrder[i + 1]], nextToStonePosY, PI))
+                        .buildAndRun(Pair(0.60) { neededBlockGrabber.pivotMid(); neededBlockGrabber.grabberMid(); })
 
                 doBlockGrab(neededBlockGrabber)
 
-                builder()
-                        .strafeTo(Vector2d(-16.0, drivingAgainstBridgePosY))
-                        .strafeTo(Vector2d(RR_PAST_BRIDGE_X, drivingAgainstBridgePosY))
-                        .strafeTo(Vector2d(foundationPlacementPositions[i], againstFoundationY))
+                builder(0.0)
+                        .splineToConstantHeading(Pose2d(-16.0, drivingAgainstBridgePosY))
+                        .splineToConstantHeading(Pose2d(RR_PAST_BRIDGE_X, drivingAgainstBridgePosY))
+                        .splineToConstantHeading(Pose2d(foundationPlacementPositions[i], againstFoundationY))
                         .buildAndRun(Pair(0.40) { neededBlockGrabber.pivotMid(); })
 
             } else {
@@ -281,11 +283,14 @@ class AutonomousState_RR : LinearOpMode() {
                 neededBlockGrabber.pivotUp()
                 if (doFoundationPull) {
 
-                    builder().strafeTo(Vector2d(52.0, 40.0 reverseIf RED)).buildAndRun()
-                    robot.foundationGrabbersFront.mid()
-                    robot.holonomicRR.turnSync((-87.5).toRadians())
-                    builder().strafeTo(Vector2d(52.0, 28.5 reverseIf RED)).buildAndRun()
-                    robot.foundationGrabbersFront.lock()
+                    builder(PI)
+                            .splineToConstantHeading(Pose2d(48.0, 45.0 reverseIf RED, 0.0))
+                            .splineTo(Pose2d(52.00, 28.50, (-87.50).toRadians()))
+                            .buildAndRun(
+                                    Pair(0.50) {robot.foundationGrabbersFront.mid()},
+                                    Pair(0.95) {robot.foundationGrabbersFront.lock()}
+                            )
+
                     sleep(350)
 
                     if (allianceColor == BLUE) {
@@ -303,7 +308,7 @@ class AutonomousState_RR : LinearOpMode() {
 //                    DriveConstantsTunedMisumi.BASE_CONSTRAINTS.maxAccel = 70.0
 
                     robot.holonomicRR.trajectoryBuilder(DriveConstraints( //                    50.0, 30.0, 40.0,
-                            80.0, 70.0, 40.0,
+                            100.0, 100.0, 40.0,
                             Math.PI, Math.PI, 0.0
                     ))
                             .strafeTo(Vector2d(0.0, 38.0 reverseIf RED))
@@ -440,7 +445,7 @@ class AutonomousState_RR : LinearOpMode() {
             robot.intakeLiftRight.targetPosition = INTAKE_DROP_POSITION
             telemetry.addData("current", robot.intakeLiftRight.currentPosition)
             telemetry.update()
-            robot.intakeLiftRight.power = 0.5
+            robot.intakeLiftRight.power = 1.0
             robot.intakeLiftRight.targetPositionTolerance = 20
         }
         while (opModeIsActive() and robot.intakeLiftRight.isBusy)
@@ -502,8 +507,9 @@ class AutonomousState_RR : LinearOpMode() {
     }
 
     private fun builder() = robot.holonomicRR.trajectoryBuilder()
+    private fun builder(tangent: Double) = robot.holonomicRR.trajectoryBuilder(tangent)
 
-    private fun BaseTrajectoryBuilder.buildAndRun(vararg waypointActions: Pair<Double, ()->Unit>) =
+    private fun BaseTrajectoryBuilder<TrajectoryBuilder>.buildAndRun(vararg waypointActions: Pair<Double, ()->Unit>) =
             robot.holonomicRR.followTrajectorySync(this.build(), waypointActions.toList())
 
 }
