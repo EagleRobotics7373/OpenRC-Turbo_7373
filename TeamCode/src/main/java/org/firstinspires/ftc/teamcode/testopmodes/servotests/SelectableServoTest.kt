@@ -5,7 +5,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.Servo
 import org.firstinspires.ftc.teamcode.library.functions.ToggleButtonWatcher
 import org.firstinspires.ftc.teamcode.library.functions.telemetrymenu.kotlin.*
-import org.firstinspires.ftc.teamcode.library.robot.robotcore.legacyconfig.MisumiRobot
 
 @TeleOp
 class SelectableServoTest : OpMode() {

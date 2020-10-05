@@ -1,13 +1,10 @@
 package org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner
 
-import com.acmerobotics.roadrunner.geometry.Pose2d
 import com.acmerobotics.roadrunner.localization.TwoTrackingWheelLocalizer
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit
-import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.OdometryConstants.*
+import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.constants.OdometryConstants.*
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.INCH
-import org.firstinspires.ftc.teamcode.library.functions.toRadians
 import org.firstinspires.ftc.teamcode.library.robot.robotcore.IMUController
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.RobotConstantsAccessor.leftOdometryPoseInches
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.RobotConstantsAccessor.rearOdometryPoseInches

@@ -24,8 +24,8 @@ import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.Rob
 import java.util.List;
 
 import static org.firstinspires.ftc.teamcode.library.robot.robotcore.RobotProvider.providePresetRobot;
-import static org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.DriveConstantsNew.RUN_USING_ENCODER;
-import static org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.DriveConstantsNew.kV;
+import static org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.constants.DriveConstantsNew.RUN_USING_ENCODER;
+import static org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.constants.DriveConstantsNew.kV;
 
 /*
  * This routine is designed to tune the PID coefficients used by the REV Expansion Hubs for closed-

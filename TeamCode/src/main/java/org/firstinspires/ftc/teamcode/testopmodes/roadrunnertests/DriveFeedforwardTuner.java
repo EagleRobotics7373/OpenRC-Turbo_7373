@@ -15,8 +15,8 @@ import org.firstinspires.ftc.teamcode.library.functions.roadrunnersupport.Loggin
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.HolonomicRR;
 
 import static org.firstinspires.ftc.teamcode.library.robot.robotcore.RobotProvider.providePresetRobot;
-import static org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.DriveConstantsNew.getMaxRpm;
-import static org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.DriveConstantsNew.rpmToVelocity;
+import static org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.constants.DriveConstantsNew.getMaxRpm;
+import static org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.constants.DriveConstantsNew.rpmToVelocity;
 
 /*
  * Op mode for computing kV, kStatic, and kA from various drive routines. For the curious, here's an

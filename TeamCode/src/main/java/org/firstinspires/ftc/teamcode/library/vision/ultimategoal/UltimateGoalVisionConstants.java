@@ -19,11 +19,10 @@ public class UltimateGoalVisionConstants {
     public static RingPixelAnalysisPipeline.SearchType SEARCH_TYPE =
             RingPixelAnalysisPipeline.SearchType.AVERAGE;
 
-    public static ExposureControl.Mode exposureMode = ExposureControl.Mode.Auto;
-    public static int exposure = 10;
-    public static ImageResolution resolution = ImageResolution.R_960x720;
-    public static int channel = 1;
-    public static FocusControl.Mode mode = FocusControl.Mode.Unknown;
-    public static double focusLength = 0;
+    public static final String TFOD_MODEL_ASSET_EXT     = "/sdcard/FIRST/vision/UltimateGoal.tflite";
+    public static final String TFOD_FIRST_ELEMENT = "Quad";
+    public static final String TFOD_SECOND_ELEMENT = "Single";
+
+    public static ImageResolution RESOLUTION = ImageResolution.R_960x720;
 
 }

@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.opmodes.gen2
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import org.firstinspires.ftc.teamcode.library.functions.rangeBuffer
-import org.firstinspires.ftc.teamcode.library.robot.robotcore.IMUController
 
 /**
  * Driver-operated opmode for field-oriented drive, as an extension of base TeleOp functions
@@ -36,7 +35,7 @@ class TeleOpFOD : TeleOpRD() {
         if (fod)
         {
             // reset IMU baseline if left stick button is pressed
-            if (gamepad1.left_stick_button) zeroAngle = robot.imuControllerA.getHeading()
+            if (gamepad1.left_stick_button) zeroAngle = robot.imuControllerC.getHeading()
 
             // Set x, y, and z inputs:
             //    Use Double.rangeBuffer to set motor power dead-band
@@ -46,7 +45,7 @@ class TeleOpFOD : TeleOpRD() {
             val z = gamepad1.right_stick_x.toDouble().rangeBuffer(-0.15, 0.15, 0.0).times(0.33*speed)
 
             // Set drivetrain values, including an offset angle for FOD
-            robot.holonomic.runWithoutEncoderVectored(x, y, z, zeroAngle - robot.imuControllerA.getHeading())
+            robot.holonomic.runWithoutEncoderVectored(x, y, z, zeroAngle - robot.imuControllerC.getHeading())
         }
         // if FOD is not enabled, call superclass relative driving method instead
         else super.controlDrivetrain()

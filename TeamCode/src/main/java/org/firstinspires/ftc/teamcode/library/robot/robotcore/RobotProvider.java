@@ -7,7 +7,7 @@ import java.lang.reflect.InvocationTargetException;
 
 @Config
 public class RobotProvider {
-    public static RobotType selectedRobot = RobotType.PUSHBOT;
+    public static RobotType selectedRobot = RobotType.RINGPLACE;
     public static boolean useTwoWheelOdometry = true;
 
     public static BaseRobot providePresetRobot(HardwareMap hardwareMap) {
@@ -22,14 +22,14 @@ public class RobotProvider {
                     ((e.getCause() instanceof IllegalArgumentException)?": "+e.getCause().getMessage():"!"), e));
         } catch (Exception e) {
             System.out.println("INSTANTIATION FAILED!!! Creating ExtPushBot instead!");
-            robot = new ExtPushBot(hardwareMap);
+            robot = null;
             e.printStackTrace();
         }
         return robot;
     }
 
     public enum RobotType {
-        MISUMI(ExtMisumiRobot.class), PUSHBOT(ExtPushBot.class);
+        RINGPLACE(ExtRingPlaceBot.class);
 
         public Class<? extends BaseRobot> robotClass;
 

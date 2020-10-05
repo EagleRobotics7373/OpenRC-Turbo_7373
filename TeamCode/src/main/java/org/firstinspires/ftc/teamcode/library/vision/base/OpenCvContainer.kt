@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.library.vision.base
 
+import com.acmerobotics.dashboard.FtcDashboard
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl
+import org.firstinspires.ftc.robotcore.external.stream.CameraStreamServer
 import org.firstinspires.ftc.teamcode.library.functions.process.Stoppable
 import org.firstinspires.ftc.teamcode.library.vision.skystone.SkystonePixelStatsPipeline
 import org.openftc.easyopencv.OpenCvCamera
@@ -22,6 +24,7 @@ class OpenCvContainer<out Pipeline : OpenCvPipeline>(
         }
         camera.showFpsMeterOnViewport(false)
         if (pipeline is ResolutionPipeline) pipeline.resolution = resolution
+        CameraStreamSplitter.startCameraStream(camera)
     }
 
     fun adjustSettings(func: (OpenCvCamera)->Unit) {
@@ -29,5 +32,8 @@ class OpenCvContainer<out Pipeline : OpenCvPipeline>(
     }
 
 
-    override fun stop() = camera.stopStreaming()
+    override fun stop() {
+        camera.stopStreaming()
+        CameraStreamSplitter.stopCameraStream()
+    }
 }

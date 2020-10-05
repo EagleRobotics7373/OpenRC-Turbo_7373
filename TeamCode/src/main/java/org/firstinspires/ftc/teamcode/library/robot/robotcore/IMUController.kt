@@ -24,5 +24,10 @@ class IMUController @JvmOverloads constructor(hardwareMap: HardwareMap, private 
         initImu(imuA, 'A')
     }
 
+    /**
+     * Function to simplify getting the current heading from the IMU
+     *
+     * @return Current robot heading, in radians
+     */
     fun getHeading() = imuA.getAngularOrientation(AxesReference.INTRINSIC, axesOrder, AngleUnit.RADIANS).firstAngle.toDouble()
 }

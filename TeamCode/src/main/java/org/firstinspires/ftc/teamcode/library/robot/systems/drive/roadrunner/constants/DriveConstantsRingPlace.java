@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner;
+package org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.constants;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.control.PIDCoefficients;
@@ -6,7 +6,7 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.constraints.DriveConstraints;
 
 @Config
-public class DriveConstantsOld {
+public class DriveConstantsRingPlace {
     public static double WHEEL_RADIUS = 2;
     public static double GEAR_RATIO = 0.5;
     public static double TRACK_WIDTH = 14.0;

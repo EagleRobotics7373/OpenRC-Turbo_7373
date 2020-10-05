@@ -6,7 +6,7 @@ import org.firstinspires.ftc.teamcode.library.functions.AllianceColor;
 import org.firstinspires.ftc.teamcode.library.functions.AutonomousType;
 import org.firstinspires.ftc.teamcode.library.functions.ExtMusicFile;
 import org.firstinspires.ftc.teamcode.library.functions.FieldSide;
-import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.DriveConstantsTunedMisumi;
+import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.constants.DriveConstantsTunedMisumi;
 
 @Config
 public class AutonomousConstants {

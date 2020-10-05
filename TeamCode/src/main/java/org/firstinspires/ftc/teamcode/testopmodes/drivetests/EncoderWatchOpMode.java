@@ -9,7 +9,6 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.library.functions.FunctionalExtensionsKt;
 import org.firstinspires.ftc.teamcode.library.robot.robotcore.BaseRobot;
-import org.firstinspires.ftc.teamcode.library.robot.robotcore.legacyconfig.MisumiRobot;
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.legacy.OdometryModule;
 
 import static org.firstinspires.ftc.teamcode.library.robot.robotcore.RobotProvider.providePresetRobot;

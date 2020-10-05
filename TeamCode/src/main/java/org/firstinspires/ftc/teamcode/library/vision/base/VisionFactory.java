@@ -14,12 +14,13 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvInternalCamera;
 
-import static org.firstinspires.ftc.teamcode.library.vision.skystone.SkystoneVisionConstants.*;
+import static org.firstinspires.ftc.teamcode.library.vision.ultimategoal.UltimateGoalVisionConstants.*;
+
 public class VisionFactory {
 
     static String webcamName = "Webcam 720p";
 
-    public static VuforiaLocalizer createVuforia(CameraType cameraType, HardwareMap hardwareMap) {
+    public static VuforiaLocalizer createVuforia(HardwareMap hardwareMap, CameraType cameraType) {
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(getCameraMonitorViewId(hardwareMap));
         parameters.vuforiaLicenseKey = "AVsEI0//////AAABmfbnDsRuiEqQsFcH7Lyqo3QuISqpJopGJxX15CNQ6JRwa6IhhZMdS346pkBRyp94aOkulPOzR+MQZ84lQbPclj/UW9I95nliTUyCT+Ie8Bw9qNN5X5Cv4sBkIAyNJpUXfxMjUf/5Hw098czCJ1HTiVoqUVB+AGNgZ6tLD4AGqbv/ftucrrA/nnzT045vPyCZCKujFStiBc1Hkab9Y96FE5wHPrfBeCrq8nYd0T+mB3eaCO3kUahLaqyjhFAyQnQCpa1oOzsqbDARsc5FuIcACzdzOFSG+LAEOj+Bgb7Nm+jJQHn8rYsCJi94aoSptfsgXSR0N2pTwhM3eQZEf9g6m1fbUJH18eCFJWwS1FVr3U+6";
         switch (cameraType) {
@@ -35,12 +36,16 @@ public class VisionFactory {
         return ClassFactory.getInstance().createVuforia(parameters);
     }
 
+    public static VuforiaLocalizer createVuforia(HardwareMap hardwareMap) {
+        return createVuforia(hardwareMap, CameraType.WEBCAM);
+    }
+
     public static TFObjectDetector attachTFOD(HardwareMap hardwareMap, VuforiaLocalizer vuforia) {
         int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
                 "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
         TFObjectDetector tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
-        tfod.loadModelFromFile(TFOD_MODEL_ASSET_EXT, TFOD_LABEL_STONE, TFOD_LABEL_SKYSTONE);
+        tfod.loadModelFromFile(TFOD_MODEL_ASSET_EXT, TFOD_FIRST_ELEMENT, TFOD_SECOND_ELEMENT);
         return tfod;
     }
 
@@ -54,14 +59,13 @@ public class VisionFactory {
                     OpenCvCameraFactory.getInstance().createWebcam(
                             hardwareMap.get(WebcamName.class, webcamName),
                             getCameraMonitorViewId(hardwareMap));
-            resolution = UltimateGoalVisionConstants.resolution;
+            resolution = UltimateGoalVisionConstants.RESOLUTION;
         }
         else  {
             camera =
                     OpenCvCameraFactory.getInstance().createInternalCamera(
                             (cameraType==CameraType.PHONE_FRONT)? OpenCvInternalCamera.CameraDirection.FRONT : OpenCvInternalCamera.CameraDirection.BACK,
                             getCameraMonitorViewId(hardwareMap));
-//            rotation = OpenCvCameraRotation.UPRIGHT;
         }
 
         return new OpenCvContainer<Pipeline>(camera, pipeline, resolution, rotation);
