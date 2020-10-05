@@ -34,7 +34,6 @@ class UltimateGoalOpenCvTest : OpMode() {
             val exposureControl = webcam?.exposureControl
             telemetry.addData("Exposure control null", exposureControl == null)
             telemetry.addData("Exposure control allowed", exposureControl?.isExposureSupported)
-            telemetry.addData("Exposure control mode allowed", exposureControl?.isModeSupported(UltimateGoalVisionConstants.exposureMode))
             telemetry.addData("Exposure control min exposure", exposureControl?.getMinExposure(TimeUnit.MILLISECONDS))
             telemetry.addData("Exposure control max exposure", exposureControl?.getMaxExposure(TimeUnit.MILLISECONDS))
 
@@ -45,15 +44,6 @@ class UltimateGoalOpenCvTest : OpMode() {
             telemetry.addData("Min focus length", focusControl?.minFocusLength)
             telemetry.addData("Max focus length", focusControl?.maxFocusLength)
             telemetry.addData("Focus length mode", focusControl?.mode)
-
-
-            if (gamepad1.x) {
-                exposureControl?.mode = UltimateGoalVisionConstants.exposureMode
-                exposureControl?.setExposure(UltimateGoalVisionConstants.exposure.toLong(), TimeUnit.MILLISECONDS)
-                focusControl?.mode =UltimateGoalVisionConstants.mode
-                focusControl?.focusLength = UltimateGoalVisionConstants.focusLength
-            }
-
 
         }
 

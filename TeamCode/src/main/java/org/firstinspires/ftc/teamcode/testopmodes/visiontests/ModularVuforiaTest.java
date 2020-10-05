@@ -13,7 +13,7 @@ public class ModularVuforiaTest extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        VuforiaLocalizer vuforia = createVuforia(VisionFactory.CameraType.PHONE_REAR, hardwareMap);
+        VuforiaLocalizer vuforia = createVuforia(hardwareMap, VisionFactory.CameraType.PHONE_REAR);
         VuforiaController vuforiaController = new VuforiaController(vuforia,telemetry);
 
         waitForStart();

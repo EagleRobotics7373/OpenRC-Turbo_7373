@@ -7,7 +7,7 @@ import org.firstinspires.ftc.teamcode.library.functions.ToggleButtonWatcher
 import org.firstinspires.ftc.teamcode.library.vision.base.TFODContainer
 import org.firstinspires.ftc.teamcode.library.vision.base.VisionFactory
 
-@TeleOp
+@TeleOp(group="Test")
 class BasicTFODTest: LinearOpMode() {
     override fun runOpMode() {
         val vuforia = VisionFactory.createVuforia(hardwareMap)
@@ -18,11 +18,11 @@ class BasicTFODTest: LinearOpMode() {
         waitForStart()
 
         if (!opModeIsActive()) return
-
+        tfodContainer.activate()
         while (opModeIsActive()) {
-            if (gamepadButtonA.call()) {
+            while (gamepad1.a) {
                 val recognitions = tfodContainer.getUpdatedRecognitions()
-                recognitions.forEachIndexed { index, recognition ->
+                recognitions?.forEachIndexed { index, recognition ->
                     val no = "($index)"
                     telemetry.addLine("RECOGNITION $index")
                     telemetry.addData("label$no", recognition.label)
@@ -37,9 +37,7 @@ class BasicTFODTest: LinearOpMode() {
                 }
                 telemetry.update()
             }
-            else if (gamepad1.b) {
-                telemetry.update()
-            }
+
 
         }
 

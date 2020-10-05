@@ -46,7 +46,7 @@ class RingPixelAnalysisPipeline() : ResolutionPipeline() {
 
     private fun extractSingleChannel() {
         cvtColor(rgbMat, fullHsvMat, COLOR_RGB2HLS)
-        Core.extractChannel(fullHsvMat, hsvMat, UltimateGoalVisionConstants.channel)
+        Core.extractChannel(fullHsvMat, hsvMat, 2)
     }
 
     private fun trackRings()

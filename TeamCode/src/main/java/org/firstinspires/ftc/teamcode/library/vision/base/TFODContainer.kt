@@ -16,7 +16,7 @@ class TFODContainer(
         CameraStreamSplitter.startCameraStream(tfod)
     }
 
-    fun getUpdatedRecognitions(): List<Recognition> = tfod.updatedRecognitions
+    fun getUpdatedRecognitions(): List<Recognition>? = tfod.updatedRecognitions
 
     fun activate() {
         tfod.activate()
