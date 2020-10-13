@@ -103,13 +103,43 @@ open class TeleOpRD : OpMode() {
 
     }
 
+    /**
+     * Control wobble grabber
+     */
     private fun controlOtherDevices() {
+//        when {
+//            gamepad2.y -> robot.wobbleGrabber.releaseGrab()     // y is for yeet
+//            gamepad2.x -> robot.wobbleGrabber.grab()
+//            gamepad2.b -> robot.wobbleGrabber.midGrab()
+//        }
+
+        when {
+            gamepad2.dpad_up    -> robot.wobbleGrabber.pivotBack()
+            gamepad2.dpad_left || gamepad2.dpad_right
+                                -> robot.wobbleGrabber.pivotVertical()
+            gamepad2.dpad_down  -> robot.wobbleGrabber.pivotDown()
+        }
 
     }
 
     // set PID control coefficients for auto-intake raise in controlIntakeMechanism()
     // this should eventually be moved
     private fun controlIntakeMechanism() {
+        robot.intakeSystem.manualMoveIntake(gamepad2.left_stick_y.toDouble())
+
+        robot.intakeSystem.manualRingMotor(
+                when {
+                    gamepad2.left_trigger  > 0.05 -> -gamepad2.left_trigger.toDouble()
+                    gamepad2.right_trigger > 0.05 -> gamepad2.right_trigger.toDouble()
+                    else                          -> 0.0
+                }
+        )
+
+        when {
+            gamepad2.x -> robot.intakeSystem.ringServoGrab()
+            gamepad2.y -> robot.intakeSystem.ringServoRelease()
+        }
+
 
     }
 

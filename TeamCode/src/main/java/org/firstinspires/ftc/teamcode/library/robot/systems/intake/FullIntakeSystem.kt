@@ -1,77 +1,61 @@
 package org.firstinspires.ftc.teamcode.library.robot.systems.intake
 
+import com.acmerobotics.roadrunner.profile.MotionProfileBuilder
+import com.acmerobotics.roadrunner.profile.MotionState
 import com.qualcomm.hardware.rev.RevTouchSensor
+import com.qualcomm.robotcore.hardware.AnalogInput
 import com.qualcomm.robotcore.hardware.DcMotor
-import org.firstinspires.ftc.teamcode.library.robot.systems.wrappedservos.IntakeBlockGrabber
+import com.qualcomm.robotcore.hardware.DcMotorEx
+import com.qualcomm.robotcore.hardware.Servo
 
 class FullIntakeSystem(
-        private val intakePivot : DcMotor,
-        private val intakeLiftLeft: DcMotor,
-        private val intakeLiftRight: DcMotor,
-        private val intakeBlockGrabber: DcMotor
+        private val intakeLiftMotor: DcMotorEx,
+        private val liftPositionPotentiometer: AnalogInput,
+        private val ringIntakeMotor: DcMotorEx,
+        private val ringDropServo: Servo
 ) {
     var intakeState: State = State.IDLE
-
-    val intakeLift = MisumiIntakeLift(intakeLiftLeft, intakeLiftRight, 0.0)
-    lateinit var intakeSensor: RevTouchSensor
-
-    init {
-        intakeLiftRight.mode = DcMotor.RunMode.RUN_TO_POSITION
-    }
+    val minIntakeVoltage = 0.0
+    val maxIntakeVoltage = 3.0
 
     enum class State {
-        LIFT_BLOCK, LOWER, PIVOT, PLACE, IDLE
+        IDLE, MANUAL, AUTOMATED
     }
+
+    enum class IntakePosition(val voltage: Double) {
+        COLLECT(0.0),
+        WOBBLE(0.0),
+        SCORE(0.0)
+    }
+
+    fun moveIntake(position: IntakePosition) {
+
+    }
+
+    fun manualMoveIntake(power: Double) {
+        intakeLiftMotor.power = power.coerceIn(-1.0, 1.0)
+    }
+
+    fun manualRingMotor(power: Double) {
+        ringIntakeMotor.power = power
+    }
+
+    fun ringServoRelease() {
+        ringDropServo.position = 0.0
+    }
+
+    fun ringServoGrab() {
+        ringDropServo.position = 0.0
+    }
+
+
 
     fun update() {
         when (intakeState) {
             State.IDLE -> {
 
             }
-            State.LIFT_BLOCK -> {
-
-            }
-            State.LOWER -> {
-
-            }
-            State.PIVOT -> {
-
-            }
         }
     }
 
-    fun beginBlockLift(numBlocks: Int) : Boolean {
-        intakeState = State.LIFT_BLOCK
-        return true
-    }
-
-    class MisumiIntakeLift(
-            intakeLiftLeft: DcMotor,
-            intakeLiftRight: DcMotor,
-            startingHeight: Double
-    ) {
-        val spoolDiameter = 2.0
-        val encoderTicksPerRevolution = 103.6
-
-        val startingEncoderPosition = intakeLiftRight.currentPosition
-        var zeroEncoderPosition = heightToEncoderTicks(startingHeight) - startingEncoderPosition
-
-        var targetEncoderPosition = startingEncoderPosition
-            private set(value) {field = value}
-
-        fun setEncoderTarget(numBlocks: Int, extOverBlock: Boolean) {
-            targetEncoderPosition = zeroEncoderPosition + heightToEncoderTicks(blocksToHeight(numBlocks))
-            if (extOverBlock) targetEncoderPosition += extensionHeightOverBlock.toInt()
-        }
-
-        fun blocksToHeight(numBlocks: Int) : Double {
-            return numBlocks * 4.1
-        }
-
-        val extensionHeightOverBlock : Double = 1.5
-
-        fun heightToEncoderTicks(height: Double) : Int {
-            return ((Math.PI * spoolDiameter)/(height * encoderTicksPerRevolution)).toInt()
-        }
-    }
 }

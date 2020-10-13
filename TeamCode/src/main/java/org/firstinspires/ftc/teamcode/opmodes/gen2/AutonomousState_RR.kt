@@ -19,7 +19,6 @@ import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.con
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.constants.DriveConstantsSlowMisumi
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.constants.DriveConstantsTunedMisumi
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.RobotConstantsAccessor
-import org.firstinspires.ftc.teamcode.library.robot.systems.wrappedservos.AutoBlockIntake
 import org.firstinspires.ftc.teamcode.library.vision.base.VisionFactory
 import org.firstinspires.ftc.teamcode.library.vision.base.OpenCvContainer
 import org.firstinspires.ftc.teamcode.library.vision.skystone.SkystonePixelStatsPipeline
@@ -216,20 +215,6 @@ class AutonomousState_RR : LinearOpMode() {
 
     }
 
-    private fun doBlockGrab(grabber: AutoBlockIntake) {
-        grabber.pivotDown()
-        sleep(600)
-        grabber.grabBlock()
-        sleep(750)
-        grabber.pivotUp()
-        sleep(400)
-    }
-
-    private fun doBlockRelease(grabber: AutoBlockIntake) {
-        grabber.releaseBlock()
-        sleep(350)
-        grabber.pivotUp()
-    }
 
     /**
      * Robot strafes for desired distance until motors have reached target.

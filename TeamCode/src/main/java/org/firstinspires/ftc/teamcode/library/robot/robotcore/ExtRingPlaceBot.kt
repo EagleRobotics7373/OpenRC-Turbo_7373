@@ -5,6 +5,8 @@ import org.firstinspires.ftc.teamcode.library.robot.systems.drive.legacy.Odometr
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.*
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.constants.DriveConstantsTunedMisumi
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.constants.OdometryConstants
+import org.firstinspires.ftc.teamcode.library.robot.systems.intake.FullIntakeSystem
+import org.firstinspires.ftc.teamcode.library.robot.systems.wrappedservos.WobbleGrabber
 
 open class ExtRingPlaceBot(_hardwareMap: HardwareMap) : BaseRobot(_hardwareMap) {
 
@@ -16,11 +18,16 @@ open class ExtRingPlaceBot(_hardwareMap: HardwareMap) : BaseRobot(_hardwareMap) 
         )
     }
 
-    // Drivetrain Variables
-            // @JvmField val frontLeftMotor  : DcMotorEx FROM BaseRobot
-            // @JvmField val backLeftMotor   : DcMotorEx FROM BaseRobot
-            // @JvmField val frontRightMotor : DcMotorEx FROM BaseRobot
-            // @JvmField val backRightMotor  : DcMotorEx FROM BaseRobot
+    @JvmField val odometryLeft           : DcMotorEx              = hwInit("odometryLeft")
+    @JvmField val odometryRear           : DcMotorEx              = hwInit("odometryRear")
+
+    @JvmField val intakeLiftMotor        : DcMotorEx              = hwInit("intakeLiftMotor")
+    @JvmField val ringIntakeMotor        : DcMotorEx              = hwInit("ringIntakeMotor")
+    @JvmField val ringDropServo          : Servo                  = hwInit("ringDropServo")
+    @JvmField val liftPotentiometer      : AnalogInput            = hwInit("liftPotentiometer")
+
+    @JvmField val wobblePivotServo       : Servo                  = hwInit("wobblePivotServo")
+    @JvmField val wobbleGrabServo        : Servo                  = hwInit("wobbleGrabServo")
 
     // Odometry module variables - these will be set once we determine plug-in locations on REV Hubs
     override val leftOdometryModule: OdometryModule?  = null
@@ -34,7 +41,10 @@ open class ExtRingPlaceBot(_hardwareMap: HardwareMap) : BaseRobot(_hardwareMap) 
     @JvmField val imuControllerC          : IMUController         = IMUController(hardwareMap = hardwareMap, id = 'C')
     @JvmField val imuControllerE          : IMUController         = IMUController(hardwareMap = hardwareMap, id = 'E')
 
-    // RoadRunner holonomic drivetrain controller
+    // RoadRunner holonomic drivetrain controller and other multi-component systems
      override val holonomicRR             : HolonomicRR           = HolonomicRR(imuControllerC,
-                                                                                 frontLeftMotor, backLeftMotor, backRightMotor, frontRightMotor)
+                                                                                 frontLeftMotor, backLeftMotor, backRightMotor, frontRightMotor,
+                                                                                 TwoWheelOdometryLocalizer(odometryLeft, odometryRear, imuControllerC))
+    @JvmField val intakeSystem            : FullIntakeSystem      = FullIntakeSystem(intakeLiftMotor, liftPotentiometer, ringIntakeMotor, ringDropServo)
+    @JvmField val wobbleGrabber           : WobbleGrabber         = WobbleGrabber(wobblePivotServo, wobbleGrabServo)
 }

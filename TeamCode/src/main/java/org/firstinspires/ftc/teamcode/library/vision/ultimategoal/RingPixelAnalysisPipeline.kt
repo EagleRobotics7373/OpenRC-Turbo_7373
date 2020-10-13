@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode.library.vision.ultimategoal
 import org.firstinspires.ftc.teamcode.library.functions.truncate
 import org.firstinspires.ftc.teamcode.library.vision.base.ImageResolution
 import org.firstinspires.ftc.teamcode.library.vision.base.ResolutionPipeline
+import org.firstinspires.ftc.teamcode.library.vision.base.coerceIn
+import org.firstinspires.ftc.teamcode.library.vision.base.times
 
 import org.opencv.core.*
 import org.opencv.imgproc.Imgproc.*
@@ -216,14 +218,6 @@ class RingPixelAnalysisPipeline() : ResolutionPipeline() {
 
     enum class SearchType {
         AVERAGE, STDEV
-    }
-
-    fun Point.times(increment: Double): Point {
-        return Point(this.x.times(increment), this.y.times(increment))
-    }
-
-    fun Point.coerceIn(mat: Mat): Point {
-        return Point(this.x.coerceIn(0.0, mat.cols()-1.0), this.y.coerceIn(0.0, mat.rows()-1.0))
     }
 
 }
