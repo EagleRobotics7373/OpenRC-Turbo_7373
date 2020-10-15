@@ -35,20 +35,6 @@ public class MathOperations {
     }
 
     /**
-     *
-     * @param x Number to be exponentialy multiplied.
-     * @param n Exponent in the equation
-     * @return Equation result
-     */
-    public static double pow(double x, int n){
-        double temp = x;
-        for(int i = 1; i < n; i++){
-            temp *= x;
-        }
-        return temp;
-    }
-
-    /**
      * Sets an input value to a specified default value if the input is within the range bounds
      * @param numberToBuffer Input value
      * @param lowerBound Lower bound for buffer cutoff

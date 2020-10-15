@@ -29,7 +29,7 @@ class FullIntakeSystem(
     }
 
     fun moveIntake(position: IntakePosition) {
-
+        intakeState = State.AUTOMATED
     }
 
     fun manualMoveIntake(power: Double) {
@@ -47,8 +47,6 @@ class FullIntakeSystem(
     fun ringServoGrab() {
         ringDropServo.position = 0.0
     }
-
-
 
     fun update() {
         when (intakeState) {
