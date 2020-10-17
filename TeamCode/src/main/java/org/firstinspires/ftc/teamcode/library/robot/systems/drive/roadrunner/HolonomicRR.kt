@@ -368,7 +368,7 @@ constructor (
      * Get the velocities for all four motors as a list
      */
     @NonNull
-    fun getWheelVelocities() : List<Double> {
+    override fun getWheelVelocities() : List<Double> {
         return listOf(
                 encoderTicksToInches(frontLeftExt.velocity),
                 encoderTicksToInches(backLeftExt.velocity),
@@ -401,10 +401,10 @@ constructor (
         driveConstraints = MecanumConstraints(baseConstraints, trackWidth)
     }
 
-    /**
-     * Create trajectory builder from current pose estimate
-     */
-    @JvmOverloads fun trajectoryBuilder(_driveConstraints : DriveConstraints = driveConstraints) = TrajectoryBuilder(poseEstimate, _driveConstraints)
+    @JvmOverloads fun trajectoryBuilder(tangent : Double, _driveConstraints : DriveConstraints = driveConstraints) =
+            TrajectoryBuilder(poseEstimate, startTangent  = tangent, constraints = _driveConstraints)
+    @JvmOverloads fun trajectoryBuilder(_driveConstraints : DriveConstraints = driveConstraints) =
+            TrajectoryBuilder(poseEstimate, constraints = _driveConstraints)
 
 
     /*

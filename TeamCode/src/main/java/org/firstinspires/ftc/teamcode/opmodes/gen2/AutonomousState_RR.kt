@@ -5,6 +5,8 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry
 import com.acmerobotics.roadrunner.geometry.Pose2d
 import com.acmerobotics.roadrunner.geometry.Vector2d
 import com.acmerobotics.roadrunner.trajectory.BaseTrajectoryBuilder
+import com.acmerobotics.roadrunner.trajectory.TrajectoryBuilder
+import com.acmerobotics.roadrunner.trajectory.constraints.DriveConstraints
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.util.ElapsedTime
@@ -23,6 +25,8 @@ import org.firstinspires.ftc.teamcode.library.vision.base.VisionFactory
 import org.firstinspires.ftc.teamcode.library.vision.base.OpenCvContainer
 import org.firstinspires.ftc.teamcode.library.vision.skystone.SkystonePixelStatsPipeline
 import org.firstinspires.ftc.teamcode.opmodes.gen2.AutonomousConstants.*
+import java.util.*
+import kotlin.math.PI
 
 @com.qualcomm.robotcore.eventloop.opmode.Autonomous(name = "Autonomous State (Kotlin + RR)", group = "Main")
 class AutonomousState_RR : LinearOpMode() {
@@ -116,66 +120,6 @@ class AutonomousState_RR : LinearOpMode() {
 
     }
 
-//    override fun internalPostLoop() {
-//        super.internalPostLoop()
-//        player.stop()
-//    }
-
-    fun doCrossField() {
-        cvContainer.pipeline.tracking = true
-        while (cvContainer.pipeline.tracking);
-
-        val skystonePosition = cvContainer.pipeline.skystonePos
-
-        val skystonePositionFromWall =
-                when (allianceColor) {
-                    RED ->
-                        when (skystonePosition) {
-                            NULL  -> 2 // Not in camera frame
-                            LEFT  -> 0 // LEFT
-                            else  -> 1 // RIGHT, or unknown
-                        }
-                    BLUE ->
-                        when (skystonePosition) {
-                            RIGHT -> 0 // RIGHT
-                            LEFT  -> 1 // LEFT
-                            else  -> 2 // Not in camera frame, or unknown
-                        }
-                }
-
-        val stonesOrder = /*arrayOf(STONE_0, STONE_1, STONE_2, STONE_3).take(numStonesToMove)*/
-            when (skystonePositionFromWall) {
-                0    -> arrayOf(0, 3, 5, 4)
-                1    -> arrayOf(1, 4, 5, 3)
-                else -> arrayOf(2, 5, 4, 3)
-            }.take(numStonesToMove)
-
-        telemetry.addData("Skystone pos from wall", skystonePositionFromWall)
-        telemetry.update()
-
-        val nextToStonePosY = RR_NEXT_TO_STONE_Y reverseIf RED
-        val drivingAgainstBridgePosY = RR_AGAINST_BRIDGE_Y reverseIf RED
-        val againstFoundationY = RR_AGAINST_FOUNDATION_Y reverseIf RED
-
-        val stonePositionsFromWall =
-                (if (allianceColor == BLUE) arrayOf(-62.0, -55.0, -48.0, -42.0, -31.0, -23.0)
-                        else arrayOf(-64.0, -55.0, -48.0, -39.0, -31.0, -23.0))
-
-                        .map { if (allianceColor == RED) it + RR_RED_STONE_OFFSET else it}
-
-        val foundationPlacementPositions = arrayOf(
-                42.0, 46.0, 52.0, 52.0).map { if (allianceColor == RED) it + RR_RED_STONE_OFFSET else it}
-
-        robot.holonomicRR.poseEstimate =
-                if (allianceColor == BLUE) Pose2d(-38.5, 63.0, 0.0)
-                                      else Pose2d(-39.25, -62.0, 180.0.toRadians())
-
-
-        builder()
-                .strafeTo(Vector2d(-16.0, drivingAgainstBridgePosY))
-                .buildAndRun()
-
-    }
 
     /**
      * Creates and operates [ReflectiveTelemetryMenu] before the init period.
@@ -241,7 +185,6 @@ class AutonomousState_RR : LinearOpMode() {
     }
 
 
-
     /**
      * Reverses input number if [testColor] matches [allianceColor]
      */
@@ -298,8 +241,9 @@ class AutonomousState_RR : LinearOpMode() {
     }
 
     private fun builder() = robot.holonomicRR.trajectoryBuilder()
+    private fun builder(tangent: Double) = robot.holonomicRR.trajectoryBuilder(tangent)
 
-    private fun BaseTrajectoryBuilder.buildAndRun(vararg waypointActions: Pair<Double, ()->Unit>) =
+    private fun BaseTrajectoryBuilder<TrajectoryBuilder>.buildAndRun(vararg waypointActions: Pair<Double, ()->Unit>) =
             robot.holonomicRR.followTrajectorySync(this.build(), waypointActions.toList())
 
 }

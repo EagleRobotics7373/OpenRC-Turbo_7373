@@ -5,6 +5,7 @@ import com.acmerobotics.roadrunner.geometry.Pose2d
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import org.firstinspires.ftc.teamcode.library.robot.robotcore.RobotProvider.providePresetRobot
+import kotlin.math.PI
 
 @Config
 @TeleOp(group="rr_cfg")
@@ -25,8 +26,7 @@ for (i in 1..4) {
             .splineTo(Pose2d(70.0, -8.0))
             .build())
     sleep(0)
-    drive.followTrajectorySync(drive.trajectoryBuilder()
-            .reverse()
+    drive.followTrajectorySync(drive.trajectoryBuilder(PI)
             .splineTo(Pose2d(0.0, 0.0))
             .build())
     sleep(0)
