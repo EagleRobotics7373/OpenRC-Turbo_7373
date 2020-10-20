@@ -21,6 +21,7 @@ import com.acmerobotics.roadrunner.trajectory.constraints.MecanumConstraints
 import com.acmerobotics.roadrunner.util.NanoClock
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
+import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.PIDFCoefficients
 import org.firstinspires.ftc.teamcode.library.functions.MathOperations
 import org.firstinspires.ftc.teamcode.library.functions.roadrunnersupport.DashboardUtil
@@ -103,7 +104,7 @@ constructor (
 
         motorsExt.forEach {
             it.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
-
+            it.direction = DcMotorSimple.Direction.FORWARD
             if (runUsingEncoder) {
                 it.mode = DcMotor.RunMode.RUN_USING_ENCODER
                 if (motorVelocityPID != null) setPIDCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, motorVelocityPID as PIDCoefficients)

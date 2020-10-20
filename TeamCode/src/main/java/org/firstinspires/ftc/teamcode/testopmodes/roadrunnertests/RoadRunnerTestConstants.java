@@ -14,6 +14,4 @@ public class RoadRunnerTestConstants {
     public static double SPLINE_TEST_ENDTANGENT = 0.0;
     public static double SPLINE_TEST_STARTTANGENT = 0.0;
     public static double SPLINE_TEST_ENDHEADING = 0.0;
-    public static TrajectoryConfig.HeadingInterpolationType SPLINE_TEST_INTERPOLATOR = TrajectoryConfig.HeadingInterpolationType.CONSTANT;
-
 }

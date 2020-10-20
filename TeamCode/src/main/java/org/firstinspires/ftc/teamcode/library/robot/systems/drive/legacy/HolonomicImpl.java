@@ -60,7 +60,7 @@ public class HolonomicImpl implements Holonomic {
         for (DcMotorEx motor : motors) {
             motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             motor.setTargetPositionTolerance(TARGET_POSITION_TOLERANCE);
-            motor.setDirection(DcMotorSimple.Direction.REVERSE);
+//            motor.setDirection(DcMotorSimple.Direction.REVERSE);
         }
     }
 

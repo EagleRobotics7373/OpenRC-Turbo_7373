@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.testopmodes.roadrunnertests
 
 import com.acmerobotics.roadrunner.geometry.Pose2d
-import com.acmerobotics.roadrunner.trajectory.config.TrajectoryConfig
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import org.firstinspires.ftc.teamcode.library.functions.toRadians
@@ -20,14 +19,7 @@ class SplineTestPlus : LinearOpMode() {
                 SPLINE_TEST_ENDTANGENT.toRadians()
         )
         val trajectory =
-                drive.trajectoryBuilder(tangent = SPLINE_TEST_STARTTANGENT.toRadians()).apply {
-                    when (SPLINE_TEST_INTERPOLATOR) {
-                        TrajectoryConfig.HeadingInterpolationType.CONSTANT -> splineToConstantHeading(splineTestEndPose);
-                        TrajectoryConfig.HeadingInterpolationType.LINEAR -> splineToLinearHeading(splineTestEndPose, SPLINE_TEST_ENDHEADING.toRadians());
-                        TrajectoryConfig.HeadingInterpolationType.SPLINE -> splineToSplineHeading(splineTestEndPose, SPLINE_TEST_ENDHEADING.toRadians());
-                        TrajectoryConfig.HeadingInterpolationType.TANGENT -> splineTo(splineTestEndPose)
-                    }
-                }
+                drive.trajectoryBuilder(tangent = SPLINE_TEST_STARTTANGENT.toRadians())
                         .build()
 
         if (isStopRequested) return

@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.library.robot.robotcore
 import com.qualcomm.robotcore.hardware.*
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.legacy.OdometryModule
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.*
+import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.constants.DriveConstantsRingPlace
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.constants.DriveConstantsTunedMisumi
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.constants.OdometryConstants
 import org.firstinspires.ftc.teamcode.library.robot.systems.intake.FullIntakeSystem
@@ -13,7 +14,7 @@ open class ExtRingPlaceBot(_hardwareMap: HardwareMap) : BaseRobot(_hardwareMap) 
     init {
         println("ExtRingPlaceBot being constructed!")
         RobotConstantsAccessor.load(
-                DriveConstantsTunedMisumi::class.java,
+                DriveConstantsRingPlace::class.java,
                 OdometryConstants::class.java
         )
     }

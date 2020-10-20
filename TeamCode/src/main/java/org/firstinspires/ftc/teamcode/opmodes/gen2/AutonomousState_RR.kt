@@ -24,6 +24,7 @@ import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.Rob
 import org.firstinspires.ftc.teamcode.library.vision.base.VisionFactory
 import org.firstinspires.ftc.teamcode.library.vision.base.OpenCvContainer
 import org.firstinspires.ftc.teamcode.library.vision.skystone.SkystonePixelStatsPipeline
+import org.firstinspires.ftc.teamcode.library.vision.ultimategoal.RingPixelAnalysisPipeline
 import org.firstinspires.ftc.teamcode.opmodes.gen2.AutonomousConstants.*
 import java.util.*
 import kotlin.math.PI
@@ -40,7 +41,7 @@ class AutonomousState_RR : LinearOpMode() {
     private          val telem           : MultipleTelemetry = MultipleTelemetry(telemetry, FtcDashboard.getInstance().telemetry)
     private lateinit var elapsedTime     : ElapsedTime
 
-    private lateinit var cvContainer     : OpenCvContainer<SkystonePixelStatsPipeline>
+    private lateinit var cvContainer     : OpenCvContainer<RingPixelAnalysisPipeline>
 
     private lateinit var player          : ExtDirMusicPlayer
 
@@ -53,7 +54,7 @@ class AutonomousState_RR : LinearOpMode() {
     var driveClass                              = _driveClass
     var musicFile                           = _musicFile
     var parkOnly                            = _parkOnly
-    var visionDetector                      = SkystonePixelStatsPipeline.StatsDetector.DETECTOR_VALUE_STDDEV
+//    var visionDetector                      = SkystonePixelStatsPipeline.StatsDetector.DETECTOR_VALUE_STDDEV
     var delayBeforeParking                  = _delayBeforeParking
 //    var foundationSwivel                    = _foundationSwivel
     var doFoundationPull                    = _doFoundationPull
@@ -72,7 +73,7 @@ class AutonomousState_RR : LinearOpMode() {
         cvContainer = VisionFactory.createOpenCv(
                 VisionFactory.CameraType.WEBCAM,
                 hardwareMap,
-                SkystonePixelStatsPipeline(SkystonePixelStatsPipeline.StatsDetector.DETECTOR_VALUE_STDDEV))
+                RingPixelAnalysisPipeline())
 
 
         /*
@@ -98,12 +99,27 @@ class AutonomousState_RR : LinearOpMode() {
 
         elapsedTime = ElapsedTime()
 
-        cvContainer.pipeline.detector = visionDetector
+//        cvContainer.pipeline.detector = visionDetector
 
 
         /*
             Perform actions
          */
+        cvContainer.pipeline.shouldKeepTracking = false
+        cvContainer.pipeline.tracking = true
+        while (cvContainer.pipeline.tracking);
+
+        val numRings = cvContainer.pipeline.numberOfRings
+        val startingVectorMap = mapOf(0 to Vector2d(0.0, -60.0), 1 to Vector2d(24.0, -36.0), 4 to Vector2d(48.0, -60.0))
+
+        robot.holonomicRR.poseEstimate = Pose2d(-59.8, -48.0, 120.0.toRadians())
+
+        robot.holonomicRR.trajectoryBuilder(0.0)
+                .splineToSplineHeading(Pose2d(-24.0, -60.0), 0.0)
+                .splineToConstantHeading(startingVectorMap[numRings]!!, 0.0)
+                .buildAndRun()
+
+
 
 
 

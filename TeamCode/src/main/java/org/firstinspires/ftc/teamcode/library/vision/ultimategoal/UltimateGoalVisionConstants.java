@@ -15,12 +15,12 @@ public class UltimateGoalVisionConstants {
      */
 
     // (x,y) position of the lowest ring in the stack
-    public static int BOTTOM_RING_CENTER_X = 375;
-    public static int BOTTOM_RING_CENTER_Y = 315;
+    public static int BOTTOM_RING_CENTER_X = 585;
+    public static int BOTTOM_RING_CENTER_Y = 300;
 
     // Width and height of the ring
-    public static int RING_WIDTH = 229;
-    public static int RING_HEIGHT = 45;
+    public static int RING_WIDTH = 100;
+    public static int RING_HEIGHT = 15;
 
     // Spacing between rings
     public static int RING_SPACING = 5;
