@@ -17,9 +17,6 @@ import org.firstinspires.ftc.teamcode.library.functions.Position.*
 import org.firstinspires.ftc.teamcode.library.functions.telemetrymenu.kotlin.*
 import org.firstinspires.ftc.teamcode.library.robot.robotcore.ExtRingPlaceBot
 import org.firstinspires.ftc.teamcode.library.robot.robotcore.IMUController
-import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.constants.DriveConstantsBlueMisumi
-import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.constants.DriveConstantsSlowMisumi
-import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.constants.DriveConstantsTunedMisumi
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.RobotConstantsAccessor
 import org.firstinspires.ftc.teamcode.library.vision.base.VisionFactory
 import org.firstinspires.ftc.teamcode.library.vision.base.OpenCvContainer
@@ -28,6 +25,7 @@ import org.firstinspires.ftc.teamcode.library.vision.ultimategoal.RingPixelAnaly
 import org.firstinspires.ftc.teamcode.opmodes.gen2.AutonomousConstants.*
 import java.util.*
 import kotlin.math.PI
+import org.firstinspires.ftc.teamcode.opmodes.gen2.OpModeConfig
 
 @com.qualcomm.robotcore.eventloop.opmode.Autonomous(name = "Autonomous State (Kotlin + RR)", group = "Main")
 class AutonomousState_RR : LinearOpMode() {
@@ -48,21 +46,8 @@ class AutonomousState_RR : LinearOpMode() {
     /*
         VARIABLES: Menu Options
      */
-    var allianceColor                       = _allianceColor
-//    var startingPosition                    = _startingPosition
-    var autonomousType               = _autonomousType
-    var driveClass                              = _driveClass
-    var musicFile                           = _musicFile
-    var parkOnly                            = _parkOnly
-//    var visionDetector                      = SkystonePixelStatsPipeline.StatsDetector.DETECTOR_VALUE_STDDEV
-    var delayBeforeParking                  = _delayBeforeParking
-//    var foundationSwivel                    = _foundationSwivel
-    var doFoundationPull                    = _doFoundationPull
-    var doParkAtEnd                                 = _doParkAtEnd
-    var liftLowerOnly = _liftLowerOnly
-    var doLiftLower = false
-    var parkNearDS                          = false
-    var numStonesToMove                    = _numStonesToMove
+    val config = OpModeConfig(telemetry)
+    var allianceColor: AllianceColor by config.custom("Alliance Color", RED, BLUE)
 
     override fun runOpMode() {
         /*
@@ -91,15 +76,11 @@ class AutonomousState_RR : LinearOpMode() {
         /*
             Prepare music and setup additional components.
          */
-        RobotConstantsAccessor.loadedOdometryClass = driveClass
         robot.holonomicRR.redefine()
 
-        player = ExtDirMusicPlayer(musicFile, true)
-        player.play()
 
         elapsedTime = ElapsedTime()
 
-//        cvContainer.pipeline.detector = visionDetector
 
 
         /*
@@ -128,7 +109,6 @@ class AutonomousState_RR : LinearOpMode() {
          */
         while (opModeIsActive()) robot.holonomicRR.update()
 
-        player.stop()
         Thread {
             cvContainer.stop()
             cvContainer.camera.closeCameraDevice()
@@ -143,35 +123,22 @@ class AutonomousState_RR : LinearOpMode() {
      */
 
     fun operateMenu() {
-        val menu = ReflectiveTelemetryMenu(telem,
-                ReflectiveMenuItemFeedback("Status") { if (doLiftLower) "Prepared" else "NOT PREPARED!"},
-                ReflectiveMenuItemEnum("Alliance Color", ::allianceColor, AllianceColor.RED, AllianceColor.BLUE),
-                ReflectiveMenuItemEnum("Autonomous Type", ::autonomousType, *AutonomousType.values()),
-                ReflectiveMenuItemEnum("Constants", ::driveClass, DriveConstantsTunedMisumi::class.java, DriveConstantsSlowMisumi::class.java, DriveConstantsBlueMisumi::class.java, toStringMethod = { it.simpleName }),
-                ReflectiveMenuItemEnum("Music", ::musicFile, *ExtMusicFile.values()),
-//                ReflectiveMenuItemBoolean("Foundation Swivel", ::foundationSwivel),
-                ReflectiveMenuItemBoolean("Foundation Pull", ::doFoundationPull),
-                ReflectiveMenuItemBoolean("Park at End", ::doParkAtEnd),
-                ReflectiveMenuItemBoolean("Lift Lower Only", ::liftLowerOnly),
-                ReflectiveMenuItemInteger("Number of Stones", ::numStonesToMove, 1, 3, 1),
-                ReflectiveMenuItemInteger("Park Delay", ::delayBeforeParking, 0, 25, 1),
-                ReflectiveMenuItemBoolean("Park Near DS (FOUNDATION TYPE)", ::parkNearDS)
-        )
 
         val dpadUpWatch = ToggleButtonWatcher {gamepad1.dpad_up}
         val dpadDownWatch = ToggleButtonWatcher {gamepad1.dpad_down}
         val dpadLeftWatch = ToggleButtonWatcher {gamepad1.dpad_left}
         val dpadRightWatch = ToggleButtonWatcher {gamepad1.dpad_right}
 
+        config.update()
+
         while (!isStarted && !isStopRequested) {
             when {
-                dpadUpWatch.call()    -> menu.previousItem()
-                dpadDownWatch.call()  -> menu.nextItem()
-                dpadLeftWatch.call()  -> menu.iterateBackward()
-                dpadRightWatch.call() -> menu.iterateForward()
+                dpadUpWatch.call()    -> config.update(prevItem = true)
+                dpadDownWatch.call()  -> config.update(nextItem = true)
+                dpadLeftWatch.call()  -> config.update(iterBack = true)
+                dpadRightWatch.call() -> config.update(iterFw   = true)
             }
         }
-
 
     }
 
@@ -200,60 +167,11 @@ class AutonomousState_RR : LinearOpMode() {
 
     }
 
-
     /**
      * Reverses input number if [testColor] matches [allianceColor]
      */
     private infix fun Double.reverseIf(testColor: AllianceColor) : Double {
         return this * if (allianceColor==testColor) -1.0 else 1.0
-    }
-
-    fun imuPIRotate(angle: Double) {
-        var currentValue = imuController.getHeading().toDegrees()
-        val targetValue = currentValue + angle
-
-        val Kp = .02 // Proportional Constant
-        val Ki = .0007 // Integral Constant
-        var et: Double // Error
-        var proportionPower: Double
-        var integralPower: Double
-        var power: Double
-        var errorSum = 0.0
-        val originalRuntime = runtime
-        while (currentValue != targetValue && opModeIsActive() && runtime - originalRuntime < 4) {
-            currentValue = imuController.getHeading().toDegrees()
-            telemetry.addData("Current value", currentValue)
-            telemetry.addData("Target value", targetValue)
-
-            if (currentValue < 0) {
-                et = -(Math.abs(targetValue) - Math.abs(currentValue))
-            } else {
-                et = targetValue - currentValue
-            }
-
-
-            if (Kp * et > .8) {
-                proportionPower = .8
-            } else {
-                proportionPower = Kp * et
-            }
-
-            if (Math.abs(et) < 45) {
-                errorSum += et
-            }
-
-            integralPower = Ki * errorSum
-
-            power = -(proportionPower + integralPower)
-            telemetry.addData("et", et)
-            telemetry.addData("propPw", proportionPower)
-            telemetry.addData("intPw", integralPower)
-            telemetry.addData("errorsum", errorSum)
-            telemetry.addData("Power", power)
-            robot.holonomic.runWithoutEncoder(0.0, 0.0, power * 0.30)
-            telemetry.update()
-        }
-        robot.holonomic.stop()
     }
 
     private fun builder() = robot.holonomicRR.trajectoryBuilder()

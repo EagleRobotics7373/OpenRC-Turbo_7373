@@ -4,8 +4,6 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.config.TrajectoryConfig;
 
-import org.firstinspires.ftc.teamcode.library.functions.AllianceColor;
-
 @Config
 public class RoadRunnerTestConstants {
     public static double STRAIGHT_TEST_DIST = 10.0;

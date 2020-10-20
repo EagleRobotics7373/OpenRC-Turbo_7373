@@ -2,8 +2,6 @@ package org.firstinspires.ftc.teamcode.opmodes.gen2;
 
 import com.acmerobotics.dashboard.config.Config;
 
-import org.firstinspires.ftc.teamcode.library.functions.AllianceColor;
-import org.firstinspires.ftc.teamcode.library.functions.AutonomousType;
 import org.firstinspires.ftc.teamcode.library.functions.ExtMusicFile;
 import org.firstinspires.ftc.teamcode.library.functions.FieldSide;
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.constants.DriveConstantsTunedMisumi;

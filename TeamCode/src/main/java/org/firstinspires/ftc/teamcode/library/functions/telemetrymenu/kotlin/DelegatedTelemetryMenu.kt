@@ -12,7 +12,8 @@ class DelegatedTelemetryMenu constructor(private val telemetry: Telemetry) : Tel
         _, _, newValue ->
         newValue in 0 until list.size
     }
-    private fun refresh() {
+
+    fun refresh() {
         list.forEach {
             telemetry.addData((if (it === list[current]) "-> " else "") + it.description,
                     (if (it.canIterateBackward()) " << " else "")
@@ -46,7 +47,7 @@ class DelegatedTelemetryMenu constructor(private val telemetry: Telemetry) : Tel
 
 }
 
-abstract class MenuItemDelegate<T>(menu : DelegatedTelemetryMenu,
+abstract class MenuItemDelegate<T>(
                                    val description : String,
                                    var value: T) : ReadWriteProperty<Any?, T> {
     override fun getValue(thisRef: Any?, property: KProperty<*>): T {
@@ -57,16 +58,21 @@ abstract class MenuItemDelegate<T>(menu : DelegatedTelemetryMenu,
     abstract fun iterateBackward()
     abstract fun canIterateForward(): Boolean
     abstract fun canIterateBackward(): Boolean
+
+    infix fun with(menu: DelegatedTelemetryMenu): MenuItemDelegate<T>
+    {
+        menu.add(this)
+        return this
+    }
 }
 
-class MenuItemIntDelegate(menu: DelegatedTelemetryMenu,
+class MenuItemIntDelegate(
                           description: String,
                           startingValue: Int,
                           private val lowerLimit: Int,
                           private val upperLimit: Int,
                           private val incrementBy: Int = 1)
     : MenuItemDelegate<Int>(
-        menu,
         description,
         if (startingValue in lowerLimit..upperLimit) startingValue else lowerLimit) {
 
@@ -89,15 +95,13 @@ class MenuItemIntDelegate(menu: DelegatedTelemetryMenu,
     override fun canIterateForward(): Boolean = value+incrementBy <= upperLimit
 
     override fun canIterateBackward(): Boolean = value-incrementBy >= lowerLimit
-    init{
-        menu.add(this)
-    }
+
 }
 
-class MenuItemBooleanDelegate(menu: DelegatedTelemetryMenu,
+class MenuItemBooleanDelegate(
                               description: String,
                               startingValue: Boolean)
-    : MenuItemDelegate<Boolean>(menu, description, startingValue) {
+    : MenuItemDelegate<Boolean>(description, startingValue) {
 
     override fun iterateForward() {
         if (canIterateForward()) value = true
@@ -114,14 +118,12 @@ class MenuItemBooleanDelegate(menu: DelegatedTelemetryMenu,
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: Boolean) {
         super.value = value
     }
-    init{
-        menu.add(this)
-    }
+
 }
-class MenuItemEnumDelegate<T>(menu: DelegatedTelemetryMenu,
+class MenuItemEnumDelegate<T>(
                               description: String,
                               private vararg val values: T)
-    : MenuItemDelegate<T>(menu, description, values[0]) {
+    : MenuItemDelegate<T>(description, values[0]) {
     override fun iterateForward() {
         if (canIterateForward()) value = values[values.indexOf(value)+1]
     }
