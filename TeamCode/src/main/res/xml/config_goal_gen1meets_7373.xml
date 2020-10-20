@@ -7,8 +7,8 @@
             <RevRoboticsCoreHexMotor name="intakeLiftMotor" port="1"/>
             <Matrix12vMotor name="frontLeftMotor" port="2" />
             <Matrix12vMotor name="backLeftMotor" port="3" />
-            <Servo name="wobblePivotServo" port="0"/>
-            <Servo name="wobbleGrabServo" port="1"/>
+            <Servo name="wobbleGrabServo" port="0"/>
+            <Servo name="wobblePivotServo" port="1"/>
             <LynxEmbeddedIMU name="imuC" port="0" bus="0" />
         </LynxModule>
     </LynxUsbDevice>

@@ -28,7 +28,7 @@ public class DriveConstantsRingPlace {
     public static DriveConstraints BASE_CONSTRAINTS =
             new DriveConstraints(
 //                    50.0, 30.0, 40.0,
-                    80.0, 55.0, 40.0,
+                    30.0, 15.0, 40.0,
                     Math.PI, Math.PI, 0.0
             );
 

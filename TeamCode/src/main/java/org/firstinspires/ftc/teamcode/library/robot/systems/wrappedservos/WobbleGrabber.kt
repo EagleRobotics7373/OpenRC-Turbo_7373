@@ -6,11 +6,22 @@ class WobbleGrabber
 constructor (private val pivotServo : Servo,
              private val grabServo  : Servo)
 {
-    fun pivotDown()     { pivotServo.position = 0.93 }
-    fun pivotVertical() { pivotServo.position = 0.60 }
-    fun pivotBack()     { pivotServo.position = 0.23 }
 
-    fun grab()          { grabServo.position = 0.00 }
-    fun midGrab()       { grabServo.position = 0.27 }
-    fun releaseGrab()   { grabServo.position = 0.60 }
+    enum class PivotPosition(val position: Double) {
+        GRAB(0.99),
+        PERPENDICULAR(0.80),
+        VERTICAL(0.48),
+        YEET(0.30),
+        STORAGE(0.23)
+    }
+
+    fun pivot(loc: PivotPosition) { pivotServo.position = loc.position }
+
+    enum class GrabPosition(val position: Double) {
+        GRAB(0.01),
+        MID_GRAB(0.33),
+        STORAGE(0.78)
+    }
+
+    fun grab(loc: GrabPosition) { grabServo.position = loc.position }
 }

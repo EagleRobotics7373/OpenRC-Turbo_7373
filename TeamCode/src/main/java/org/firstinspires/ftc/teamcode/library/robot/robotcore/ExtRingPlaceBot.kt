@@ -7,6 +7,7 @@ import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.con
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.constants.DriveConstantsTunedMisumi
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.constants.OdometryConstants
 import org.firstinspires.ftc.teamcode.library.robot.systems.intake.FullIntakeSystem
+import org.firstinspires.ftc.teamcode.library.robot.systems.wrappedservos.RingDropper
 import org.firstinspires.ftc.teamcode.library.robot.systems.wrappedservos.WobbleGrabber
 
 open class ExtRingPlaceBot(_hardwareMap: HardwareMap) : BaseRobot(_hardwareMap) {
@@ -46,6 +47,8 @@ open class ExtRingPlaceBot(_hardwareMap: HardwareMap) : BaseRobot(_hardwareMap) 
      override val holonomicRR             : HolonomicRR           = HolonomicRR(imuControllerC,
                                                                                  frontLeftMotor, backLeftMotor, backRightMotor, frontRightMotor,
                                                                                  TwoWheelOdometryLocalizer(odometryLeft, odometryRear, imuControllerC))
-    @JvmField val intakeSystem            : FullIntakeSystem      = FullIntakeSystem(intakeLiftMotor, liftPotentiometer, ringIntakeMotor, ringDropServo)
+    @JvmField val ringDropper             : RingDropper           = RingDropper(ringDropServo)
+    @JvmField val intakeSystem            : FullIntakeSystem      = FullIntakeSystem(intakeLiftMotor, liftPotentiometer, ringIntakeMotor, ringDropper)
     @JvmField val wobbleGrabber           : WobbleGrabber         = WobbleGrabber(wobblePivotServo, wobbleGrabServo)
+
 }

@@ -6,29 +6,25 @@ import com.acmerobotics.roadrunner.geometry.Pose2d
 import com.acmerobotics.roadrunner.geometry.Vector2d
 import com.acmerobotics.roadrunner.trajectory.BaseTrajectoryBuilder
 import com.acmerobotics.roadrunner.trajectory.TrajectoryBuilder
-import com.acmerobotics.roadrunner.trajectory.constraints.DriveConstraints
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.util.ElapsedTime
 import org.firstinspires.ftc.teamcode.library.functions.*
-import org.firstinspires.ftc.teamcode.library.functions.AllianceColor.BLUE
-import org.firstinspires.ftc.teamcode.library.functions.AllianceColor.RED
-import org.firstinspires.ftc.teamcode.library.functions.Position.*
+import org.firstinspires.ftc.teamcode.library.functions.AllianceColor.*
+import org.firstinspires.ftc.teamcode.library.functions.StartingLine.*
 import org.firstinspires.ftc.teamcode.library.functions.telemetrymenu.kotlin.*
 import org.firstinspires.ftc.teamcode.library.robot.robotcore.ExtRingPlaceBot
 import org.firstinspires.ftc.teamcode.library.robot.robotcore.IMUController
-import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.RobotConstantsAccessor
+import org.firstinspires.ftc.teamcode.library.robot.systems.wrappedservos.WobbleGrabber
 import org.firstinspires.ftc.teamcode.library.vision.base.VisionFactory
 import org.firstinspires.ftc.teamcode.library.vision.base.OpenCvContainer
-import org.firstinspires.ftc.teamcode.library.vision.skystone.SkystonePixelStatsPipeline
 import org.firstinspires.ftc.teamcode.library.vision.ultimategoal.RingPixelAnalysisPipeline
-import org.firstinspires.ftc.teamcode.opmodes.gen2.AutonomousConstants.*
-import java.util.*
+import org.firstinspires.ftc.teamcode.library.vision.ultimategoal.UltimateGoalVisionConstants
 import kotlin.math.PI
 import org.firstinspires.ftc.teamcode.opmodes.gen2.OpModeConfig
 
 @com.qualcomm.robotcore.eventloop.opmode.Autonomous(name = "Autonomous State (Kotlin + RR)", group = "Main")
-class AutonomousState_RR : LinearOpMode() {
+class AutonomousRR : LinearOpMode() {
 
     /*
         VARIABLES: Hardware and Control
@@ -46,8 +42,9 @@ class AutonomousState_RR : LinearOpMode() {
     /*
         VARIABLES: Menu Options
      */
-    val config = OpModeConfig(telemetry)
-    var allianceColor: AllianceColor by config.custom("Alliance Color", RED, BLUE)
+    private val config = OpModeConfig(telemetry)
+    private var allianceColor: AllianceColor by config.custom("Alliance Color", RED, BLUE)
+    private var startingLine: StartingLine by config.custom("Starting Line", CENTER, FAR)
 
     override fun runOpMode() {
         /*
@@ -87,22 +84,19 @@ class AutonomousState_RR : LinearOpMode() {
             Perform actions
          */
         cvContainer.pipeline.shouldKeepTracking = false
+
+        if (allianceColor == RED && startingLine == FAR || allianceColor == BLUE && startingLine == CENTER) {
+            UltimateGoalVisionConstants.BOTTOM_RING_CENTER_X = UltimateGoalVisionConstants.BOTTOM_RING_CENTER_X_ON_LEFT
+            UltimateGoalVisionConstants.BOTTOM_RING_CENTER_Y = UltimateGoalVisionConstants.BOTTOM_RING_CENTER_Y_ON_LEFT
+        } else {
+            UltimateGoalVisionConstants.BOTTOM_RING_CENTER_X = UltimateGoalVisionConstants.BOTTOM_RING_CENTER_X_ON_RIGHT
+            UltimateGoalVisionConstants.BOTTOM_RING_CENTER_Y = UltimateGoalVisionConstants.BOTTOM_RING_CENTER_Y_ON_RIGHT
+        }
+
         cvContainer.pipeline.tracking = true
         while (cvContainer.pipeline.tracking);
 
-        val numRings = cvContainer.pipeline.numberOfRings
-        val startingVectorMap = mapOf(0 to Vector2d(0.0, -60.0), 1 to Vector2d(24.0, -36.0), 4 to Vector2d(48.0, -60.0))
-
-        robot.holonomicRR.poseEstimate = Pose2d(-59.8, -48.0, 120.0.toRadians())
-
-        robot.holonomicRR.trajectoryBuilder(0.0)
-                .splineToSplineHeading(Pose2d(-24.0, -60.0), 0.0)
-                .splineToConstantHeading(startingVectorMap[numRings]!!, 0.0)
-                .buildAndRun()
-
-
-
-
+        doFullAuto()
 
         /*
             OpMode actions have finished. Wait until OpMode is stopped, then close resources.
@@ -116,6 +110,79 @@ class AutonomousState_RR : LinearOpMode() {
 
     }
 
+    fun doFullAuto() {
+
+        // Get the number of viewable rings from OpenCV
+        val numRings = cvContainer.pipeline.numberOfRings
+
+        // Create a static map of wobble goal drop-off positions for each number of rings
+        val wobbleDropoffs = mapOf(
+                0 to Vector2d(-6.5, -60.0 reverseIf BLUE),
+                1 to Vector2d(16.0, -36.0 reverseIf BLUE),
+                4 to Vector2d(40.0, -60.0 reverseIf BLUE)
+        )
+
+        // Set the robot starting position within RoadRunner
+        robot.holonomicRR.poseEstimate = Pose2d(
+                -63.0,
+                (if (startingLine == CENTER) -24.0 else -48.0) reverseIf BLUE,
+                0.0
+        )
+
+        // Do the initial movement to wobble drop-off location
+        builder(PI.div(4) reverseIf BLUE reverseIf FAR)
+                // Spline to drive around and preserve the starter stack
+                .splineToConstantHeading(
+                        endPosition = Vector2d(
+                                x = -24.0,
+                                y = robot.holonomicRR.poseEstimate.y.plus(6.0 reverseIf FAR reverseIf BLUE)
+                        ),
+                        endTangent = 0.0
+                )
+                // Spline to the wobble drop-off position
+                .splineToConstantHeading(
+                        endPosition = wobbleDropoffs[numRings] ?: error("Incorrect number of rings set"),
+                        endTangent = if (startingLine == CENTER) -PI.div(2) reverseIf BLUE else 0.0
+                )
+                .buildAndRun()
+
+        robot.wobbleGrabber.pivot(WobbleGrabber.PivotPosition.PERPENDICULAR)
+        sleep(1000)
+        robot.wobbleGrabber.grab(WobbleGrabber.GrabPosition.STORAGE)
+        sleep(500)
+        robot.wobbleGrabber.pivot(WobbleGrabber.PivotPosition.STORAGE)
+        sleep(1000)
+
+
+
+        // Do subsequent movement to the ring drop-off
+        builder(5*PI/4 reverseIf RED)
+                // Motion to avoid the placed wobble goal. This will be different based on whether wobble is in pos A/C or B
+                .run {
+                    if (numRings == 1)
+                        splineToConstantHeading(Vector2d(24.0, 13.0 reverseIf RED), -PI/4)
+                                .splineToConstantHeading(Vector2d(48.0, 13.0 reverseIf RED), PI/4)
+                    else
+                        splineToConstantHeading(
+                                Vector2d(
+                                        x = robot.holonomicRR.poseEstimate.x,
+                                        y = 37.0 reverseIf RED ),
+                                endTangent = (-PI/4) reverseIf RED)
+                }
+                // Spline to ring drop-off
+                .splineToConstantHeading(Vector2d(63.0, 37.0 reverseIf RED), 0.0)
+                .buildAndRun()
+
+        sleep(2000)
+
+        // Move to parking line
+        builder(PI/2 reverseIf BLUE)
+                // Single spline onto the starting line, closest to center while still on alliance side
+                .splineToConstantHeading(Vector2d(12.0, 12.0 reverseIf RED), -PI)
+                .buildAndRun()
+
+
+    }
 
     /**
      * Creates and operates [ReflectiveTelemetryMenu] before the init period.
@@ -137,6 +204,14 @@ class AutonomousState_RR : LinearOpMode() {
                 dpadDownWatch.call()  -> config.update(nextItem = true)
                 dpadLeftWatch.call()  -> config.update(iterBack = true)
                 dpadRightWatch.call() -> config.update(iterFw   = true)
+            }
+
+            when {
+                gamepad1.x -> robot.wobbleGrabber.grab(WobbleGrabber.GrabPosition.GRAB)
+                gamepad1.y -> {
+                    robot.wobbleGrabber.pivot(WobbleGrabber.PivotPosition.STORAGE)
+                    robot.wobbleGrabber.grab(WobbleGrabber.GrabPosition.MID_GRAB)
+                }
             }
         }
 
@@ -170,9 +245,14 @@ class AutonomousState_RR : LinearOpMode() {
     /**
      * Reverses input number if [testColor] matches [allianceColor]
      */
-    private infix fun Double.reverseIf(testColor: AllianceColor) : Double {
-        return this * if (allianceColor==testColor) -1.0 else 1.0
-    }
+    private infix fun Double.reverseIf(testColor: AllianceColor) : Double =
+            if (this@AutonomousRR.allianceColor==allianceColor) -this else this
+
+    /**
+     * Reverses input number if [testLine] matches [startingLine]
+     */
+    private infix fun Double.reverseIf(testLine: StartingLine): Double =
+            if (this@AutonomousRR.startingLine==testLine) -this else this
 
     private fun builder() = robot.holonomicRR.trajectoryBuilder()
     private fun builder(tangent: Double) = robot.holonomicRR.trajectoryBuilder(tangent)

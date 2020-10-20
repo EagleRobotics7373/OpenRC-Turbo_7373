@@ -1,13 +1,13 @@
 package org.firstinspires.ftc.teamcode.opmodes.gen2
 
 import com.qualcomm.hardware.lynx.LynxModule
-import com.qualcomm.hardware.rev.RevBlinkinLedDriver
 import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
-import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.util.ElapsedTime
 import org.firstinspires.ftc.teamcode.library.functions.*
+import org.firstinspires.ftc.teamcode.library.functions.telemetrymenu.kotlin.MenuItemEnumDelegate
 import org.firstinspires.ftc.teamcode.library.robot.robotcore.ExtRingPlaceBot
+import org.firstinspires.ftc.teamcode.library.robot.systems.wrappedservos.WobbleGrabber
 
 @TeleOp(name="TeleOp RD Gen2", group="Gen2 Basic")
 open class TeleOpRD : OpMode() {
@@ -113,12 +113,22 @@ open class TeleOpRD : OpMode() {
 //            gamepad2.b -> robot.wobbleGrabber.midGrab()
 //        }
 
-        when {
-            gamepad2.dpad_up    -> robot.wobbleGrabber.pivotBack()
-            gamepad2.dpad_left || gamepad2.dpad_right
-                                -> robot.wobbleGrabber.pivotVertical()
-            gamepad2.dpad_down  -> robot.wobbleGrabber.pivotDown()
+        if (gamepad2.left_bumper) {
+            when {
+                gamepad2.a -> robot.wobbleGrabber.pivot(WobbleGrabber.PivotPosition.GRAB)
+                gamepad2.b -> robot.wobbleGrabber.pivot(WobbleGrabber.PivotPosition.STORAGE)
+                gamepad2.x -> robot.wobbleGrabber.pivot(WobbleGrabber.PivotPosition.PERPENDICULAR)
+                gamepad2.y -> robot.wobbleGrabber.pivot(WobbleGrabber.PivotPosition.YEET)
+            }
+        } else if (gamepad2.right_bumper) {
+            when {
+                gamepad2.a -> robot.wobbleGrabber.grab(WobbleGrabber.GrabPosition.GRAB)
+                gamepad2.b -> robot.wobbleGrabber.grab(WobbleGrabber.GrabPosition.STORAGE)
+                gamepad2.x -> robot.wobbleGrabber.grab(WobbleGrabber.GrabPosition.MID_GRAB)
+            }
         }
+
+
 
     }
 
@@ -134,13 +144,6 @@ open class TeleOpRD : OpMode() {
                     else                          -> 0.0
                 }
         )
-
-        when {
-            gamepad2.x -> robot.intakeSystem.ringServoGrab()
-            gamepad2.y -> robot.intakeSystem.ringServoRelease()
-        }
-
-
     }
 
     private fun controlMusic() {
