@@ -41,10 +41,10 @@ class FullIntakeSystem(
     fun manualRingMotor(power: Double) {
         if (power.absoluteValue > 0) {
             ringIntakeMotor.power = power
-            ringDropServo.pivot(RingDropper.DropperPosition.INTAKE)
+//            ringDropServo.pivot(RingDropper.DropperPosition.INTAKE)
         } else {
             ringIntakeMotor.power = 0.0
-            ringDropServo.pivot(RingDropper.DropperPosition.HOLD_RING)
+//            ringDropServo.pivot(RingDropper.DropperPosition.HOLD_RING)
         }
 
     }

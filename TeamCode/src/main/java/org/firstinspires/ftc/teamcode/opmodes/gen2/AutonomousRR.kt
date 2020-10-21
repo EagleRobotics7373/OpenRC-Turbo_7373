@@ -246,7 +246,7 @@ class AutonomousRR : LinearOpMode() {
      * Reverses input number if [testColor] matches [allianceColor]
      */
     private infix fun Double.reverseIf(testColor: AllianceColor) : Double =
-            if (this@AutonomousRR.allianceColor==allianceColor) -this else this
+            if (this@AutonomousRR.allianceColor==testColor) -this else this
 
     /**
      * Reverses input number if [testLine] matches [startingLine]

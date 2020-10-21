@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.util.ElapsedTime
 import org.firstinspires.ftc.teamcode.library.functions.*
 import org.firstinspires.ftc.teamcode.library.functions.telemetrymenu.kotlin.MenuItemEnumDelegate
 import org.firstinspires.ftc.teamcode.library.robot.robotcore.ExtRingPlaceBot
+import org.firstinspires.ftc.teamcode.library.robot.systems.wrappedservos.RingDropper
 import org.firstinspires.ftc.teamcode.library.robot.systems.wrappedservos.WobbleGrabber
 
 @TeleOp(name="TeleOp RD Gen2", group="Gen2 Basic")
@@ -144,6 +145,11 @@ open class TeleOpRD : OpMode() {
                     else                          -> 0.0
                 }
         )
+
+        when {
+            gamepad2.dpad_up -> robot.ringDropper.pivot(RingDropper.DropperPosition.HOLD_RING)
+            gamepad2.dpad_down -> robot.ringDropper.pivot(RingDropper.DropperPosition.INTAKE)
+        }
     }
 
     private fun controlMusic() {
