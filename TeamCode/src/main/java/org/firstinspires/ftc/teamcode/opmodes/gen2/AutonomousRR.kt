@@ -5,25 +5,33 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry
 import com.acmerobotics.roadrunner.geometry.Pose2d
 import com.acmerobotics.roadrunner.geometry.Vector2d
 import com.acmerobotics.roadrunner.trajectory.BaseTrajectoryBuilder
+import com.acmerobotics.roadrunner.trajectory.MarkerCallback
 import com.acmerobotics.roadrunner.trajectory.TrajectoryBuilder
+import com.acmerobotics.roadrunner.trajectory.constraints.MecanumConstraints
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.util.ElapsedTime
+import org.firstinspires.ftc.robotcontroller.external.samples.SensorREV2mDistance
 import org.firstinspires.ftc.teamcode.library.functions.*
 import org.firstinspires.ftc.teamcode.library.functions.AllianceColor.*
 import org.firstinspires.ftc.teamcode.library.functions.StartingLine.*
 import org.firstinspires.ftc.teamcode.library.functions.telemetrymenu.kotlin.*
 import org.firstinspires.ftc.teamcode.library.robot.robotcore.ExtRingPlaceBot
 import org.firstinspires.ftc.teamcode.library.robot.robotcore.IMUController
+import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.constants.DriveConstantsRingPlace
+import org.firstinspires.ftc.teamcode.library.robot.systems.intake.FullIntakeSystem
+import org.firstinspires.ftc.teamcode.library.robot.systems.wrappedservos.RingDropper
 import org.firstinspires.ftc.teamcode.library.robot.systems.wrappedservos.WobbleGrabber
 import org.firstinspires.ftc.teamcode.library.vision.base.VisionFactory
 import org.firstinspires.ftc.teamcode.library.vision.base.OpenCvContainer
+import org.firstinspires.ftc.teamcode.library.vision.ultimategoal.RingContourPipeline
 import org.firstinspires.ftc.teamcode.library.vision.ultimategoal.RingPixelAnalysisPipeline
 import org.firstinspires.ftc.teamcode.library.vision.ultimategoal.UltimateGoalVisionConstants
 import kotlin.math.PI
 import org.firstinspires.ftc.teamcode.opmodes.gen2.OpModeConfig
+import kotlin.concurrent.thread
 
-@com.qualcomm.robotcore.eventloop.opmode.Autonomous(name = "Autonomous State (Kotlin + RR)", group = "Main")
+@com.qualcomm.robotcore.eventloop.opmode.Autonomous(name = "Autonomous LM1 (Kotlin + RR)", group = "Main")
 class AutonomousRR : LinearOpMode() {
 
     /*
@@ -35,7 +43,7 @@ class AutonomousRR : LinearOpMode() {
     private          val telem           : MultipleTelemetry = MultipleTelemetry(telemetry, FtcDashboard.getInstance().telemetry)
     private lateinit var elapsedTime     : ElapsedTime
 
-    private lateinit var cvContainer     : OpenCvContainer<RingPixelAnalysisPipeline>
+    private lateinit var cvContainer     : OpenCvContainer<RingContourPipeline>
 
     private lateinit var player          : ExtDirMusicPlayer
 
@@ -55,7 +63,10 @@ class AutonomousRR : LinearOpMode() {
         cvContainer = VisionFactory.createOpenCv(
                 VisionFactory.CameraType.WEBCAM,
                 hardwareMap,
-                RingPixelAnalysisPipeline())
+                RingContourPipeline())
+        cvContainer.pipeline.shouldKeepTracking = true
+        cvContainer.pipeline.tracking = true
+        robot.intakeLiftMotor.mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER
 
 
         /*
@@ -83,20 +94,13 @@ class AutonomousRR : LinearOpMode() {
         /*
             Perform actions
          */
-        cvContainer.pipeline.shouldKeepTracking = false
 
-        if (allianceColor == RED && startingLine == FAR || allianceColor == BLUE && startingLine == CENTER) {
-            UltimateGoalVisionConstants.BOTTOM_RING_CENTER_X = UltimateGoalVisionConstants.BOTTOM_RING_CENTER_X_ON_LEFT
-            UltimateGoalVisionConstants.BOTTOM_RING_CENTER_Y = UltimateGoalVisionConstants.BOTTOM_RING_CENTER_Y_ON_LEFT
-        } else {
-            UltimateGoalVisionConstants.BOTTOM_RING_CENTER_X = UltimateGoalVisionConstants.BOTTOM_RING_CENTER_X_ON_RIGHT
-            UltimateGoalVisionConstants.BOTTOM_RING_CENTER_Y = UltimateGoalVisionConstants.BOTTOM_RING_CENTER_Y_ON_RIGHT
-        }
+        val numRings = cvContainer.pipeline.numberOfRings
+        cvContainer.pipeline.tracking = false
+        telemetry.addData("Number of rings", numRings)
+        telemetry.update()
 
-        cvContainer.pipeline.tracking = true
-        while (cvContainer.pipeline.tracking);
-
-        doFullAuto()
+        doFullAuto(numRings)
 
         /*
             OpMode actions have finished. Wait until OpMode is stopped, then close resources.
@@ -110,16 +114,17 @@ class AutonomousRR : LinearOpMode() {
 
     }
 
-    fun doFullAuto() {
+    fun doFullAuto(numRings: Int?) {
 
-        // Get the number of viewable rings from OpenCV
-        val numRings = cvContainer.pipeline.numberOfRings
+//        thread { robot.intakeSystem.update() }
+        robot.ringDropper.pivot(RingDropper.DropperPosition.HOLD_RING)
 
         // Create a static map of wobble goal drop-off positions for each number of rings
+        val intoSquareDisp = 6.0
         val wobbleDropoffs = mapOf(
-                0 to Vector2d(-6.5, -60.0 reverseIf BLUE),
-                1 to Vector2d(16.0, -36.0 reverseIf BLUE),
-                4 to Vector2d(40.0, -60.0 reverseIf BLUE)
+                0 to Vector2d(-6.5 + intoSquareDisp, -60.0 reverseIf BLUE),
+                1 to Vector2d(16.0 + intoSquareDisp, -36.0 reverseIf BLUE),
+                4 to Vector2d(40.0 + intoSquareDisp, -60.0 reverseIf BLUE)
         )
 
         // Set the robot starting position within RoadRunner
@@ -147,21 +152,22 @@ class AutonomousRR : LinearOpMode() {
                 .buildAndRun()
 
         robot.wobbleGrabber.pivot(WobbleGrabber.PivotPosition.PERPENDICULAR)
-        sleep(1000)
+        sleep(1500)
         robot.wobbleGrabber.grab(WobbleGrabber.GrabPosition.STORAGE)
         sleep(500)
         robot.wobbleGrabber.pivot(WobbleGrabber.PivotPosition.STORAGE)
-        sleep(1000)
+        sleep(2500)
 
 
 
         // Do subsequent movement to the ring drop-off
         builder(5*PI/4 reverseIf RED)
                 // Motion to avoid the placed wobble goal. This will be different based on whether wobble is in pos A/C or B
+                .addDisplacementMarker(MarkerCallback { robot.intakeSystem.moveIntake(FullIntakeSystem.IntakePosition.SCORE) })
                 .run {
                     if (numRings == 1)
                         splineToConstantHeading(Vector2d(24.0, 13.0 reverseIf RED), -PI/4)
-                                .splineToConstantHeading(Vector2d(48.0, 13.0 reverseIf RED), PI/4)
+                                .splineToConstantHeading(Vector2d(45.0, 16.0 reverseIf RED), (-20.0 reverseIf BLUE).toRadians())
                     else
                         splineToConstantHeading(
                                 Vector2d(
@@ -170,15 +176,20 @@ class AutonomousRR : LinearOpMode() {
                                 endTangent = (-PI/4) reverseIf RED)
                 }
                 // Spline to ring drop-off
-                .splineToConstantHeading(Vector2d(63.0, 37.0 reverseIf RED), 0.0)
+                .splineToConstantHeading(Vector2d(59.5, 37.0 reverseIf RED), (PI/4) reverseIf RED)
                 .buildAndRun()
 
-        sleep(2000)
+        sleep(500)
+        robot.ringIntakeMotor.power = 1.0
+        sleep(3000)
+        robot.ringIntakeMotor.power = 0.0
 
         // Move to parking line
-        builder(PI/2 reverseIf BLUE)
+        builder(-PI)
                 // Single spline onto the starting line, closest to center while still on alliance side
+                .splineToConstantHeading(Vector2d(45.0, 16.0 reverseIf RED), (-200.0 reverseIf BLUE).toRadians())
                 .splineToConstantHeading(Vector2d(12.0, 12.0 reverseIf RED), -PI)
+                .addDisplacementMarker(0.5, 0.0, MarkerCallback { robot.intakeSystem.moveIntake(FullIntakeSystem.IntakePosition.GROUND) })
                 .buildAndRun()
 
 
@@ -209,7 +220,7 @@ class AutonomousRR : LinearOpMode() {
             when {
                 gamepad1.x -> robot.wobbleGrabber.grab(WobbleGrabber.GrabPosition.GRAB)
                 gamepad1.y -> {
-                    robot.wobbleGrabber.pivot(WobbleGrabber.PivotPosition.STORAGE)
+                    robot.wobbleGrabber.pivot(WobbleGrabber.PivotPosition.VERTICAL)
                     robot.wobbleGrabber.grab(WobbleGrabber.GrabPosition.MID_GRAB)
                 }
             }
@@ -240,6 +251,11 @@ class AutonomousRR : LinearOpMode() {
         robot.holonomic.stop()
         robot.holonomic.setMotorsMode(DcMotor.RunMode.RUN_USING_ENCODER)
 
+    }
+
+    private fun forDurationMs(duration: Long, action: ()->Unit) {
+        val end = System.currentTimeMillis() + duration
+        while (System.currentTimeMillis() < end) action.invoke()
     }
 
     /**

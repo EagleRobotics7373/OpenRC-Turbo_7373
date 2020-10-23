@@ -20,17 +20,17 @@ public class UltimateGoalVisionConstants {
     public static int BOTTOM_RING_CENTER_Y_ON_RIGHT = 165;
     public static int BOTTOM_RING_CENTER_Y_ON_LEFT = 155;
 
-    public static int BOTTOM_RING_CENTER_X = BOTTOM_RING_CENTER_X_ON_LEFT;
-    public static int BOTTOM_RING_CENTER_Y = BOTTOM_RING_CENTER_Y_ON_RIGHT;
+    public static int BOTTOM_RING_CENTER_X = 285;
+    public static int BOTTOM_RING_CENTER_Y = 390;
 
 
     // Width and height of the ring
-    public static int RING_WIDTH = 70;
-    public static int RING_HEIGHT = 15;
+    public static int RING_WIDTH = 240;
+    public static int RING_HEIGHT = 40;
 
 
     // Spacing between rings
-    public static int RING_SPACING = 5;
+    public static int RING_SPACING = 85;
 
     // Amount of pixels to skip within each ring
     public static int SEARCH_SKIP = 10;
@@ -48,10 +48,13 @@ public class UltimateGoalVisionConstants {
     // Lower and upper bounds for cv::inRange() function
     public static double CONTOUR_HUE_LOWER_BOUND = 10;
     public static double CONTOUR_HUE_UPPER_BOUND = 25;
-    public static double CONTOUR_SAT_LOWER_BOUND = 210;
+    public static double CONTOUR_SAT_LOWER_BOUND = 150;
     public static double CONTOUR_SAT_UPPER_BOUND = 255;
     public static double CONTOUR_LUM_LOWER_BOUND = 0;
     public static double CONTOUR_LUM_UPPER_BOUND = 255;
+    public static int CONTOUR_RING_MINWIDTH = 60;
+    public static int CONTOUR_MAT_PRINTOUT_NUM = 2;
+    public static double CONTOUR_DILATION_KSIZE = 2.0;
 
     /*
 

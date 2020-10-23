@@ -9,6 +9,8 @@
             <Matrix12vMotor name="backLeftMotor" port="3" />
             <Servo name="wobbleGrabServo" port="0"/>
             <Servo name="wobblePivotServo" port="1"/>
+<!--            <RevTouchSensor name="intakeTouchSensor" port="0" />-->
+            <RevColorSensorV3 name="intakeColorSensor" port="1" bus="0" />
             <LynxEmbeddedIMU name="imuC" port="0" bus="0" />
         </LynxModule>
     </LynxUsbDevice>

@@ -10,7 +10,7 @@ constructor (private val pivotServo : Servo,
     enum class PivotPosition(val position: Double) {
         GRAB(0.99),
         PERPENDICULAR(0.80),
-        VERTICAL(0.48),
+        VERTICAL(0.40),
         YEET(0.30),
         STORAGE(0.23)
     }

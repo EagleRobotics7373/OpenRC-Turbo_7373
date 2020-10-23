@@ -28,6 +28,7 @@ class OpModeConfig(var telemetry: Telemetry) {
             nextItem -> menu.nextItem()
             iterBack -> menu.iterateBackward()
             iterFw   -> menu.iterateForward()
+            else     -> menu.refresh()
         }
     }
 }

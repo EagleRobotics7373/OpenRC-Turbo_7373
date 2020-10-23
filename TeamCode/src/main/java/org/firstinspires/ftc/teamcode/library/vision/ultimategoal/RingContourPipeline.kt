@@ -30,10 +30,10 @@ class RingContourPipeline() : ResolutionPipeline() {
         if (tracking) {
 
             // Blur the image for greater contour recognition accuracy
-            medianBlur(input, input, 15)
+            blur(input, input, Size(5.0, 10.0))
 
-            // Convert our input, in BGR format, to HLS (hue, luminosity, saturation)
-            cvtColor(input, hlsMat, COLOR_BGR2HLS)
+            // Convert our input, in RGB format, to HLS (hue, luminosity, saturation)
+            cvtColor(input, hlsMat, COLOR_RGB2HLS)
 
             // Threshold the HLS mat to only include objects with yellow hue and high saturation
             inRange(
@@ -50,18 +50,22 @@ class RingContourPipeline() : ResolutionPipeline() {
             )
 
             val elementType = Imgproc.CV_SHAPE_RECT;
-            val kernelSize = 5.0;
+            val kernelSize = CONTOUR_DILATION_KSIZE;
             val element = getStructuringElement(
                     elementType, Size(2 * kernelSize + 1, 2 * kernelSize + 1),
                     Point(kernelSize, kernelSize)
             )
-            erode(
+            dilate(
                     thresholdResult,                    // original mat
                     thresholdResult,                    // resultant mat - just overwrite the original
                     element                             // iterations - more of these means more erosion
             )
 
-
+            val drawingMat = when(CONTOUR_MAT_PRINTOUT_NUM) {
+                0       -> input
+                1       -> hlsMat
+                else    -> thresholdResult
+            }
             val contours = emptyList<MatOfPoint>().toMutableList()
             val hierarchy = Mat()
             findContours(
@@ -72,10 +76,10 @@ class RingContourPipeline() : ResolutionPipeline() {
                     CHAIN_APPROX_SIMPLE
             )
 
-            val res = contours.mapIndexed { index, matOfPoint ->
+            val contoursCmpltd = contours.mapIndexed { index, matOfPoint ->
 
                 drawContours(
-                        input,
+                        drawingMat,
                         contours,
                         index,
                         Scalar.all(150.0),
@@ -98,16 +102,22 @@ class RingContourPipeline() : ResolutionPipeline() {
                 return@mapIndexed ContourResult(
                         Point(minX.toDouble(), minY.toDouble()),
                         Point(maxX.toDouble(), maxY.toDouble()))
-            }.filter { it.ratio in 1.0..3.0 }.maxBy { it.area }?.ratio
+            }
+
+            val resCntur = contoursCmpltd
+                    .filter { it.width > CONTOUR_RING_MINWIDTH * resolution.scale && it.max.y < input.rows() / 2 }
+                    .maxBy { it.area }
+            val res = resCntur?.ratio
 
             numberOfRings = when (res) {
                 null -> 0
-                in 1.00..1.75 -> 1
-                in 1.75..3.00 -> 4
+                in 1.00..1.75 -> 4
+                in 1.75..3.00 -> 1
                 else -> 0
             }
-            addLabels(input)
-            return input
+            if (!shouldKeepTracking) tracking = false
+            addLabels(drawingMat, res)
+            return drawingMat
         }
         else {
             addLabels(input)
@@ -115,10 +125,9 @@ class RingContourPipeline() : ResolutionPipeline() {
         }
     }
 
-    class ContourResult(
-            val min: Point,
-            val max: Point
-    )  {
+    class ContourResult
+    constructor(val min: Point, val max: Point)
+    {
         val width = max.x - min.x
         val height = max.y - min.y
         val ratio = width.toDouble() / height
@@ -134,7 +143,7 @@ class RingContourPipeline() : ResolutionPipeline() {
     }
 
 
-    private fun addLabels(mat: Mat) {
+    private fun addLabels(mat: Mat, ratio: Double? = null) {
 
         // Place text representing the team name (at the top)
         val teamNameStartPoint = Point(5.0, 30.0)
@@ -160,7 +169,8 @@ class RingContourPipeline() : ResolutionPipeline() {
                 .coerceIn(mat)
         val resultText = when {
             numberOfRings == null   -> "No detection stored."
-            else                    -> "Detecting $numberOfRings rings."
+            ratio == null           -> "Detecting $numberOfRings rings."
+            else                    -> "Detecting $numberOfRings rings with ratio ${String.format("%.2f", ratio)}"
         }
         putText(mat, resultText,
                 resultTextStartPoint,

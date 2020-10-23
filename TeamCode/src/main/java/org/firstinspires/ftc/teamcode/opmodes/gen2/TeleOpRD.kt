@@ -5,10 +5,14 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.util.ElapsedTime
 import org.firstinspires.ftc.teamcode.library.functions.*
-import org.firstinspires.ftc.teamcode.library.functions.telemetrymenu.kotlin.MenuItemEnumDelegate
 import org.firstinspires.ftc.teamcode.library.robot.robotcore.ExtRingPlaceBot
-import org.firstinspires.ftc.teamcode.library.robot.systems.wrappedservos.RingDropper
+import org.firstinspires.ftc.teamcode.library.robot.systems.intake.FullIntakeSystem
 import org.firstinspires.ftc.teamcode.library.robot.systems.wrappedservos.WobbleGrabber
+import org.firstinspires.ftc.teamcode.library.vision.base.OpenCvContainer
+import org.firstinspires.ftc.teamcode.library.vision.base.VisionFactory
+import org.firstinspires.ftc.teamcode.library.vision.ultimategoal.IntakeRingViewingPipeline
+import kotlin.concurrent.thread
+import kotlin.math.absoluteValue
 
 @TeleOp(name="TeleOp RD Gen2", group="Gen2 Basic")
 open class TeleOpRD : OpMode() {
@@ -20,7 +24,7 @@ open class TeleOpRD : OpMode() {
     protected lateinit var watch_gamepad1_dpadDown : ToggleButtonWatcher
     protected lateinit var watch_gamepad1_dpadUp : ToggleButtonWatcher
     protected lateinit var watch_gamepad2_rightStickButton : ToggleButtonWatcher
-    protected lateinit var watch_gamepad2_buttonB : ToggleButtonWatcher
+    protected lateinit var watch_gamepad2_buttonA : ToggleButtonWatcher
 
     val musicPlayer = ExtDirMusicPlayer(ExtMusicFile.TETRIS)
     var playingMusic = false
@@ -35,6 +39,7 @@ open class TeleOpRD : OpMode() {
     var reverseIntakeLift = true
     var useLEDs             = true
 
+    lateinit var container : OpenCvContainer<IntakeRingViewingPipeline>
 
     override fun init() {
         // instantiate robot variables
@@ -48,11 +53,19 @@ open class TeleOpRD : OpMode() {
         watch_gamepad1_dpadDown = ToggleButtonWatcher {gamepad1.dpad_down}
         watch_gamepad1_dpadUp = ToggleButtonWatcher {gamepad1.dpad_up}
         watch_gamepad2_rightStickButton = ToggleButtonWatcher { gamepad2.right_stick_button }
-        watch_gamepad2_buttonB = ToggleButtonWatcher { !gamepad2.right_bumper && gamepad2.b }
+        watch_gamepad2_buttonA = ToggleButtonWatcher { gamepad2.a }
 
         intakeLiftBaseline = 0
 
+        container = VisionFactory.createOpenCv(VisionFactory.CameraType.WEBCAM, hardwareMap,
+                IntakeRingViewingPipeline())
+        container.pipeline.shouldKeepTracking = true
+    }
 
+    override fun start() {
+        container.pipeline.tracking = true
+        robot.intakeSystem.intakeStage1Trigger = { container.pipeline.ringVisibleOutsideIntake }
+        robot.intakeSystem.intakeStage2Trigger = { container.pipeline.ringVisibleInsideIntake }
     }
 
     override fun loop() {
@@ -69,6 +82,7 @@ open class TeleOpRD : OpMode() {
     override fun stop() {
         // overrides OpMode.stop() to ensure hardware components and music player stop
         super.stop()
+        thread { container.stop() }
         musicPlayer.stop()
     }
 
@@ -135,21 +149,44 @@ open class TeleOpRD : OpMode() {
 
     // set PID control coefficients for auto-intake raise in controlIntakeMechanism()
     // this should eventually be moved
+    var maxTriggerSpeed = 1.0
     private fun controlIntakeMechanism() {
-        robot.intakeSystem.manualMoveIntake(gamepad2.left_stick_y.toDouble())
+        if (gamepad2.left_stick_y.absoluteValue > 0.05)
+            robot.intakeSystem.manualMoveIntake(gamepad2.left_stick_y.toDouble())
+        else if (robot.intakeSystem.intakeArmState == FullIntakeSystem.IntakeArmState.IDLE)
+            robot.intakeSystem.manualMoveIntake(0.0)
 
-        robot.intakeSystem.manualRingMotor(
-                when {
-                    gamepad2.left_trigger  > 0.05 -> -gamepad2.left_trigger.toDouble()
-                    gamepad2.right_trigger > 0.05 -> gamepad2.right_trigger.toDouble()
-                    else                          -> 0.0
-                }
-        )
-
-        when {
-            gamepad2.dpad_up -> robot.ringDropper.pivot(RingDropper.DropperPosition.HOLD_RING)
-            gamepad2.dpad_down -> robot.ringDropper.pivot(RingDropper.DropperPosition.INTAKE)
+//        robot.intakeSystem.manualRingMotor(
+//                when {
+//                    gamepad2.left_trigger  > 0.05 -> -gamepad2.left_trigger.toDouble()
+//                    gamepad2.right_trigger > 0.05 -> gamepad2.right_trigger.toDouble()
+//                    else                          -> 0.0
+//                }
+//        )
+        val speedInput = gamepad2.right_trigger.toDouble()
+        if (speedInput > 0.05 && maxTriggerSpeed < speedInput) {
+            maxTriggerSpeed = speedInput
+            robot.intakeSystem.desiredRingIntakePower = speedInput
         }
+        else if (speedInput < 0.05) {
+            maxTriggerSpeed = 0.0
+        }
+
+        if(!(gamepad2.left_bumper || gamepad2.right_bumper)) {
+            when {
+                watch_gamepad2_buttonA.call() -> robot.intakeSystem.doNextRingIntakeState()
+                gamepad2.b -> robot.intakeSystem.rejectRing()
+                gamepad2.dpad_up -> robot.intakeSystem.moveIntake(FullIntakeSystem.IntakePosition.SCORE)
+                gamepad2.dpad_down -> robot.intakeSystem.moveIntake(FullIntakeSystem.IntakePosition.GROUND)
+            }
+        }
+
+//        when {
+//            gamepad2.dpad_up -> robot.ringDropper.pivot(RingDropper.DropperPosition.HOLD_RING)
+//            gamepad2.dpad_down -> robot.ringDropper.pivot(RingDropper.DropperPosition.INTAKE)
+//        }
+
+        robot.intakeSystem.update()
     }
 
     private fun controlMusic() {
@@ -161,7 +198,25 @@ open class TeleOpRD : OpMode() {
     }
 
     private fun controlTelemetry() {
-
+        telemetry.addData("IntakeLiftMotor pos", robot.intakeLiftMotor.currentPosition)
+        telemetry.addData("IntakeLiftMotor pwr", robot.intakeLiftMotor.power)
+        telemetry.addLine()
+        telemetry.addData("Potentiometer pos", robot.liftPotentiometer.voltage)
+        telemetry.addLine()
+        telemetry.addData("Intake arm state", robot.intakeSystem.intakeArmState)
+        telemetry.addData("Intake ring state", robot.intakeSystem.ringIntakeState)
+        telemetry.addData("Intake ring state (next)", robot.intakeSystem.nextRingIntakeState)
+        telemetry.addData("Intake arm target", robot.intakeSystem.intakeArmTarget)
+        telemetry.addLine()
+        telemetry.addData("Intake ring speed", robot.intakeSystem.desiredRingIntakePower)
+        telemetry.addLine()
+        telemetry.addData("Ring visible out", container.pipeline.ringVisibleOutsideIntake)
+        telemetry.addData("Num qualify out", container.pipeline.numSuccessfulOutsideIntake)
+        telemetry.addLine()
+        telemetry.addData("Ring visible in", container.pipeline.ringVisibleInsideIntake)
+        telemetry.addData("Num qualify in", container.pipeline.numSuccessfulInsideIntake)
+        telemetry.addLine()
+        telemetry.addData("Ring fully in", robot.intakeSystem.ringFullyInIntake)
     }
 
     // functionality is explained throughout opmode; allows for encapsulation of button presses
