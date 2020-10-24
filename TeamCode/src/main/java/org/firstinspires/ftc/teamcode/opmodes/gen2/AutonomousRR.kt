@@ -109,7 +109,7 @@ class AutonomousRR : LinearOpMode() {
 
         Thread {
             cvContainer.stop()
-            cvContainer.camera.closeCameraDevice()
+//            cvContainer.camera.closeCameraDevice()
         }.start()
 
     }
@@ -176,7 +176,7 @@ class AutonomousRR : LinearOpMode() {
                                 endTangent = (-PI/4) reverseIf RED)
                 }
                 // Spline to ring drop-off
-                .splineToConstantHeading(Vector2d(59.5, 37.0 reverseIf RED), (PI/4) reverseIf RED)
+                .splineToConstantHeading(Vector2d(58.5, 37.0 reverseIf RED), (PI/4) reverseIf RED)
                 .buildAndRun()
 
         sleep(500)

@@ -123,7 +123,6 @@ class FullIntakeSystem(
     val ringFullyInIntake: Boolean
     get() = colorSensor?.rhue == 0.0 && colorSensor.rsaturation == 0.0
 
-
     val lastIntakeRead = System.currentTimeMillis()
     var raiseIntegralSum = 0.0
     var raiseLastDeriv = 0.0

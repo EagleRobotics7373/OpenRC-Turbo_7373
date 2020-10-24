@@ -17,9 +17,8 @@ public class ColorSensorTest extends OpMode {
 
     @Override
     public void init() {
-        left = hardwareMap.get(ColorSensor.class, "leftColorSensor");
-        leftDs = hardwareMap.get(DistanceSensor.class, "leftColorSensor");
-        right = hardwareMap.get(ColorSensor.class, "rightColorSensor");
+        left = hardwareMap.get(ColorSensor.class, "intakeColorSensor");
+        leftDs = hardwareMap.get(DistanceSensor.class, "intakeColorSensor");
     }
 
     @Override

@@ -136,10 +136,10 @@ open class TeleOpRD : OpMode() {
         if (gamepad2.left_bumper) {
             // Let's provide options for grabbing the intake
             when {
-                gamepad2.y -> robot.wobbleGrabber.grab(WobbleGrabber.GrabPosition.MID_GRAB)
-                gamepad2.b -> robot.wobbleGrabber.pivot(WobbleGrabber.PivotPosition.PERPENDICULAR)
                 gamepad2.a -> robot.wobbleGrabber.pivot(WobbleGrabber.PivotPosition.GRAB)
                 gamepad2.x -> robot.wobbleGrabber.grab(WobbleGrabber.GrabPosition.GRAB)
+                gamepad2.b -> robot.wobbleGrabber.pivot(WobbleGrabber.PivotPosition.PERPENDICULAR)
+                gamepad2.y -> robot.wobbleGrabber.grab(WobbleGrabber.GrabPosition.MID_GRAB)
             }
         } else if (gamepad2.right_bumper) {
             // Let's provide options for releasing the intake in yeet position

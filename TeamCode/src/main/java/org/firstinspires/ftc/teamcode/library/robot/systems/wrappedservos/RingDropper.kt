@@ -8,7 +8,7 @@ constructor (private val servo: Servo)
 
     enum class DropperPosition(val position: Double) {
         ONTO_WOBBLE(0.90),
-        INTAKE(0.68),
+        INTAKE(0.73),
         HOLD_RING(0.62)
     }
 

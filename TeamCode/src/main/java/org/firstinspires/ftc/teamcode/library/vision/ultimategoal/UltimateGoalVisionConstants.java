@@ -21,16 +21,16 @@ public class UltimateGoalVisionConstants {
     public static int BOTTOM_RING_CENTER_Y_ON_LEFT = 155;
 
     public static int BOTTOM_RING_CENTER_X = 285;
-    public static int BOTTOM_RING_CENTER_Y = 400;
+    public static int BOTTOM_RING_CENTER_Y = 360;
 
 
     // Width and height of the ring
     public static int RING_WIDTH = 240;
-    public static int RING_HEIGHT = 22;
+    public static int RING_HEIGHT = 25;
 
 
     // Spacing between rings
-    public static int RING_SPACING = 110;
+    public static int RING_SPACING = 150;
 
     // Amount of pixels to skip within each ring
     public static int SEARCH_SKIP = 15;
@@ -62,8 +62,8 @@ public class UltimateGoalVisionConstants {
 
 
      */
-    public static int QUALIFY_MIN_OUT = 10;
-    public static int QUALIFY_MIN_IN = 10;
+    public static int QUALIFY_MIN_OUT = 9;
+    public static int QUALIFY_MIN_IN = 15;
 
     /*
 
