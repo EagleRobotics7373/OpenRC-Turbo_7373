@@ -21,19 +21,19 @@ public class UltimateGoalVisionConstants {
     public static int BOTTOM_RING_CENTER_Y_ON_LEFT = 155;
 
     public static int BOTTOM_RING_CENTER_X = 285;
-    public static int BOTTOM_RING_CENTER_Y = 390;
+    public static int BOTTOM_RING_CENTER_Y = 400;
 
 
     // Width and height of the ring
     public static int RING_WIDTH = 240;
-    public static int RING_HEIGHT = 40;
+    public static int RING_HEIGHT = 22;
 
 
     // Spacing between rings
-    public static int RING_SPACING = 85;
+    public static int RING_SPACING = 110;
 
     // Amount of pixels to skip within each ring
-    public static int SEARCH_SKIP = 10;
+    public static int SEARCH_SKIP = 15;
 
     // Method by which to search each bounding box
     public static RingPixelAnalysisPipeline.SearchType SEARCH_TYPE =
@@ -55,6 +55,15 @@ public class UltimateGoalVisionConstants {
     public static int CONTOUR_RING_MINWIDTH = 60;
     public static int CONTOUR_MAT_PRINTOUT_NUM = 2;
     public static double CONTOUR_DILATION_KSIZE = 2.0;
+
+
+    /*
+
+
+
+     */
+    public static int QUALIFY_MIN_OUT = 10;
+    public static int QUALIFY_MIN_IN = 10;
 
     /*
 

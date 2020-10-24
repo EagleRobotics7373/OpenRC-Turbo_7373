@@ -44,10 +44,10 @@ class IntakeRingViewingPipeline() : ResolutionPipeline() {
                     .times(resolution.scale).toInt()
 
             numSuccessfulOutsideIntake = isRingPresent(x0, y0, width, height)
-            ringVisibleOutsideIntake = numSuccessfulOutsideIntake > 10
+            ringVisibleOutsideIntake = numSuccessfulOutsideIntake > QUALIFY_MIN_OUT
 
             numSuccessfulInsideIntake = isRingPresent(x0, y0 + spacing, width, height)
-            ringVisibleInsideIntake = numSuccessfulInsideIntake > 7
+            ringVisibleInsideIntake = numSuccessfulInsideIntake > QUALIFY_MIN_IN
 
             addLabels(mat = fullHlsMat, numSuccessful = numSuccessfulOutsideIntake, ringPresent = ringVisibleOutsideIntake)
             if (!shouldKeepTracking) tracking = false

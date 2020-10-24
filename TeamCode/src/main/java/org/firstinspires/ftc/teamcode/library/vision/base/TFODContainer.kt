@@ -5,7 +5,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector
 import org.firstinspires.ftc.teamcode.library.functions.process.Stoppable
-import org.java_websocket.server.CustomSSLWebSocketServerFactory
 
 class TFODContainer(
         val vuforia: VuforiaLocalizer,

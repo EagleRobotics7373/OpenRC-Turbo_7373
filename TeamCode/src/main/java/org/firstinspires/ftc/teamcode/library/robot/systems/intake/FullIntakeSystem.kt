@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.library.robot.systems.intake
 import com.qualcomm.robotcore.hardware.*
 import org.firstinspires.ftc.teamcode.library.functions.rhue
 import org.firstinspires.ftc.teamcode.library.functions.rsaturation
+import org.firstinspires.ftc.teamcode.library.robot.systems.intake.IntakeConstants.*
 import org.firstinspires.ftc.teamcode.library.robot.systems.wrappedservos.RingDropper
 import kotlin.math.absoluteValue
 
@@ -18,22 +19,35 @@ class FullIntakeSystem(
     var intakeArmTarget = IntakePosition.GROUND
         private set
 
+    var usePotentiometer: Boolean = false
+
     enum class IntakeArmState {
         IDLE, RAISE
     }
 
-    enum class IntakePosition(val ticks: Int, val voltage: Double?) {
-        GROUND(0, 1.743),
+    enum class IntakePosition(val ticks: Int, val voltage: Double) {
+        GROUND(0, 1.68),
         WOBBLE(0, 0.0),
-        SCORE(430, 0.902)
+        SCORE(510, 0.842);
+
+        companion object {
+            fun closest(voltage: Double): IntakePosition? {
+                return (
+                        IntakePosition.values()
+                                .minBy { (it.voltage.absoluteValue - voltage.absoluteValue).absoluteValue }
+                        )
+            }
+        }
     }
 
     var ringIntakeState: RingIntakeState = RingIntakeState.IDLE
-        private set
+        private set(value) { previousRingIntakeState = ringIntakeState; field = value }
     var desiredRingIntakePower: Double = 1.0
         set(value) {
             field = value.absoluteValue.coerceIn(0.25, 1.0)
         }
+
+    var shouldUseLambdaActivation: Boolean = true
 
     val nextRingIntakeState: RingIntakeState
         get() = when (ringIntakeState) {
@@ -44,22 +58,28 @@ class FullIntakeSystem(
                 if (intakeArmTarget != IntakePosition.GROUND) RingIntakeState.OUTPUT
                 else RingIntakeState.IDLE_WITH_RING
             RingIntakeState.OUTPUT -> RingIntakeState.IDLE
+            RingIntakeState.WOBBLE_DEPOSIT -> RingIntakeState.IDLE
         }
+
+    var previousRingIntakeState: RingIntakeState = RingIntakeState.IDLE
 
     var intakeStage1Trigger: (() -> Boolean)? = null
     var intakeStage2Trigger: (() -> Boolean)? = null
     var earliestAllowableAutoStart: Long = Long.MIN_VALUE
 
     enum class RingIntakeState {
-        IDLE, IDLE_WITH_RING, COLLECT_STAGE_1, COLLECT_STAGE_2, OUTPUT
+        IDLE, IDLE_WITH_RING, COLLECT_STAGE_1, COLLECT_STAGE_2, OUTPUT, WOBBLE_DEPOSIT
     }
 
     fun moveIntake(position: IntakePosition) {
         intakeArmState = IntakeArmState.RAISE
-        intakeLiftMotor.targetPosition = position.ticks
         intakeArmTarget = position
-        intakeLiftMotor.power = if (intakeArmTarget == IntakePosition.GROUND) 0.8 else 1.0
-        intakeLiftMotor.mode = DcMotor.RunMode.RUN_TO_POSITION
+
+        if (!usePotentiometer) {
+            intakeLiftMotor.targetPosition = position.ticks
+            intakeLiftMotor.power = if (intakeArmTarget == IntakePosition.GROUND) 0.8 else 1.0
+            intakeLiftMotor.mode = DcMotor.RunMode.RUN_TO_POSITION
+        }
     }
 
     fun manualMoveIntake(power: Double) {
@@ -68,8 +88,21 @@ class FullIntakeSystem(
         intakeLiftMotor.mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
     }
 
+    fun resetZero() {
+        intakeLiftMotor.mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER
+        intakeLiftMotor.mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
+    }
+
     fun doNextRingIntakeState() {
         ringIntakeState = nextRingIntakeState
+    }
+
+    fun doPreviousRingIntakeState() {
+        ringIntakeState = previousRingIntakeState
+    }
+
+    fun ringDropOnWobble() {
+        if (ringIntakeState == RingIntakeState.IDLE_WITH_RING) ringIntakeState = RingIntakeState.WOBBLE_DEPOSIT
     }
 
     fun rejectRing() {
@@ -91,13 +124,33 @@ class FullIntakeSystem(
     get() = colorSensor?.rhue == 0.0 && colorSensor.rsaturation == 0.0
 
 
+    val lastIntakeRead = System.currentTimeMillis()
+    var raiseIntegralSum = 0.0
+    var raiseLastDeriv = 0.0
+    var raiseLastError : Double? = null
     fun update() {
         when (intakeArmState) {
             IntakeArmState.IDLE -> {
                 intakeLiftMotor.mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
             }
             IntakeArmState.RAISE -> {
-                if (!intakeLiftMotor.isBusy) intakeArmState = IntakeArmState.IDLE
+                if (usePotentiometer) {
+                    val error = intakeArmTarget.voltage!!.minus(liftPositionPotentiometer.voltage)
+                    val timeDelta = System.currentTimeMillis() - lastIntakeRead
+                    val coeffs = RAISE_COEFFS
+                    val output = coeffs.p * error + coeffs.i * raiseIntegralSum + coeffs.d * raiseLastDeriv
+                    val coercedOutput = output.coerceIn(-1.0, 1.0)
+
+                    raiseIntegralSum += error * timeDelta
+                    raiseLastDeriv = (raiseLastError ?: error) - error
+
+                    intakeLiftMotor.power = if (reverseMotorOutput) -coercedOutput else coercedOutput
+
+                    if (error.absoluteValue < 0.05) intakeArmState = IntakeArmState.IDLE
+
+                } else {
+                    if (!intakeLiftMotor.isBusy) intakeArmState = IntakeArmState.IDLE
+                }
             }
         }
 
@@ -109,7 +162,8 @@ class FullIntakeSystem(
 
                 // If [intakeStage1Trigger] returns true aka ring is present, start the intake
                 if (System.currentTimeMillis() >= earliestAllowableAutoStart
-                        && intakeStage1Trigger?.invoke() == true) {
+                        && intakeStage1Trigger?.invoke() == true
+                        && shouldUseLambdaActivation) {
                     doNextRingIntakeState()
                 }
             }
@@ -119,7 +173,7 @@ class FullIntakeSystem(
                 ringDropServo.pivot(RingDropper.DropperPosition.INTAKE)
 
                 // If [intakeStage2Trigger] returns true aka ring is partially in intake, tighten servo flap
-                if (intakeStage2Trigger?.invoke() == true) doNextRingIntakeState()
+                if (intakeStage2Trigger?.invoke() == true && shouldUseLambdaActivation) doNextRingIntakeState()
 
                 // If touch sensor is pressed, ring is fully in intake, so advance to next stage
                 if (ringFullyInIntake) doNextRingIntakeState()
@@ -149,6 +203,15 @@ class FullIntakeSystem(
 
                 // Advance the earliest allowable auto-start to two seconds later from now
                 earliestAllowableAutoStart = System.currentTimeMillis() + 2000
+            }
+            RingIntakeState.WOBBLE_DEPOSIT -> {
+                ringIntakeMotor.power = 0.0
+                ringDropServo.pivot(
+                        if (IntakePosition.closest(liftPositionPotentiometer.voltage) == IntakePosition.GROUND)
+                            RingDropper.DropperPosition.HOLD_RING
+                        else RingDropper.DropperPosition.ONTO_WOBBLE
+                )
+                ringDropServo.pivot(RingDropper.DropperPosition.ONTO_WOBBLE)
             }
 
         }

@@ -20,11 +20,13 @@ open class TeleOpRD : OpMode() {
     lateinit var robot : ExtRingPlaceBot
 
     // gamepad toggle button watchers, instantiated after opmode init
-    protected lateinit var watch_gamepad1_buttonY : ToggleButtonWatcher
+    private lateinit var watch_gamepad1_buttonY : ToggleButtonWatcher
     protected lateinit var watch_gamepad1_dpadDown : ToggleButtonWatcher
     protected lateinit var watch_gamepad1_dpadUp : ToggleButtonWatcher
-    protected lateinit var watch_gamepad2_rightStickButton : ToggleButtonWatcher
-    protected lateinit var watch_gamepad2_buttonA : ToggleButtonWatcher
+    private lateinit var watch_gamepad2_rightStickButton : ToggleButtonWatcher
+    private lateinit var watch_gamepad2_buttonA : ToggleButtonWatcher
+    private lateinit var watch_gamepad2_buttonB : ToggleButtonWatcher
+    protected lateinit var watch_gamepad2_dpadLeft : ToggleButtonWatcher
 
     val musicPlayer = ExtDirMusicPlayer(ExtMusicFile.TETRIS)
     var playingMusic = false
@@ -54,6 +56,8 @@ open class TeleOpRD : OpMode() {
         watch_gamepad1_dpadUp = ToggleButtonWatcher {gamepad1.dpad_up}
         watch_gamepad2_rightStickButton = ToggleButtonWatcher { gamepad2.right_stick_button }
         watch_gamepad2_buttonA = ToggleButtonWatcher { gamepad2.a }
+        watch_gamepad2_buttonB = ToggleButtonWatcher { gamepad2.b && !gamepad2.start }
+        watch_gamepad2_dpadLeft = ToggleButtonWatcher { gamepad2.dpad_left }
 
         intakeLiftBaseline = 0
 
@@ -66,6 +70,7 @@ open class TeleOpRD : OpMode() {
         container.pipeline.tracking = true
         robot.intakeSystem.intakeStage1Trigger = { container.pipeline.ringVisibleOutsideIntake }
         robot.intakeSystem.intakeStage2Trigger = { container.pipeline.ringVisibleInsideIntake }
+        robot.intakeSystem.usePotentiometer = true
     }
 
     override fun loop() {
@@ -129,17 +134,20 @@ open class TeleOpRD : OpMode() {
 //        }
 
         if (gamepad2.left_bumper) {
+            // Let's provide options for grabbing the intake
             when {
+                gamepad2.y -> robot.wobbleGrabber.grab(WobbleGrabber.GrabPosition.MID_GRAB)
+                gamepad2.b -> robot.wobbleGrabber.pivot(WobbleGrabber.PivotPosition.PERPENDICULAR)
                 gamepad2.a -> robot.wobbleGrabber.pivot(WobbleGrabber.PivotPosition.GRAB)
-                gamepad2.b -> robot.wobbleGrabber.pivot(WobbleGrabber.PivotPosition.STORAGE)
-                gamepad2.x -> robot.wobbleGrabber.pivot(WobbleGrabber.PivotPosition.PERPENDICULAR)
-                gamepad2.y -> robot.wobbleGrabber.pivot(WobbleGrabber.PivotPosition.YEET)
+                gamepad2.x -> robot.wobbleGrabber.grab(WobbleGrabber.GrabPosition.GRAB)
             }
         } else if (gamepad2.right_bumper) {
+            // Let's provide options for releasing the intake in yeet position
             when {
-                gamepad2.a -> robot.wobbleGrabber.grab(WobbleGrabber.GrabPosition.GRAB)
-                gamepad2.b -> robot.wobbleGrabber.grab(WobbleGrabber.GrabPosition.STORAGE)
-                gamepad2.x -> robot.wobbleGrabber.grab(WobbleGrabber.GrabPosition.MID_GRAB)
+                gamepad2.a -> robot.wobbleGrabber.pivot(WobbleGrabber.PivotPosition.YEET)
+                gamepad2.x -> robot.wobbleGrabber.pivot(WobbleGrabber.PivotPosition.OVER_WALL)
+                gamepad2.b -> robot.wobbleGrabber.pivot(WobbleGrabber.PivotPosition.STORAGE)
+                gamepad2.y -> robot.wobbleGrabber.grab(WobbleGrabber.GrabPosition.STORAGE)
             }
         }
 
@@ -175,11 +183,18 @@ open class TeleOpRD : OpMode() {
         if(!(gamepad2.left_bumper || gamepad2.right_bumper)) {
             when {
                 watch_gamepad2_buttonA.call() -> robot.intakeSystem.doNextRingIntakeState()
-                gamepad2.b -> robot.intakeSystem.rejectRing()
+                watch_gamepad2_buttonB.call() -> robot.intakeSystem.doPreviousRingIntakeState()
+                gamepad2.x -> robot.intakeSystem.ringDropOnWobble()
+                gamepad2.y -> robot.intakeSystem.rejectRing()
                 gamepad2.dpad_up -> robot.intakeSystem.moveIntake(FullIntakeSystem.IntakePosition.SCORE)
                 gamepad2.dpad_down -> robot.intakeSystem.moveIntake(FullIntakeSystem.IntakePosition.GROUND)
+                gamepad2.left_stick_button -> robot.intakeSystem.resetZero()
+                watch_gamepad2_rightStickButton.call() -> robot.intakeSystem.shouldUseLambdaActivation =
+                        !robot.intakeSystem.shouldUseLambdaActivation
             }
         }
+
+//        if (watch_gamepad2_dpadLeft.call()) robot.intakeSystem.usePotentiometer = !robot.intakeSystem.usePotentiometer
 
 //        when {
 //            gamepad2.dpad_up -> robot.ringDropper.pivot(RingDropper.DropperPosition.HOLD_RING)
@@ -202,9 +217,15 @@ open class TeleOpRD : OpMode() {
         telemetry.addData("IntakeLiftMotor pwr", robot.intakeLiftMotor.power)
         telemetry.addLine()
         telemetry.addData("Potentiometer pos", robot.liftPotentiometer.voltage)
+        telemetry.addData("Use potentiometer", robot.intakeSystem.usePotentiometer)
+        telemetry.addLine()
+        telemetry.addData("Raise last deriv", robot.intakeSystem.raiseLastDeriv)
+        telemetry.addData("Raise integral sum", robot.intakeSystem.raiseIntegralSum)
+        telemetry.addData("Raise last error", robot.intakeSystem.raiseLastError)
         telemetry.addLine()
         telemetry.addData("Intake arm state", robot.intakeSystem.intakeArmState)
         telemetry.addData("Intake ring state", robot.intakeSystem.ringIntakeState)
+        telemetry.addData("Intake ring state (prev)", robot.intakeSystem.previousRingIntakeState)
         telemetry.addData("Intake ring state (next)", robot.intakeSystem.nextRingIntakeState)
         telemetry.addData("Intake arm target", robot.intakeSystem.intakeArmTarget)
         telemetry.addLine()
@@ -217,6 +238,7 @@ open class TeleOpRD : OpMode() {
         telemetry.addData("Num qualify in", container.pipeline.numSuccessfulInsideIntake)
         telemetry.addLine()
         telemetry.addData("Ring fully in", robot.intakeSystem.ringFullyInIntake)
+        telemetry.addData("Should lambda activate", robot.intakeSystem.shouldUseLambdaActivation)
     }
 
     // functionality is explained throughout opmode; allows for encapsulation of button presses
