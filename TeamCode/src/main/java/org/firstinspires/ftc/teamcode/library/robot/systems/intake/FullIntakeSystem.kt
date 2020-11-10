@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.library.robot.systems.intake
 
 import com.qualcomm.robotcore.hardware.*
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit
 import org.firstinspires.ftc.teamcode.library.functions.rhue
 import org.firstinspires.ftc.teamcode.library.functions.rsaturation
 import org.firstinspires.ftc.teamcode.library.robot.systems.intake.IntakeConstants.*
@@ -12,7 +13,8 @@ class FullIntakeSystem(
         private val liftPositionPotentiometer: AnalogInput,
         private val ringIntakeMotor: DcMotorEx,
         private val ringDropServo: RingDropper,
-        private val colorSensor: ColorSensor? = null
+        private val colorSensor: ColorSensor? = null,
+        private val distanceSensor: DistanceSensor? = null
 ) {
     var intakeArmState: IntakeArmState = IntakeArmState.IDLE
         private set
@@ -121,7 +123,8 @@ class FullIntakeSystem(
 //    }
 
     val ringFullyInIntake: Boolean
-    get() = colorSensor?.rhue == 0.0 && colorSensor.rsaturation == 0.0
+//    get() = colorSensor?.rhue == 0.0 && colorSensor.rsaturation == 0.0
+    get() = (distanceSensor?.getDistance(DistanceUnit.CM)?:1.0) < 0.8
 
     val lastIntakeRead = System.currentTimeMillis()
     var raiseIntegralSum = 0.0
@@ -134,7 +137,7 @@ class FullIntakeSystem(
             }
             IntakeArmState.RAISE -> {
                 if (usePotentiometer) {
-                    val error = intakeArmTarget.voltage!!.minus(liftPositionPotentiometer.voltage)
+                    val error = intakeArmTarget.voltage.minus(liftPositionPotentiometer.voltage)
                     val timeDelta = System.currentTimeMillis() - lastIntakeRead
                     val coeffs = RAISE_COEFFS
                     val output = coeffs.p * error + coeffs.i * raiseIntegralSum + coeffs.d * raiseLastDeriv

@@ -33,6 +33,7 @@ open class ExtRingPlaceBot(_hardwareMap: HardwareMap) : BaseRobot(_hardwareMap) 
 
 //    @JvmField val intakeTouchSensor      : TouchSensor            = hwInit("intakeTouchSensor")
     @JvmField val intakeColorSensor      : ColorSensor            = hwInit("intakeColorSensor")
+    @JvmField val intakeDistanceSensor   : DistanceSensor         = hwInit("intakeColorSensor")
 
     // Odometry module variables - these will be set once we determine plug-in locations on REV Hubs
     override val leftOdometryModule: OdometryModule?  = null

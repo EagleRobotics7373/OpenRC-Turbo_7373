@@ -1,11 +1,15 @@
 package org.firstinspires.ftc.teamcode.library.vision.ultimategoal
 
+import org.firstinspires.ftc.robotcore.internal.opmode.OpModeManagerImpl
+import org.firstinspires.ftc.robotcore.internal.system.AppUtil
 import org.firstinspires.ftc.teamcode.library.vision.base.ImageResolution
 import org.firstinspires.ftc.teamcode.library.vision.base.ResolutionPipeline
 import org.firstinspires.ftc.teamcode.library.vision.base.coerceIn
 import org.firstinspires.ftc.teamcode.library.vision.base.times
 import org.firstinspires.ftc.teamcode.library.vision.ultimategoal.UltimateGoalVisionConstants.*
-import org.opencv.core.*
+import org.opencv.core.Mat
+import org.opencv.core.Point
+import org.opencv.core.Scalar
 import org.opencv.imgproc.Imgproc.*
 
 class IntakeRingViewingPipeline() : ResolutionPipeline() {
@@ -21,6 +25,8 @@ class IntakeRingViewingPipeline() : ResolutionPipeline() {
     var ringVisibleInsideIntake: Boolean = false
         private set
 
+    var exception: Exception? = null
+
     // The mat that we will analyze, alone with the channel number we need to extract from HSV
     private var rgbMat: Mat = Mat()
     private var fullHlsMat: Mat = Mat()
@@ -28,6 +34,15 @@ class IntakeRingViewingPipeline() : ResolutionPipeline() {
     override var resolution : ImageResolution = ImageResolution.R_720x480
 
     override fun processFrame(input: Mat): Mat {
+        try {
+            if (exception != null) throw exception as Exception
+        } catch (e: java.lang.Exception) {
+            val managerImpl = OpModeManagerImpl.getOpModeManagerOfActivity(AppUtil.getInstance().activity)
+            managerImpl.stopActiveOpMode()
+        }
+
+
+
         if (tracking) {
 
             cvtColor(input, fullHlsMat, COLOR_RGB2HLS)

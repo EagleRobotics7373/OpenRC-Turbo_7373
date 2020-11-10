@@ -1,6 +1,7 @@
 import java.text.SimpleDateFormat
 
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
 
 android {
     compileSdkVersion 28
@@ -67,4 +68,9 @@ dependencies {
     api('com.acmerobotics.dashboard:dashboard:0.3.10') {
         exclude group: 'org.firstinspires.ftc'
     }
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+}
+repositories {
+    maven { url 'https://dl.bintray.com/kotlin/kotlin-eap' }
+    mavenCentral()
 }
