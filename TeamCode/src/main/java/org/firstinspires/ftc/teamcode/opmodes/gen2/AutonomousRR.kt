@@ -7,29 +7,23 @@ import com.acmerobotics.roadrunner.geometry.Vector2d
 import com.acmerobotics.roadrunner.trajectory.BaseTrajectoryBuilder
 import com.acmerobotics.roadrunner.trajectory.MarkerCallback
 import com.acmerobotics.roadrunner.trajectory.TrajectoryBuilder
-import com.acmerobotics.roadrunner.trajectory.constraints.MecanumConstraints
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.util.ElapsedTime
-import org.firstinspires.ftc.robotcontroller.external.samples.SensorREV2mDistance
 import org.firstinspires.ftc.teamcode.library.functions.*
 import org.firstinspires.ftc.teamcode.library.functions.AllianceColor.*
 import org.firstinspires.ftc.teamcode.library.functions.StartingLine.*
 import org.firstinspires.ftc.teamcode.library.functions.telemetrymenu.kotlin.*
 import org.firstinspires.ftc.teamcode.library.robot.robotcore.ExtRingPlaceBot
 import org.firstinspires.ftc.teamcode.library.robot.robotcore.IMUController
-import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.constants.DriveConstantsRingPlace
 import org.firstinspires.ftc.teamcode.library.robot.systems.intake.FullIntakeSystem
 import org.firstinspires.ftc.teamcode.library.robot.systems.wrappedservos.RingDropper
 import org.firstinspires.ftc.teamcode.library.robot.systems.wrappedservos.WobbleGrabber
 import org.firstinspires.ftc.teamcode.library.vision.base.VisionFactory
 import org.firstinspires.ftc.teamcode.library.vision.base.OpenCvContainer
 import org.firstinspires.ftc.teamcode.library.vision.ultimategoal.RingContourPipeline
-import org.firstinspires.ftc.teamcode.library.vision.ultimategoal.RingPixelAnalysisPipeline
-import org.firstinspires.ftc.teamcode.library.vision.ultimategoal.UltimateGoalVisionConstants
 import kotlin.math.PI
 import org.firstinspires.ftc.teamcode.opmodes.gen2.OpModeConfig
-import kotlin.concurrent.thread
 
 @com.qualcomm.robotcore.eventloop.opmode.Autonomous(name = "Autonomous LM1 (Kotlin + RR)", group = "Main")
 class AutonomousRR : LinearOpMode() {
@@ -151,11 +145,11 @@ class AutonomousRR : LinearOpMode() {
                 )
                 .buildAndRun()
 
-        robot.wobbleGrabber.pivot(WobbleGrabber.PivotPosition.PERPENDICULAR)
+        robot.wobbleGrabber.move(pivot = WobbleGrabber.PivotPosition.PERPENDICULAR)
         sleep(1500)
-        robot.wobbleGrabber.grab(WobbleGrabber.GrabPosition.STORAGE)
+        robot.wobbleGrabber.move(grab = WobbleGrabber.GrabPosition.STORAGE)
         sleep(500)
-        robot.wobbleGrabber.pivot(WobbleGrabber.PivotPosition.STORAGE)
+        robot.wobbleGrabber.move(pivot = WobbleGrabber.PivotPosition.STORAGE)
         sleep(2500)
 
 
@@ -211,17 +205,17 @@ class AutonomousRR : LinearOpMode() {
 
         while (!isStarted && !isStopRequested) {
             when {
-                dpadUpWatch.call()    -> config.update(prevItem = true)
-                dpadDownWatch.call()  -> config.update(nextItem = true)
-                dpadLeftWatch.call()  -> config.update(iterBack = true)
-                dpadRightWatch.call() -> config.update(iterFw   = true)
+                dpadUpWatch.invoke()    -> config.update(prevItem = true)
+                dpadDownWatch.invoke()  -> config.update(nextItem = true)
+                dpadLeftWatch.invoke()  -> config.update(iterBack = true)
+                dpadRightWatch.invoke() -> config.update(iterFw   = true)
             }
 
             when {
-                gamepad1.x -> robot.wobbleGrabber.grab(WobbleGrabber.GrabPosition.GRAB)
+                gamepad1.x -> robot.wobbleGrabber.move(grab = WobbleGrabber.GrabPosition.GRAB)
                 gamepad1.y -> {
-                    robot.wobbleGrabber.pivot(WobbleGrabber.PivotPosition.VERTICAL)
-                    robot.wobbleGrabber.grab(WobbleGrabber.GrabPosition.MID_GRAB)
+                    robot.wobbleGrabber.move(pivot = WobbleGrabber.PivotPosition.VERTICAL)
+                    robot.wobbleGrabber.move(grab = WobbleGrabber.GrabPosition.MID_GRAB)
                 }
             }
         }

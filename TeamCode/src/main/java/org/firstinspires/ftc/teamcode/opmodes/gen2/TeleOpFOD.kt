@@ -25,11 +25,11 @@ class TeleOpFOD : TeleOpRD() {
      */
     override fun controlDrivetrain() {
         // enable field-oriented drive if 'x' button is pressed
-        if (gamepad1.x) {
+        if (canControlDrivetrainOrientation && gamepad1.x) {
             fod = true
         }
         // disable field-oriented drive if 'a' or 'b' buttons are pressed
-        else if (gamepad1.a or gamepad1.b) fod = false
+        else if ((gamepad1.left_bumper && gamepad1.right_bumper && !gamepad1.start) && (gamepad1.a or gamepad1.b)) fod = false
 
 
         if (fod)
@@ -47,12 +47,12 @@ class TeleOpFOD : TeleOpRD() {
             // Set drivetrain values, including an offset angle for FOD
             robot.holonomic.runWithoutEncoderVectored(x, y, z, zeroAngle - robot.imuControllerC.getHeading())
         }
-        // if FOD is not enabled, call superclass relative driving method instead
+        // if FOD is not enabled, invoke superclass relative driving method instead
         else super.controlDrivetrain()
 
         // speed control using button watchers
-        if (watch_gamepad1_dpadDown.call() and (speed > 1)) speed--
-        if (watch_gamepad1_dpadUp.call() and (speed < 3)) speed++
+        if (watch_gamepad1_dpadDown.invoke() and (speed > 1)) speed--
+        if (watch_gamepad1_dpadUp.invoke() and (speed < 3)) speed++
 
         // basic telemetry
         telemetry.addData("fod", fod)

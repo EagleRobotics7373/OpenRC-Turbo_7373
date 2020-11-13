@@ -31,9 +31,9 @@ open class ExtRingPlaceBot(_hardwareMap: HardwareMap) : BaseRobot(_hardwareMap) 
     @JvmField val wobblePivotServo       : Servo                  = hwInit("wobblePivotServo")
     @JvmField val wobbleGrabServo        : Servo                  = hwInit("wobbleGrabServo")
 
-//    @JvmField val intakeTouchSensor      : TouchSensor            = hwInit("intakeTouchSensor")
-    @JvmField val intakeColorSensor      : ColorSensor            = hwInit("intakeColorSensor")
-    @JvmField val intakeDistanceSensor   : DistanceSensor         = hwInit("intakeColorSensor")
+    @JvmField val intakeTouchSensor      : TouchSensor            = hwInit("intakeTouchSensor")
+//    @JvmField val intakeColorSensor      : ColorSensor            = hwInit("intakeColorSensor")
+//    @JvmField val intakeDistanceSensor   : DistanceSensor         = hwInit("intakeColorSensor")
 
     // Odometry module variables - these will be set once we determine plug-in locations on REV Hubs
     override val leftOdometryModule: OdometryModule?  = null
@@ -52,7 +52,7 @@ open class ExtRingPlaceBot(_hardwareMap: HardwareMap) : BaseRobot(_hardwareMap) 
                                                                                  frontLeftMotor, backLeftMotor, backRightMotor, frontRightMotor,
                                                                                  TwoWheelOdometryLocalizer(odometryLeft, odometryRear, imuControllerC))
     @JvmField val ringDropper             : RingDropper           = RingDropper(ringDropServo)
-    @JvmField val intakeSystem            : FullIntakeSystem      = FullIntakeSystem(intakeLiftMotor, liftPotentiometer, ringIntakeMotor, ringDropper, intakeColorSensor)
+    @JvmField val intakeSystem            : FullIntakeSystem      = FullIntakeSystem(intakeLiftMotor, liftPotentiometer, ringIntakeMotor, ringDropper, intakeTouchSensor)
     @JvmField val wobbleGrabber           : WobbleGrabber         = WobbleGrabber(wobblePivotServo, wobbleGrabServo)
 
 }

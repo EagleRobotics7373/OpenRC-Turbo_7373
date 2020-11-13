@@ -21,7 +21,7 @@ public class UltimateGoalVisionConstants {
     public static int BOTTOM_RING_CENTER_Y_ON_LEFT = 155;
 
     public static int BOTTOM_RING_CENTER_X = 285;
-    public static int BOTTOM_RING_CENTER_Y = 360;
+    public static int BOTTOM_RING_CENTER_Y = 400;
 
 
     // Width and height of the ring

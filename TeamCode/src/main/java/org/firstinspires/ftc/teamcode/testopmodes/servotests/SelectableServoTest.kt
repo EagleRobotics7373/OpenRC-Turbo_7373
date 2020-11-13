@@ -47,10 +47,10 @@ class SelectableServoTest : OpMode() {
 
     override fun loop() {
             when {
-                dpadUpWatch.call()    -> menu.previousItem()
-                dpadDownWatch.call()  -> menu.nextItem()
-                dpadLeftWatch.call()  -> menu.iterateBackward()
-                dpadRightWatch.call() -> menu.iterateForward()
+                dpadUpWatch.invoke()    -> menu.previousItem()
+                dpadDownWatch.invoke()  -> menu.nextItem()
+                dpadLeftWatch.invoke()  -> menu.iterateBackward()
+                dpadRightWatch.invoke() -> menu.iterateForward()
                 else -> menu.refresh()
             }
         if (enable) {

@@ -260,11 +260,6 @@ public class FtcRobotControllerActivity extends Activity
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
-    Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler(this));
-    if (getIntent().getBooleanExtra("crash", false)) {
-      System.out.println("\n\n\n\n\n\n\n\n\nApp restarted after crash (EPIC WIN)\n\n\n\n\n\n\n\n\n");
-      AppUtil.getInstance().showToast(UILocation.BOTH, "App restarted after crash (EPIC WIN)");
-    }
 
     super.onCreate(savedInstanceState);
 
@@ -390,6 +385,17 @@ public class FtcRobotControllerActivity extends Activity
     FtcDashboard.start();
 
     FtcAboutActivity.setBuildTimeFromBuildConfig(BuildConfig.BUILD_TIME);
+
+    // Implementation of custom code to restart robot controller app post-crash
+    Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler(this));
+    if (getIntent().getBooleanExtra("crash", false)) {
+      System.out.println("\n\n\n\n\n\n\n\n\nApp restarted after crash (EPIC WIN)\n\n\n\n\n\n\n\n\n");
+      AppUtil.getInstance().showToast(UILocation.BOTH, "App restarted after crash (EPIC WIN)");
+    }
+
+    // Set Wi-Fi network settings
+    boolean didUpdateWiFiSettings = NetworkUtil.INSTANCE.loadNetworkSettingsFromFile();
+    AppUtil.getInstance().showToast(UILocation.BOTH, (didUpdateWiFiSettings ? "Loaded" : "Could not load") + " network settings from file.");
   }
 
   protected UpdateUI createUpdateUI() {

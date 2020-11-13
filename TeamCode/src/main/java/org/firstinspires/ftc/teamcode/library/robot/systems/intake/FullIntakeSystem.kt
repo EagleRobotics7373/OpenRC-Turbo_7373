@@ -13,8 +13,7 @@ class FullIntakeSystem(
         private val liftPositionPotentiometer: AnalogInput,
         private val ringIntakeMotor: DcMotorEx,
         private val ringDropServo: RingDropper,
-        private val colorSensor: ColorSensor? = null,
-        private val distanceSensor: DistanceSensor? = null
+        private val intakeTouchSensor: TouchSensor? = null
 ) {
     var intakeArmState: IntakeArmState = IntakeArmState.IDLE
         private set
@@ -54,7 +53,7 @@ class FullIntakeSystem(
     val nextRingIntakeState: RingIntakeState
         get() = when (ringIntakeState) {
             RingIntakeState.IDLE -> RingIntakeState.COLLECT_STAGE_1
-            RingIntakeState.COLLECT_STAGE_1 -> RingIntakeState.COLLECT_STAGE_2
+            RingIntakeState.COLLECT_STAGE_1 -> RingIntakeState.IDLE_WITH_RING
             RingIntakeState.COLLECT_STAGE_2 -> RingIntakeState.IDLE_WITH_RING
             RingIntakeState.IDLE_WITH_RING ->
                 if (intakeArmTarget != IntakePosition.GROUND) RingIntakeState.OUTPUT
@@ -123,8 +122,9 @@ class FullIntakeSystem(
 //    }
 
     val ringFullyInIntake: Boolean
+    get() = intakeTouchSensor?.isPressed == true
 //    get() = colorSensor?.rhue == 0.0 && colorSensor.rsaturation == 0.0
-    get() = (distanceSensor?.getDistance(DistanceUnit.CM)?:1.0) < 0.8
+//    get() = (distanceSensor?.getDistance(DistanceUnit.CM)?:1.0) < 0.8
 
     val lastIntakeRead = System.currentTimeMillis()
     var raiseIntegralSum = 0.0
@@ -171,7 +171,7 @@ class FullIntakeSystem(
             }
             RingIntakeState.COLLECT_STAGE_1 -> {
                 // Turn on the intake and put servo flap into intake position
-                ringIntakeMotor.power = desiredRingIntakePower
+                ringIntakeMotor.power = -desiredRingIntakePower
                 ringDropServo.pivot(RingDropper.DropperPosition.INTAKE)
 
                 // If [intakeStage2Trigger] returns true aka ring is partially in intake, tighten servo flap
@@ -182,7 +182,7 @@ class FullIntakeSystem(
             }
             RingIntakeState.COLLECT_STAGE_2 -> {
                 // Turn on the intake and tighten servo flap
-                ringIntakeMotor.power = desiredRingIntakePower
+                ringIntakeMotor.power = -desiredRingIntakePower
                 ringDropServo.pivot(RingDropper.DropperPosition.HOLD_RING)
 
                 // If touch sensor is pressed, ring is fully in intake, so advance to next stage
@@ -195,7 +195,7 @@ class FullIntakeSystem(
             }
             RingIntakeState.OUTPUT -> {
                 // Turn on the intake, with reversed power to output ring
-                ringIntakeMotor.power = -desiredRingIntakePower
+                ringIntakeMotor.power = desiredRingIntakePower
 
                 // Pivot ring servo down if on ground, otherwise leave tight
                 ringDropServo.pivot(
