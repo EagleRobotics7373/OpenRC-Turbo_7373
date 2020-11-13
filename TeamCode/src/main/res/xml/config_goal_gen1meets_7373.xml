@@ -10,7 +10,6 @@
             <Servo name="wobbleGrabServo" port="0"/>
             <Servo name="wobblePivotServo" port="1"/>
             <RevTouchSensor name="intakeTouchSensor" port="0" />
-            <RevColorSensorV3 name="intakeColorSensor" port="1" bus="0" />
             <LynxEmbeddedIMU name="imuC" port="0" bus="0" />
         </LynxModule>
     </LynxUsbDevice>
@@ -20,7 +19,8 @@
             <Motor name="odometryLeft" port="1"/>
             <Matrix12vMotor name="backRightMotor" port="2" />
             <Matrix12vMotor name="frontRightMotor" port="3" />
-            <Servo name="ringDropServo" port="5"/>
+            <Servo name="ringDropServo" port="2"/>
+            <RevBlinkinLedDriver name="blinkin" port="5"/>
             <AnalogInput name="liftPotentiometer" port="0" />
             <LynxEmbeddedIMU name="imuE" port="0" bus="0" />
         </LynxModule>

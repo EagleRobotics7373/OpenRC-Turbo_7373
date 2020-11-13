@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.opmodes.gen2
 
 import com.qualcomm.hardware.lynx.LynxModule
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver
 import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.util.ElapsedTime
@@ -23,7 +24,10 @@ open class TeleOpRD : OpMode() {
     private lateinit var watch_gamepad1_buttonY : ToggleButtonWatcher
     protected lateinit var watch_gamepad1_dpadDown : ToggleButtonWatcher
     protected lateinit var watch_gamepad1_dpadUp : ToggleButtonWatcher
+    private lateinit var watch_gamepad2_leftStickButton : ToggleButtonWatcher
     private lateinit var watch_gamepad2_rightStickButton : ToggleButtonWatcher
+    private lateinit var watch_gamepad1_buttonA : ToggleButtonWatcher
+    private lateinit var watch_gamepad1_buttonB : ToggleButtonWatcher
     private lateinit var watch_gamepad2_buttonA : ToggleButtonWatcher
     private lateinit var watch_gamepad2_buttonB : ToggleButtonWatcher
     private lateinit var watch_gamepad2_dpadLeft : ToggleButtonWatcher
@@ -60,6 +64,9 @@ open class TeleOpRD : OpMode() {
         watch_gamepad1_buttonY = ToggleButtonWatcher {gamepad1.y}
         watch_gamepad1_dpadDown = ToggleButtonWatcher {gamepad1.dpad_down}
         watch_gamepad1_dpadUp = ToggleButtonWatcher {gamepad1.dpad_up}
+        watch_gamepad1_buttonA = ToggleButtonWatcher { gamepad1.a }
+        watch_gamepad1_buttonB = ToggleButtonWatcher { gamepad1.b }
+        watch_gamepad2_leftStickButton = ToggleButtonWatcher { gamepad2.left_stick_button }
         watch_gamepad2_rightStickButton = ToggleButtonWatcher { gamepad2.right_stick_button }
         watch_gamepad2_buttonA = ToggleButtonWatcher { gamepad2.a }
         watch_gamepad2_buttonB = ToggleButtonWatcher { gamepad2.b && !gamepad2.start }
@@ -164,6 +171,7 @@ open class TeleOpRD : OpMode() {
             (watch_gamepad2_dpadLeft()  && gamepad2.start) || (watch_gamepad1_leftBumper() && gamepad1.start) -> robot.wobbleGrabber.prevState()
             (watch_gamepad2_dpadRight() && gamepad2.start) || (watch_gamepad1_rightBumper() && gamepad1.start) -> robot.wobbleGrabber.nextState()
         }
+        robot.wobbleGrabber.update()
 
 
 
@@ -179,10 +187,10 @@ open class TeleOpRD : OpMode() {
                 if (gamepad2.left_stick_y.absoluteValue > 0.05)
                     gamepad2.left_stick_y
                 else if (gamepad1.left_trigger > 0.05) {
-                    -gamepad1.left_trigger
+                    gamepad1.left_trigger
                 }
                 else if (gamepad1.right_trigger > 0.05) {
-                    gamepad1.right_trigger
+                    -gamepad1.right_trigger
                 }
                 else if (robot.intakeSystem.intakeArmState == FullIntakeSystem.IntakeArmState.IDLE)
                     0.0f
@@ -190,20 +198,19 @@ open class TeleOpRD : OpMode() {
                     null
                 )?.toDouble()
 
-        if (input != null) {
-            if (gamepad2.left_trigger > 0.05 || gamepad2.right_trigger > 0.05) {
-                if (input.absoluteValue == 1.0 && !didActivateMax) {
-                    didActivateMax = true
-                    robot.intakeSystem.moveIntake(if (input == 1.0) FullIntakeSystem.IntakePosition.SCORE else FullIntakeSystem.IntakePosition.GROUND)
-                } else {
-                    if (!didActivateMax)
-                        robot.intakeSystem.manualMoveIntake(input)
-                }
+        if (gamepad1.left_trigger > 0.05 || gamepad1.right_trigger > 0.05) {
+            if (input?.absoluteValue == 1.0 && !didActivateMax) {
+                didActivateMax = true
+                robot.intakeSystem.moveIntake(if (input == -1.0) FullIntakeSystem.IntakePosition.SCORE else FullIntakeSystem.IntakePosition.GROUND)
             } else {
-                didActivateMax = false
-                robot.intakeSystem.manualMoveIntake(input)
+                if (!didActivateMax && input != null)
+                    robot.intakeSystem.manualMoveIntake(input)
             }
+        } else {
+            didActivateMax = false
+            if (input != null) robot.intakeSystem.manualMoveIntake(input)
         }
+
 
 //        robot.intakeSystem.manualRingMotor(
 //                when {
@@ -223,10 +230,10 @@ open class TeleOpRD : OpMode() {
 
         if(!(gamepad2.left_bumper || gamepad2.right_bumper)) {
             when {
-                watch_gamepad2_buttonA.invoke() -> robot.intakeSystem.doNextRingIntakeState()
-                watch_gamepad2_buttonB.invoke() -> robot.intakeSystem.doPreviousRingIntakeState()
-                gamepad2.x -> robot.intakeSystem.ringDropOnWobble()
-                gamepad2.y -> robot.intakeSystem.rejectRing()
+                watch_gamepad2_buttonA.invoke() || (watch_gamepad1_buttonA() && !canControlDrivetrainOrientation) -> robot.intakeSystem.ringIntakeState = FullIntakeSystem.RingIntakeState.COLLECT_STAGE_1
+                watch_gamepad2_buttonB.invoke() || (watch_gamepad1_buttonB() && !canControlDrivetrainOrientation) -> robot.intakeSystem.ringIntakeState = FullIntakeSystem.RingIntakeState.IDLE
+//                gamepad2.x || (gamepad1.x && !canControlDrivetrainOrientation) -> robot.intakeSystem.ringDropOnWobble()
+                gamepad2.y || (gamepad1.y && !canControlDrivetrainOrientation) -> robot.intakeSystem.rejectRing()
                 gamepad2.dpad_up -> robot.intakeSystem.moveIntake(FullIntakeSystem.IntakePosition.SCORE)
                 gamepad2.dpad_down -> robot.intakeSystem.moveIntake(FullIntakeSystem.IntakePosition.GROUND)
                 gamepad2.left_stick_button -> robot.intakeSystem.resetZero()
@@ -234,6 +241,8 @@ open class TeleOpRD : OpMode() {
                         !robot.intakeSystem.shouldUseLambdaActivation
             }
         }
+
+        if (watch_gamepad2_leftStickButton()) robot.intakeSystem.shouldTempHold = !robot.intakeSystem.shouldTempHold
 
 //        if (watch_gamepad2_dpadLeft.invoke()) robot.intakeSystem.usePotentiometer = !robot.intakeSystem.usePotentiometer
 
@@ -251,6 +260,13 @@ open class TeleOpRD : OpMode() {
 //            if (musicPlayer.isPlaying()) musicPlayer.pause()
 //            else musicPlayer.play()
 //        }
+        robot.blinkin.setPattern(
+                when (robot.intakeSystem.intakeArmState) {
+                    FullIntakeSystem.IntakeArmState.RAISE -> RevBlinkinLedDriver.BlinkinPattern.YELLOW
+                    FullIntakeSystem.IntakeArmState.TEMP_HOLD -> RevBlinkinLedDriver.BlinkinPattern.BLUE
+                    FullIntakeSystem.IntakeArmState.IDLE -> RevBlinkinLedDriver.BlinkinPattern.RED
+                }
+        )
     }
 
     private fun controlTelemetry() {
@@ -265,15 +281,17 @@ open class TeleOpRD : OpMode() {
         telemetry.addData("Raise last error", robot.intakeSystem.raiseLastError)
         telemetry.addLine()
         telemetry.addData("Intake arm state", robot.intakeSystem.intakeArmState)
+        telemetry.addData("Intake arm target", robot.intakeSystem.intakeArmTarget)
         telemetry.addData("Intake ring state", robot.intakeSystem.ringIntakeState)
         telemetry.addData("Intake ring state (prev)", robot.intakeSystem.previousRingIntakeState)
         telemetry.addData("Intake ring state (next)", robot.intakeSystem.nextRingIntakeState)
-        telemetry.addData("Intake arm target", robot.intakeSystem.intakeArmTarget)
         telemetry.addLine()
         telemetry.addData("Intake manual raise input", intakeRaiseInput)
         telemetry.addData("Intake did activate max", didActivateMax)
+        telemetry.addData("Intake should do temp hold", robot.intakeSystem.shouldTempHold)
         telemetry.addLine()
         telemetry.addData("Intake ring speed", robot.intakeSystem.desiredRingIntakePower)
+        telemetry.addData("Intake ring fully in", robot.intakeSystem.ringFullyInIntake)
         telemetry.addLine()
         telemetry.addData("Ring visible out", container.pipeline.ringVisibleOutsideIntake)
         telemetry.addData("Num qualify out", container.pipeline.numSuccessfulOutsideIntake)
@@ -287,6 +305,8 @@ open class TeleOpRD : OpMode() {
         telemetry.addData("Wobble state", robot.wobbleGrabber.state)
         telemetry.addData("Wobble state (prev)", robot.wobbleGrabber.state)
         telemetry.addData("Wobble state (next)", robot.wobbleGrabber.state)
+//        telemetry.addLine()
+//        telemetry.addData("LED Pattern", robot.blinkin.)
     }
 
     // functionality is explained throughout opmode; allows for encapsulation of button presses

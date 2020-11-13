@@ -11,12 +11,12 @@ constructor (private val pivotServo : Servo,
         Enum class defining positions for the arm to pivot
      */
     enum class PivotPosition(val position: Double) {
-        GRAB(0.99),
-        PERPENDICULAR(0.80),
-        OVER_WALL(0.55),
-        VERTICAL(0.40),
-        YEET(0.30),
-        STORAGE(0.23)
+        GRAB(0.0),
+        PERPENDICULAR(0.07),
+        OVER_WALL(0.24),
+        VERTICAL(0.38),
+        YEET(0.48),
+        STORAGE(0.70)
     }
 
     /**
@@ -25,7 +25,7 @@ constructor (private val pivotServo : Servo,
     enum class GrabPosition(val position: Double) {
         GRAB(0.01),
         MID_GRAB(0.33),
-        STORAGE(0.78)
+        STORAGE(0.69)
     }
 
     /**
@@ -68,7 +68,7 @@ constructor (private val pivotServo : Servo,
                 prev = { GRAB_PREP },
                 next = { IN_AIR }),
         IN_AIR(
-                action = { it, _ -> it.pivot(PivotPosition.PERPENDICULAR); it.grab(GrabPosition.GRAB) },
+                action = { it, _ -> it.pivot(PivotPosition.VERTICAL); it.grab(GrabPosition.GRAB) },
                 prev = { GRAB },
                 next = { RELEASE }),
         RELEASE(

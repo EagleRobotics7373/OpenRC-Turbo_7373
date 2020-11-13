@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.library.robot.robotcore
 
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver
 import com.qualcomm.robotcore.hardware.*
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.legacy.OdometryModule
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.*
@@ -41,7 +42,7 @@ open class ExtRingPlaceBot(_hardwareMap: HardwareMap) : BaseRobot(_hardwareMap) 
     override val rearOdometryModule: OdometryModule?  = null
 
     // LED module - can be uncommented when installed on robot
-//    @JvmField val blinkin                 : RevBlinkinLedDriver   = hwInit("blinkin")
+    @JvmField val blinkin                 : RevBlinkinLedDriver = hwInit("blinkin")
 
     // IMU Controller variables - allows for easier access to get heading
     @JvmField val imuControllerC          : IMUController         = IMUController(hardwareMap = hardwareMap, id = 'C')

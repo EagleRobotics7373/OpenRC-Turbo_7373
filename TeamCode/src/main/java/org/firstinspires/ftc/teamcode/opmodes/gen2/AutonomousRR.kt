@@ -25,7 +25,7 @@ import org.firstinspires.ftc.teamcode.library.vision.ultimategoal.RingContourPip
 import kotlin.math.PI
 import org.firstinspires.ftc.teamcode.opmodes.gen2.OpModeConfig
 
-@com.qualcomm.robotcore.eventloop.opmode.Autonomous(name = "Autonomous LM1 (Kotlin + RR)", group = "Main")
+@com.qualcomm.robotcore.eventloop.opmode.Autonomous(name = "Autonomous LM2 (Kotlin + RR)", group = "Main")
 class AutonomousRR : LinearOpMode() {
 
     /*
@@ -155,26 +155,40 @@ class AutonomousRR : LinearOpMode() {
 
 
         // Do subsequent movement to the ring drop-off
-        builder(5*PI/4 reverseIf RED)
-                // Motion to avoid the placed wobble goal. This will be different based on whether wobble is in pos A/C or B
-                .addDisplacementMarker(MarkerCallback { robot.intakeSystem.moveIntake(FullIntakeSystem.IntakePosition.SCORE) })
-                .run {
-                    if (numRings == 1)
-                        splineToConstantHeading(Vector2d(24.0, 13.0 reverseIf RED), -PI/4)
-                                .splineToConstantHeading(Vector2d(45.0, 16.0 reverseIf RED), (-20.0 reverseIf BLUE).toRadians())
-                    else
-                        splineToConstantHeading(
-                                Vector2d(
-                                        x = robot.holonomicRR.poseEstimate.x,
-                                        y = 37.0 reverseIf RED ),
-                                endTangent = (-PI/4) reverseIf RED)
-                }
-                // Spline to ring drop-off
-                .splineToConstantHeading(Vector2d(58.5, 37.0 reverseIf RED), (PI/4) reverseIf RED)
-                .buildAndRun()
+//        builder(5*PI/4 reverseIf RED)
+//                // Motion to avoid the placed wobble goal. This will be different based on whether wobble is in pos A/C or B
+//                .addDisplacementMarker(MarkerCallback { robot.intakeSystem.moveIntake(FullIntakeSystem.IntakePosition.SCORE) })
+//                .run {
+//                    if (numRings == 1)
+//                        splineToConstantHeading(Vector2d(24.0, 13.0 reverseIf RED), -PI/4)
+//                                .splineToConstantHeading(Vector2d(45.0, 16.0 reverseIf RED), (-20.0 reverseIf BLUE).toRadians())
+//                    else
+//                        splineToConstantHeading(
+//                                Vector2d(
+//                                        x = robot.holonomicRR.poseEstimate.x,
+//                                        y = 37.0 reverseIf RED ),
+//                                endTangent = (-PI/4) reverseIf RED)
+//                }
+//                // Spline to ring drop-off
+//                .splineToConstantHeading(Vector2d(60.0, 37.0 reverseIf RED), (PI/4) reverseIf RED)
+//                .buildAndRun()
+
+        robot.intakeSystem.moveIntake(FullIntakeSystem.IntakePosition.SCORE)
+        if (numRings == 1) {
+            builder()
+                    .strafeTo(Vector2d(24.0, 13.0 reverseIf RED)).buildAndRun()
+            builder().strafeTo(Vector2d(45.0, 16.0 reverseIf RED)).buildAndRun()
+        } else {
+            builder().strafeTo(
+                    Vector2d(
+                            x = robot.holonomicRR.poseEstimate.x,
+                            y = 37.0 reverseIf RED ))
+                    .buildAndRun()
+        }
+        builder().strafeTo(Vector2d(58.5, 37.0 reverseIf RED)).buildAndRun()
 
         sleep(500)
-        robot.ringIntakeMotor.power = 1.0
+        robot.ringIntakeMotor.power = -1.0
         sleep(3000)
         robot.ringIntakeMotor.power = 0.0
 
@@ -214,7 +228,7 @@ class AutonomousRR : LinearOpMode() {
             when {
                 gamepad1.x -> robot.wobbleGrabber.move(grab = WobbleGrabber.GrabPosition.GRAB)
                 gamepad1.y -> {
-                    robot.wobbleGrabber.move(pivot = WobbleGrabber.PivotPosition.VERTICAL)
+                    robot.wobbleGrabber.move(pivot = WobbleGrabber.PivotPosition.YEET)
                     robot.wobbleGrabber.move(grab = WobbleGrabber.GrabPosition.MID_GRAB)
                 }
             }

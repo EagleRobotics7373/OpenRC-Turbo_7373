@@ -24,7 +24,9 @@ class ExceptionHandler(private val activity: Activity) : Thread.UncaughtExceptio
         val mgr = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         mgr.set(AlarmManager.RTC, System.currentTimeMillis(), pendingIntent)
 
-        print("\n\n\n\n\n\n\n CRASHING due to uncaught exception \n\n\n\n\n")
+        println("\n\n\n\n\n\n\n CRASHING due to uncaught exception from activity $activity ")
+        e?.printStackTrace()
+        println("\n\n\n\n\n\n\n")
         exitProcess(2)
     }
 

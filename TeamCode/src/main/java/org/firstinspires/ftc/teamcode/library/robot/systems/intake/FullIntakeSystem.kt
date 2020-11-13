@@ -13,23 +13,24 @@ class FullIntakeSystem(
         private val liftPositionPotentiometer: AnalogInput,
         private val ringIntakeMotor: DcMotorEx,
         private val ringDropServo: RingDropper,
-        private val intakeTouchSensor: TouchSensor? = null
+        private val intakeTouchSensor: TouchSensor
 ) {
     var intakeArmState: IntakeArmState = IntakeArmState.IDLE
-        private set
+        private set(value) {field=value; intakeArmHoldPos = if (value == IntakeArmState.TEMP_HOLD) liftPositionPotentiometer.voltage else null }
     var intakeArmTarget = IntakePosition.GROUND
         private set
+    var intakeArmHoldPos: Double? = null
 
     var usePotentiometer: Boolean = false
 
     enum class IntakeArmState {
-        IDLE, RAISE
+        IDLE, RAISE, TEMP_HOLD
     }
 
     enum class IntakePosition(val ticks: Int, val voltage: Double) {
-        GROUND(0, 1.68),
+        GROUND(0, 0.457),
         WOBBLE(0, 0.0),
-        SCORE(510, 0.842);
+        SCORE(-780, 1.06);
 
         companion object {
             fun closest(voltage: Double): IntakePosition? {
@@ -42,7 +43,7 @@ class FullIntakeSystem(
     }
 
     var ringIntakeState: RingIntakeState = RingIntakeState.IDLE
-        private set(value) { previousRingIntakeState = ringIntakeState; field = value }
+        set(value) { previousRingIntakeState = ringIntakeState; field = value }
     var desiredRingIntakePower: Double = 1.0
         set(value) {
             field = value.absoluteValue.coerceIn(0.25, 1.0)
@@ -67,6 +68,7 @@ class FullIntakeSystem(
     var intakeStage1Trigger: (() -> Boolean)? = null
     var intakeStage2Trigger: (() -> Boolean)? = null
     var earliestAllowableAutoStart: Long = Long.MIN_VALUE
+    var shouldTempHold = true
 
     enum class RingIntakeState {
         IDLE, IDLE_WITH_RING, COLLECT_STAGE_1, COLLECT_STAGE_2, OUTPUT, WOBBLE_DEPOSIT
@@ -84,7 +86,7 @@ class FullIntakeSystem(
     }
 
     fun manualMoveIntake(power: Double) {
-        intakeArmState = IntakeArmState.IDLE
+        intakeArmState = if (power == 0.0 && shouldTempHold) IntakeArmState.TEMP_HOLD else IntakeArmState.IDLE
         intakeLiftMotor.power = power.coerceIn(-1.0, 1.0)
         intakeLiftMotor.mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
     }
@@ -122,7 +124,7 @@ class FullIntakeSystem(
 //    }
 
     val ringFullyInIntake: Boolean
-    get() = intakeTouchSensor?.isPressed == true
+    get() = intakeTouchSensor.isPressed
 //    get() = colorSensor?.rhue == 0.0 && colorSensor.rsaturation == 0.0
 //    get() = (distanceSensor?.getDistance(DistanceUnit.CM)?:1.0) < 0.8
 
@@ -135,9 +137,11 @@ class FullIntakeSystem(
             IntakeArmState.IDLE -> {
                 intakeLiftMotor.mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
             }
-            IntakeArmState.RAISE -> {
+            IntakeArmState.RAISE, IntakeArmState.TEMP_HOLD -> {
                 if (usePotentiometer) {
-                    val error = intakeArmTarget.voltage.minus(liftPositionPotentiometer.voltage)
+                    val target = (if (intakeArmState == IntakeArmState.RAISE) intakeArmTarget.voltage else intakeArmHoldPos!!)
+                    val current = liftPositionPotentiometer.voltage
+                    val error = target.minus(current)
                     val timeDelta = System.currentTimeMillis() - lastIntakeRead
                     val coeffs = RAISE_COEFFS
                     val output = coeffs.p * error + coeffs.i * raiseIntegralSum + coeffs.d * raiseLastDeriv
@@ -145,10 +149,11 @@ class FullIntakeSystem(
 
                     raiseIntegralSum += error * timeDelta
                     raiseLastDeriv = (raiseLastError ?: error) - error
+                    raiseLastError = error
+                    intakeLiftMotor.power = if (current < 0.46 && error > 0) 0.0
+                                            else (if (reverseMotorOutput) -coercedOutput else coercedOutput)
 
-                    intakeLiftMotor.power = if (reverseMotorOutput) -coercedOutput else coercedOutput
-
-                    if (error.absoluteValue < 0.05) intakeArmState = IntakeArmState.IDLE
+//                    if (error.absoluteValue < 0.05) intakeArmState = IntakeArmState.IDLE
 
                 } else {
                     if (!intakeLiftMotor.isBusy) intakeArmState = IntakeArmState.IDLE

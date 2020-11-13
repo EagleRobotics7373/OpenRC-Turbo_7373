@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.robotcontroller.internal
 
+import com.qualcomm.robotcore.util.RobotLog
 import com.qualcomm.robotcore.wifi.RobotControllerAccessPointAssistant
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil
 import java.io.File
@@ -34,11 +35,16 @@ object NetworkUtil {
     }
 
     fun setNetworkSettings(name: String, password: String) {
-        properties.setProperty("name", name)
-        properties.setProperty("password", password)
+        setNetworkSettingsWithoutUpdate(name, password)
 
         setNetworkSettingsFromProperties()
         writeNetworkSettingsToFile()
+    }
+
+    private fun setNetworkSettingsWithoutUpdate(name: String, password: String) {
+        println("\n\nSetting Wi-Fi properties without update to $name $password\n\n")
+        properties.setProperty("name", name)
+        properties.setProperty("password", password)
     }
 
     private fun setNetworkSettingsFromProperties() {
@@ -55,7 +61,7 @@ object NetworkUtil {
         RobotControllerAccessPointAssistant
                 .getRobotControllerAccessPointAssistant(AppUtil.getDefContext())
                 .let {
-                    setNetworkSettings(it.deviceName, it.passphrase)
+                    setNetworkSettingsWithoutUpdate(it.deviceName, it.passphrase)
                 }
     }
 }

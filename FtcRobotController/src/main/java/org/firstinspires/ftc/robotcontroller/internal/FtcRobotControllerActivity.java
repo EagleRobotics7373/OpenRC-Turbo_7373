@@ -394,8 +394,8 @@ public class FtcRobotControllerActivity extends Activity
     }
 
     // Set Wi-Fi network settings
-    boolean didUpdateWiFiSettings = NetworkUtil.INSTANCE.loadNetworkSettingsFromFile();
-    AppUtil.getInstance().showToast(UILocation.BOTH, (didUpdateWiFiSettings ? "Loaded" : "Could not load") + " network settings from file.");
+//    boolean didUpdateWiFiSettings = NetworkUtil.INSTANCE.loadNetworkSettingsFromFile();
+//    AppUtil.getInstance().showToast(UILocation.BOTH, (didUpdateWiFiSettings ? "Loaded" : "Could not load") + " network settings from file.");
   }
 
   protected UpdateUI createUpdateUI() {
