@@ -28,9 +28,9 @@ class FullIntakeSystem(
     }
 
     enum class IntakePosition(val ticks: Int, val voltage: Double) {
-        GROUND(0, 0.457),
+        GROUND(0, 0.43),
         WOBBLE(0, 0.0),
-        SCORE(-780, 1.06);
+        SCORE(-780, 1.112);
 
         companion object {
             fun closest(voltage: Double): IntakePosition? {
@@ -150,7 +150,7 @@ class FullIntakeSystem(
                     raiseIntegralSum += error * timeDelta
                     raiseLastDeriv = (raiseLastError ?: error) - error
                     raiseLastError = error
-                    intakeLiftMotor.power = if (current < 0.46 && error > 0) 0.0
+                    intakeLiftMotor.power = if (current < 0.46 && error < 0) 0.0
                                             else (if (reverseMotorOutput) -coercedOutput else coercedOutput)
 
 //                    if (error.absoluteValue < 0.05) intakeArmState = IntakeArmState.IDLE

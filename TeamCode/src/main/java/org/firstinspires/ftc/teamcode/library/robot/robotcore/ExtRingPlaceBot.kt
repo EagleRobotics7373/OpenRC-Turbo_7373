@@ -8,6 +8,7 @@ import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.con
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.constants.DriveConstantsTunedMisumi
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.constants.OdometryConstants
 import org.firstinspires.ftc.teamcode.library.robot.systems.intake.FullIntakeSystem
+import org.firstinspires.ftc.teamcode.library.robot.systems.wrappedservos.BlinkinController
 import org.firstinspires.ftc.teamcode.library.robot.systems.wrappedservos.RingDropper
 import org.firstinspires.ftc.teamcode.library.robot.systems.wrappedservos.WobbleGrabber
 
@@ -43,6 +44,7 @@ open class ExtRingPlaceBot(_hardwareMap: HardwareMap) : BaseRobot(_hardwareMap) 
 
     // LED module - can be uncommented when installed on robot
     @JvmField val blinkin                 : RevBlinkinLedDriver = hwInit("blinkin")
+    @JvmField val blinkinController       : BlinkinController = BlinkinController(blinkin, 1000)
 
     // IMU Controller variables - allows for easier access to get heading
     @JvmField val imuControllerC          : IMUController         = IMUController(hardwareMap = hardwareMap, id = 'C')

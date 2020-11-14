@@ -42,6 +42,7 @@ open class TeleOpRD : OpMode() {
     var current = 0.0
     var reverse = false
     var speed = 3
+    var lastCycleTime = System.currentTimeMillis()
 
     protected val canControlDrivetrainOrientation: Boolean
     get() = (gamepad1.left_bumper && gamepad1.right_bumper && !gamepad1.start)
@@ -51,12 +52,12 @@ open class TeleOpRD : OpMode() {
     var reverseIntakeLift = true
     var useLEDs             = true
 
-    lateinit var container : OpenCvContainer<IntakeRingViewingPipeline>
+    var container : OpenCvContainer<IntakeRingViewingPipeline>? = null
 
     override fun init() {
         // instantiate robot variables
         robot = ExtRingPlaceBot(hardwareMap)
-        robot.expansionhubs.forEach { it.bulkCachingMode = LynxModule.BulkCachingMode.AUTO}
+        robot.expansionhubs.forEach { it.bulkCachingMode = LynxModule.BulkCachingMode.MANUAL}
         // Instantiate toggle button watchers. Each statement below is calling a constructor with a single
         //   parameter, in this case being a function for calling the gamepad button. This does not set the
         //   current gamepad state only in the ToggleButtonWatcher; rather, it sets the ability for the
@@ -77,20 +78,20 @@ open class TeleOpRD : OpMode() {
 
         intakeLiftBaseline = 0
 
-        container = VisionFactory.createOpenCv(VisionFactory.CameraType.WEBCAM, hardwareMap,
-                IntakeRingViewingPipeline())
-        container.pipeline.shouldKeepTracking = true
+//        container = VisionFactory.createOpenCv(VisionFactory.CameraType.WEBCAM, hardwareMap, IntakeRingViewingPipeline())
+        container?.pipeline?.shouldKeepTracking = true
     }
 
     override fun start() {
-        container.pipeline.tracking = true
-        robot.intakeSystem.intakeStage1Trigger = { container.pipeline.ringVisibleOutsideIntake }
+        container?.pipeline?.tracking = true
+        robot.intakeSystem.intakeStage1Trigger = { container?.pipeline?.ringVisibleOutsideIntake == true }
 //        robot.intakeSystem.intakeStage2Trigger = { container.pipeline.ringVisibleInsideIntake }
         robot.intakeSystem.usePotentiometer = true
     }
 
     override fun loop() {
         // invoke methods for each individual system for streamlined navigation
+        robot.expansionhubs.forEach { it.clearBulkCache() }
         controlDrivetrain()
         controlOtherDevices()
         controlIntakeMechanism()
@@ -103,7 +104,8 @@ open class TeleOpRD : OpMode() {
     override fun stop() {
         // overrides OpMode.stop() to ensure hardware components and music player stop
         super.stop()
-        thread { container.stop() }
+        robot.blinkin.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK)
+//        thread { container.stop() }
         musicPlayer.stop()
     }
 
@@ -236,13 +238,13 @@ open class TeleOpRD : OpMode() {
                 gamepad2.y || (gamepad1.y && !canControlDrivetrainOrientation) -> robot.intakeSystem.rejectRing()
                 gamepad2.dpad_up -> robot.intakeSystem.moveIntake(FullIntakeSystem.IntakePosition.SCORE)
                 gamepad2.dpad_down -> robot.intakeSystem.moveIntake(FullIntakeSystem.IntakePosition.GROUND)
-                gamepad2.left_stick_button -> robot.intakeSystem.resetZero()
+                gamepad2.left_stick_button && gamepad2.start -> robot.intakeSystem.resetZero()
                 watch_gamepad2_rightStickButton.invoke() -> robot.intakeSystem.shouldUseLambdaActivation =
                         !robot.intakeSystem.shouldUseLambdaActivation
             }
         }
 
-        if (watch_gamepad2_leftStickButton()) robot.intakeSystem.shouldTempHold = !robot.intakeSystem.shouldTempHold
+        if (watch_gamepad2_leftStickButton() && !gamepad2.start) robot.intakeSystem.shouldTempHold = !robot.intakeSystem.shouldTempHold
 
 //        if (watch_gamepad2_dpadLeft.invoke()) robot.intakeSystem.usePotentiometer = !robot.intakeSystem.usePotentiometer
 
@@ -260,12 +262,13 @@ open class TeleOpRD : OpMode() {
 //            if (musicPlayer.isPlaying()) musicPlayer.pause()
 //            else musicPlayer.play()
 //        }
-        robot.blinkin.setPattern(
+
+        robot.blinkinController.update(
                 when (robot.intakeSystem.intakeArmState) {
                     FullIntakeSystem.IntakeArmState.RAISE -> RevBlinkinLedDriver.BlinkinPattern.YELLOW
                     FullIntakeSystem.IntakeArmState.TEMP_HOLD -> RevBlinkinLedDriver.BlinkinPattern.BLUE
                     FullIntakeSystem.IntakeArmState.IDLE -> RevBlinkinLedDriver.BlinkinPattern.RED
-                }
+                }  .takeUnless { it == robot.blinkinController.currentState }
         )
     }
 
@@ -293,11 +296,11 @@ open class TeleOpRD : OpMode() {
         telemetry.addData("Intake ring speed", robot.intakeSystem.desiredRingIntakePower)
         telemetry.addData("Intake ring fully in", robot.intakeSystem.ringFullyInIntake)
         telemetry.addLine()
-        telemetry.addData("Ring visible out", container.pipeline.ringVisibleOutsideIntake)
-        telemetry.addData("Num qualify out", container.pipeline.numSuccessfulOutsideIntake)
+        telemetry.addData("Ring visible out", container?.pipeline?.ringVisibleOutsideIntake)
+        telemetry.addData("Num qualify out", container?.pipeline?.numSuccessfulOutsideIntake)
         telemetry.addLine()
-        telemetry.addData("Ring visible in", container.pipeline.ringVisibleInsideIntake)
-        telemetry.addData("Num qualify in", container.pipeline.numSuccessfulInsideIntake)
+        telemetry.addData("Ring visible in", container?.pipeline?.ringVisibleInsideIntake)
+        telemetry.addData("Num qualify in", container?.pipeline?.numSuccessfulInsideIntake)
         telemetry.addLine()
         telemetry.addData("Ring fully in", robot.intakeSystem.ringFullyInIntake)
         telemetry.addData("Should lambda activate", robot.intakeSystem.shouldUseLambdaActivation)
@@ -305,8 +308,9 @@ open class TeleOpRD : OpMode() {
         telemetry.addData("Wobble state", robot.wobbleGrabber.state)
         telemetry.addData("Wobble state (prev)", robot.wobbleGrabber.state)
         telemetry.addData("Wobble state (next)", robot.wobbleGrabber.state)
-//        telemetry.addLine()
-//        telemetry.addData("LED Pattern", robot.blinkin.)
+        telemetry.addLine()
+        telemetry.addData("Cycle rate", System.currentTimeMillis()-lastCycleTime)
+        lastCycleTime = System.currentTimeMillis()
     }
 
     // functionality is explained throughout opmode; allows for encapsulation of button presses
