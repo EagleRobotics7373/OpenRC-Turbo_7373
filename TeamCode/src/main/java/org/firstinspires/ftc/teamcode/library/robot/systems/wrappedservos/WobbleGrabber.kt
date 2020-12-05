@@ -11,7 +11,7 @@ constructor (private val pivotServo : Servo,
         Enum class defining positions for the arm to pivot
      */
     enum class PivotPosition(val position: Double) {
-        GRAB(0.0),
+        GRAB(0.02),
         PERPENDICULAR(0.07),
         OVER_WALL(0.24),
         VERTICAL(0.38),
@@ -56,7 +56,7 @@ constructor (private val pivotServo : Servo,
     {
 
         STORAGE(
-                action = { it, _ -> it.pivot(PivotPosition.STORAGE); it.grab(GrabPosition.STORAGE) },
+                action = { it, _ -> it.pivot(PivotPosition.YEET); it.grab(GrabPosition.STORAGE) },
                 prev = { RELEASE },
                 next = { GRAB_PREP }),
         GRAB_PREP(
@@ -68,11 +68,11 @@ constructor (private val pivotServo : Servo,
                 prev = { GRAB_PREP },
                 next = { IN_AIR }),
         IN_AIR(
-                action = { it, _ -> it.pivot(PivotPosition.VERTICAL); it.grab(GrabPosition.GRAB) },
+                action = { it, _ -> it.pivot(PivotPosition.YEET); it.grab(GrabPosition.GRAB) },
                 prev = { GRAB },
                 next = { RELEASE }),
         RELEASE(
-                action = { it, time -> it.pivot(PivotPosition.OVER_WALL); it.grab(if (time > 1000) GrabPosition.MID_GRAB else GrabPosition.GRAB) },
+                action = { it, time -> it.pivot(PivotPosition.OVER_WALL); it.grab(if (time > org.firstinspires.ftc.teamcode.library.robot.robotcore.ExtZoomBotConstants.WOBBLE_RELEASE_DELAY) GrabPosition.MID_GRAB else GrabPosition.GRAB) },
                 prev = { IN_AIR },
                 next = { STORAGE  }),
         CUSTOM(

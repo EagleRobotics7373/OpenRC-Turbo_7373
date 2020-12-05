@@ -1,10 +1,7 @@
-package org.firstinspires.ftc.teamcode.library.robot.systems.intake
+package org.firstinspires.ftc.teamcode.library.robot.systems.intakegen2
 
 import com.qualcomm.robotcore.hardware.*
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit
-import org.firstinspires.ftc.teamcode.library.functions.rhue
-import org.firstinspires.ftc.teamcode.library.functions.rsaturation
-import org.firstinspires.ftc.teamcode.library.robot.systems.intake.IntakeConstants.*
+import org.firstinspires.ftc.teamcode.library.robot.systems.intakegen2.IntakeConstants.*
 import org.firstinspires.ftc.teamcode.library.robot.systems.wrappedservos.RingDropper
 import kotlin.math.absoluteValue
 

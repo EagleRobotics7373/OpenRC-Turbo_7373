@@ -98,6 +98,7 @@ import com.qualcomm.robotcore.util.WebServer;
 import com.qualcomm.robotcore.wifi.NetworkConnection;
 import com.qualcomm.robotcore.wifi.NetworkConnectionFactory;
 import com.qualcomm.robotcore.wifi.NetworkType;
+import com.qualcomm.robotcore.wifi.RobotControllerAccessPointAssistant;
 
 import org.firstinspires.ftc.ftccommon.external.SoundPlayingRobotMonitor;
 import org.firstinspires.ftc.ftccommon.internal.FtcRobotControllerWatchdogService;
@@ -107,6 +108,7 @@ import org.firstinspires.ftc.onbotjava.OnBotJavaProgrammingMode;
 import org.firstinspires.ftc.robotcore.external.navigation.MotionDetection;
 import org.firstinspires.ftc.robotcore.internal.hardware.android.AndroidBoard;
 import org.firstinspires.ftc.robotcore.internal.network.DeviceNameManagerFactory;
+import org.firstinspires.ftc.robotcore.internal.network.InvalidNetworkSettingException;
 import org.firstinspires.ftc.robotcore.internal.network.PreferenceRemoterRC;
 import org.firstinspires.ftc.robotcore.internal.network.StartResult;
 import org.firstinspires.ftc.robotcore.internal.network.WifiDirectChannelChanger;
@@ -396,6 +398,17 @@ public class FtcRobotControllerActivity extends Activity
     // Set Wi-Fi network settings
 //    boolean didUpdateWiFiSettings = NetworkUtil.INSTANCE.loadNetworkSettingsFromFile();
 //    AppUtil.getInstance().showToast(UILocation.BOTH, (didUpdateWiFiSettings ? "Loaded" : "Could not load") + " network settings from file.");
+//    try {
+//      RobotControllerAccessPointAssistant
+//              .getRobotControllerAccessPointAssistant(AppUtil.getDefContext())
+//              .setNetworkSettings(
+//                      "7373-C-RC",
+//                      "eaglerobotics_7373",
+//                      null
+//              );
+//    } catch (InvalidNetworkSettingException e) {
+//      e.printStackTrace();
+//    }
   }
 
   protected UpdateUI createUpdateUI() {

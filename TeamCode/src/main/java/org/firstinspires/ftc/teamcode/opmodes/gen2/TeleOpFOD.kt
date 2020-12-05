@@ -25,7 +25,7 @@ class TeleOpFOD : TeleOpRD() {
      */
     override fun controlDrivetrain() {
         // enable field-oriented drive if 'x' button is pressed
-        if (canControlDrivetrainOrientation && gamepad1.x) {
+        if (canControlIntakeOrientation && gamepad1.x) {
             fod = true
         }
         // disable field-oriented drive if 'a' or 'b' buttons are pressed

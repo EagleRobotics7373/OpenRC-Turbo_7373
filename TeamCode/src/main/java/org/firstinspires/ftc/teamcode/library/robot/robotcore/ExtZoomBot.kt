@@ -6,35 +6,39 @@ import org.firstinspires.ftc.teamcode.library.robot.systems.drive.legacy.Odometr
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.*
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.constants.DriveConstantsRingPlace
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.constants.OdometryConstants
-import org.firstinspires.ftc.teamcode.library.robot.systems.intakegen2.FullIntakeSystem
 import org.firstinspires.ftc.teamcode.library.robot.systems.wrappedservos.BlinkinController
-import org.firstinspires.ftc.teamcode.library.robot.systems.wrappedservos.RingDropper
+import org.firstinspires.ftc.teamcode.library.robot.systems.wrappedservos.RingTapper
 import org.firstinspires.ftc.teamcode.library.robot.systems.wrappedservos.WobbleGrabber
 
-open class ExtRingPlaceBot(_hardwareMap: HardwareMap) : BaseRobot(_hardwareMap) {
+open class ExtZoomBot(_hardwareMap: HardwareMap) : BaseRobot(_hardwareMap) {
 
     init {
-        println("ExtRingPlaceBot being constructed!")
+        println("ExtZoomBot being constructed!")
         RobotConstantsAccessor.load(
                 DriveConstantsRingPlace::class.java,
                 OdometryConstants::class.java
         )
     }
 
-    @JvmField val odometryLeft           : DcMotorEx              = hwInit("odometryLeft")
-    @JvmField val odometryRear           : DcMotorEx              = hwInit("odometryRear")
 
-    @JvmField val intakeLiftMotor        : DcMotorEx              = hwInit("intakeLiftMotor")
-    @JvmField val ringIntakeMotor        : DcMotorEx              = hwInit("ringIntakeMotor")
-    @JvmField val ringDropServo          : Servo                  = hwInit("ringDropServo")
-    @JvmField val liftPotentiometer      : AnalogInput            = hwInit("liftPotentiometer")
+
+    @JvmField val intakeStage1           : DcMotorEx              = hwInit("intakeStage1")
+    @JvmField val intakeStage2           : DcMotorEx              = hwInit("intakeStage2")
+    @JvmField val zoomWheel              : DcMotorEx              = hwInit("zoomWheel")
+
+    init { intakeStage2.direction = DcMotorSimple.Direction.REVERSE }
+    init { zoomWheel.direction    = DcMotorSimple.Direction.REVERSE }
+    init { zoomWheel.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, ExtZoomBotConstants.VELOCITY_PID)}
+
+    @JvmField val ringLoadServo          : Servo                  = hwInit("ringLoadServo")
+    @JvmField val ringTapperServo        : Servo                  = hwInit("ringTapperServo")
 
     @JvmField val wobblePivotServo       : Servo                  = hwInit("wobblePivotServo")
     @JvmField val wobbleGrabServo        : Servo                  = hwInit("wobbleGrabServo")
 
-    @JvmField val intakeTouchSensor      : TouchSensor            = hwInit("intakeTouchSensor")
-//    @JvmField val intakeColorSensor      : ColorSensor            = hwInit("intakeColorSensor")
-//    @JvmField val intakeDistanceSensor   : DistanceSensor         = hwInit("intakeColorSensor")
+    @JvmField val odometryLeft           : DcMotorEx              = this.intakeStage2
+    @JvmField val odometryRear           : DcMotorEx              = hwInit("odometryRear")
+
 
     // Odometry module variables - these will be set once we determine plug-in locations on REV Hubs
     override val leftOdometryModule: OdometryModule?  = null
@@ -53,8 +57,6 @@ open class ExtRingPlaceBot(_hardwareMap: HardwareMap) : BaseRobot(_hardwareMap) 
      override val holonomicRR             : HolonomicRR           = HolonomicRR(imuControllerC,
                                                                                  frontLeftMotor, backLeftMotor, backRightMotor, frontRightMotor,
                                                                                  TwoWheelOdometryLocalizer(odometryLeft, odometryRear, imuControllerC))
-    @JvmField val ringDropper             : RingDropper           = RingDropper(ringDropServo)
-    @JvmField val intakeSystem            : FullIntakeSystem      = FullIntakeSystem(intakeLiftMotor, liftPotentiometer, ringIntakeMotor, ringDropper, intakeTouchSensor)
-    @JvmField val wobbleGrabber           : WobbleGrabber         = WobbleGrabber(wobblePivotServo, wobbleGrabServo)
-
+    @JvmField val ringTapper           : RingTapper = RingTapper(ringTapperServo)
+    @JvmField val wobbleGrabber           : WobbleGrabber = WobbleGrabber(wobblePivotServo, wobbleGrabServo)
 }

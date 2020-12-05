@@ -105,7 +105,7 @@ class RingContourPipeline() : ResolutionPipeline() {
             }
 
             val resCntur = contoursCmpltd
-                    .filter { it.width > CONTOUR_RING_MINWIDTH * resolution.scale && it.max.y < input.rows() / 2 }
+                    .filter { it.width > CONTOUR_RING_MINWIDTH * resolution.scale && it.min.y < input.rows() * (0.70) }
                     .maxBy { it.area }
             val res = resCntur?.ratio
 

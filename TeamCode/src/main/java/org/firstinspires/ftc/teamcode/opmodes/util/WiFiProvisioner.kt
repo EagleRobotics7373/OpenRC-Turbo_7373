@@ -28,6 +28,7 @@ class WiFiProvisioner: LinearOpMode() {
                 gamepad1.dpad_left -> config.update(iterBack = true)
                 gamepad1.dpad_right -> config.update(iterFw = true)
             }
+            while(gamepad1.dpad_up || gamepad1.dpad_down || gamepad1.dpad_left || gamepad1.dpad_right);
         }
 
         NetworkUtil.setNetworkSettings(networkName, password)

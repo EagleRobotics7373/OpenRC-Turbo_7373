@@ -7,12 +7,10 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.util.ElapsedTime
 import org.firstinspires.ftc.teamcode.library.functions.*
 import org.firstinspires.ftc.teamcode.library.robot.robotcore.ExtRingPlaceBot
-import org.firstinspires.ftc.teamcode.library.robot.systems.intake.FullIntakeSystem
+import org.firstinspires.ftc.teamcode.library.robot.systems.intakegen2.FullIntakeSystem
 import org.firstinspires.ftc.teamcode.library.robot.systems.wrappedservos.WobbleGrabber
 import org.firstinspires.ftc.teamcode.library.vision.base.OpenCvContainer
-import org.firstinspires.ftc.teamcode.library.vision.base.VisionFactory
 import org.firstinspires.ftc.teamcode.library.vision.ultimategoal.IntakeRingViewingPipeline
-import kotlin.concurrent.thread
 import kotlin.math.absoluteValue
 
 @TeleOp(name="TeleOp RD Gen2", group="Gen2 Basic")
@@ -44,7 +42,7 @@ open class TeleOpRD : OpMode() {
     var speed = 3
     var lastCycleTime = System.currentTimeMillis()
 
-    protected val canControlDrivetrainOrientation: Boolean
+    protected val canControlIntakeOrientation: Boolean
     get() = (gamepad1.left_bumper && gamepad1.right_bumper && !gamepad1.start)
 
     var intakeLiftBaseline = 0
@@ -122,13 +120,13 @@ open class TeleOpRD : OpMode() {
         robot.holonomicRR.runWithoutEncoder(x, y, z)
 
         // read 'a' and 'b' buttons to reverse robot orientation
-        if (canControlDrivetrainOrientation && gamepad1.a) reverse = false
-        else if (canControlDrivetrainOrientation && gamepad1.b) reverse = true
+        if (canControlIntakeOrientation && gamepad1.a) reverse = false
+        else if (canControlIntakeOrientation && gamepad1.b) reverse = true
 
         // reverse robot orientation using toggle feature in addition to static buttons
         // if y button is pressed, make reverse variable opposite of what it is now
         //   then wait until y is released before letting it change the variable again
-        if (canControlDrivetrainOrientation && watch_gamepad1_buttonY.invoke()) reverse = !reverse
+        if (canControlIntakeOrientation && watch_gamepad1_buttonY.invoke()) reverse = !reverse
 
         // increase or decrease robot speed variable using toggle system
         // speed variable should be between 1 and 3
@@ -137,8 +135,6 @@ open class TeleOpRD : OpMode() {
         //    1 = low power (0.33 * 1 * input)
         if (watch_gamepad1_dpadDown.invoke() and (speed > 1)) speed--
         if (watch_gamepad1_dpadUp.invoke() and (speed < 3)) speed++
-
-
     }
 
     /**
@@ -232,10 +228,10 @@ open class TeleOpRD : OpMode() {
 
         if(!(gamepad2.left_bumper || gamepad2.right_bumper)) {
             when {
-                watch_gamepad2_buttonA.invoke() || (watch_gamepad1_buttonA() && !canControlDrivetrainOrientation) -> robot.intakeSystem.ringIntakeState = FullIntakeSystem.RingIntakeState.COLLECT_STAGE_1
-                watch_gamepad2_buttonB.invoke() || (watch_gamepad1_buttonB() && !canControlDrivetrainOrientation) -> robot.intakeSystem.ringIntakeState = FullIntakeSystem.RingIntakeState.IDLE
+                watch_gamepad2_buttonA.invoke() || (watch_gamepad1_buttonA() && !canControlIntakeOrientation) -> robot.intakeSystem.ringIntakeState = FullIntakeSystem.RingIntakeState.COLLECT_STAGE_1
+                watch_gamepad2_buttonB.invoke() || (watch_gamepad1_buttonB() && !canControlIntakeOrientation) -> robot.intakeSystem.ringIntakeState = FullIntakeSystem.RingIntakeState.IDLE
 //                gamepad2.x || (gamepad1.x && !canControlDrivetrainOrientation) -> robot.intakeSystem.ringDropOnWobble()
-                gamepad2.y || (gamepad1.y && !canControlDrivetrainOrientation) -> robot.intakeSystem.rejectRing()
+                gamepad2.y || (gamepad1.y && !canControlIntakeOrientation) -> robot.intakeSystem.rejectRing()
                 gamepad2.dpad_up -> robot.intakeSystem.moveIntake(FullIntakeSystem.IntakePosition.SCORE)
                 gamepad2.dpad_down -> robot.intakeSystem.moveIntake(FullIntakeSystem.IntakePosition.GROUND)
                 gamepad2.left_stick_button && gamepad2.start -> robot.intakeSystem.resetZero()

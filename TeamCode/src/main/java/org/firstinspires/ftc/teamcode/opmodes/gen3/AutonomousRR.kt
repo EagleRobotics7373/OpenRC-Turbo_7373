@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.opmodes.gen2
+package org.firstinspires.ftc.teamcode.opmodes.gen3
 
 import com.acmerobotics.dashboard.FtcDashboard
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry
@@ -15,6 +15,8 @@ import org.firstinspires.ftc.teamcode.library.functions.AllianceColor.*
 import org.firstinspires.ftc.teamcode.library.functions.StartingLine.*
 import org.firstinspires.ftc.teamcode.library.functions.telemetrymenu.kotlin.*
 import org.firstinspires.ftc.teamcode.library.robot.robotcore.ExtRingPlaceBot
+import org.firstinspires.ftc.teamcode.library.robot.robotcore.ExtZoomBot
+import org.firstinspires.ftc.teamcode.library.robot.robotcore.ExtZoomBotConstants
 import org.firstinspires.ftc.teamcode.library.robot.robotcore.IMUController
 import org.firstinspires.ftc.teamcode.library.robot.systems.intakegen2.FullIntakeSystem
 import org.firstinspires.ftc.teamcode.library.robot.systems.wrappedservos.RingDropper
@@ -23,14 +25,15 @@ import org.firstinspires.ftc.teamcode.library.vision.base.VisionFactory
 import org.firstinspires.ftc.teamcode.library.vision.base.OpenCvContainer
 import org.firstinspires.ftc.teamcode.library.vision.ultimategoal.RingContourPipeline
 import kotlin.math.PI
+import org.firstinspires.ftc.teamcode.opmodes.gen2.OpModeConfig
 
-@com.qualcomm.robotcore.eventloop.opmode.Autonomous(name = "Autonomous LM2 (Kotlin + RR)", group = "Main")
+@com.qualcomm.robotcore.eventloop.opmode.Autonomous(name = "Autonomous LM3 (Kotlin + RR)", group = "Main")
 class AutonomousRR : LinearOpMode() {
 
     /*
         VARIABLES: Hardware and Control
      */
-    private lateinit var robot           : ExtRingPlaceBot
+    private lateinit var robot           : ExtZoomBot
     private lateinit var imuController   : IMUController
 
     private          val telem           : MultipleTelemetry = MultipleTelemetry(telemetry, FtcDashboard.getInstance().telemetry)
@@ -45,13 +48,15 @@ class AutonomousRR : LinearOpMode() {
      */
     private val config = OpModeConfig(telemetry)
     private var allianceColor: AllianceColor by config.custom("Alliance Color", RED, BLUE)
-    private var startingLine: StartingLine by config.custom("Starting Line", CENTER, FAR)
+    private var startingLine: StartingLine by config.custom("Starting Line", FAR, CENTER)
+    private var endingRegion: StartingLine by config.custom("Ending Region", FAR, CENTER)
+    private var delayBeforeStart: Int by config.int("Delay Before Start", 0, 0..10 step 1)
 
     override fun runOpMode() {
         /*
             Main autonomous variable initialization
          */
-        robot = ExtRingPlaceBot(hardwareMap)
+        robot = ExtZoomBot(hardwareMap)
         imuController = robot.imuControllerC
         cvContainer = VisionFactory.createOpenCv(
                 VisionFactory.CameraType.WEBCAM,
@@ -59,7 +64,8 @@ class AutonomousRR : LinearOpMode() {
                 RingContourPipeline())
         cvContainer.pipeline.shouldKeepTracking = true
         cvContainer.pipeline.tracking = true
-        robot.intakeLiftMotor.mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER
+        robot.zoomWheel.mode = DcMotor.RunMode.RUN_USING_ENCODER
+        robot.zoomWheel.velocity = 0.0
 
 
         /*
@@ -100,18 +106,16 @@ class AutonomousRR : LinearOpMode() {
          */
         while (opModeIsActive()) robot.holonomicRR.update()
 
-        Thread {
-            cvContainer.stop()
+//        Thread {
+//            cvContainer.stop()
 //            cvContainer.camera.closeCameraDevice()
-        }.start()
+//        }.start()
 
     }
 
     fun doFullAuto(numRings: Int?) {
-
+        sleep(delayBeforeStart.toLong())
 //        thread { robot.intakeSystem.update() }
-        robot.ringDropper.pivot(RingDropper.DropperPosition.HOLD_RING)
-
         // Create a static map of wobble goal drop-off positions for each number of rings
         val intoSquareDisp = 6.0
         val wobbleDropoffs = mapOf(
@@ -124,7 +128,7 @@ class AutonomousRR : LinearOpMode() {
         robot.holonomicRR.poseEstimate = Pose2d(
                 -63.0,
                 (if (startingLine == CENTER) -24.0 else -48.0) reverseIf BLUE,
-                0.0
+                PI
         )
 
         // Do the initial movement to wobble drop-off location
@@ -148,57 +152,39 @@ class AutonomousRR : LinearOpMode() {
         sleep(1500)
         robot.wobbleGrabber.move(grab = WobbleGrabber.GrabPosition.STORAGE)
         sleep(500)
-        robot.wobbleGrabber.move(pivot = WobbleGrabber.PivotPosition.STORAGE)
+        robot.wobbleGrabber.move(pivot = WobbleGrabber.PivotPosition.VERTICAL)
         sleep(2500)
 
+        val shootVector = Vector2d(-3.0, 37.0 reverseIf RED)
+        robot.zoomWheel.velocity = 800.0
 
-
-        // Do subsequent movement to the ring drop-off
-//        builder(5*PI/4 reverseIf RED)
-//                // Motion to avoid the placed wobble goal. This will be different based on whether wobble is in pos A/C or B
-//                .addDisplacementMarker(MarkerCallback { robot.intakeSystem.moveIntake(FullIntakeSystem.IntakePosition.SCORE) })
-//                .run {
-//                    if (numRings == 1)
-//                        splineToConstantHeading(Vector2d(24.0, 13.0 reverseIf RED), -PI/4)
-//                                .splineToConstantHeading(Vector2d(45.0, 16.0 reverseIf RED), (-20.0 reverseIf BLUE).toRadians())
-//                    else
-//                        splineToConstantHeading(
-//                                Vector2d(
-//                                        x = robot.holonomicRR.poseEstimate.x,
-//                                        y = 37.0 reverseIf RED ),
-//                                endTangent = (-PI/4) reverseIf RED)
-//                }
-//                // Spline to ring drop-off
-//                .splineToConstantHeading(Vector2d(60.0, 37.0 reverseIf RED), (PI/4) reverseIf RED)
-//                .buildAndRun()
-
-        robot.intakeSystem.moveIntake(FullIntakeSystem.IntakePosition.SCORE)
-        if (numRings == 1) {
-            builder()
-                    .strafeTo(Vector2d(24.0, 13.0 reverseIf RED)).buildAndRun()
-            builder().strafeTo(Vector2d(45.0, 16.0 reverseIf RED)).buildAndRun()
+        if (numRings == 0) {
+            builder(PI.div(2) reverseIf RED)
+                    .splineToConstantHeading(
+                            endPosition = shootVector,
+                            endTangent = 0.0
+                    )
+                    .buildAndRun()
         } else {
-            builder().strafeTo(
-                    Vector2d(
-                            x = robot.holonomicRR.poseEstimate.x,
-                            y = 37.0 reverseIf RED ))
+            builder()
+                    .strafeTo(shootVector)
                     .buildAndRun()
         }
-        builder().strafeTo(Vector2d(58.5, 37.0 reverseIf RED)).buildAndRun()
 
-        sleep(500)
-        robot.ringIntakeMotor.power = -1.0
-        sleep(3000)
-        robot.ringIntakeMotor.power = 0.0
+        robot.zoomWheel.velocity = 1100.0
+        sleep(1000)
 
-        // Move to parking line
-        builder(-PI)
-                // Single spline onto the starting line, closest to center while still on alliance side
-                .splineToConstantHeading(Vector2d(45.0, 16.0 reverseIf RED), (-200.0 reverseIf BLUE).toRadians())
-                .splineToConstantHeading(Vector2d(12.0, 12.0 reverseIf RED), -PI)
-                .addDisplacementMarker(0.5, 0.0, MarkerCallback { robot.intakeSystem.moveIntake(FullIntakeSystem.IntakePosition.GROUND) })
+        for (i in 1..3) {
+            robot.ringLoadServo.position = ExtZoomBotConstants.RING_LOAD_SERVO_PUSH
+            sleep(ExtZoomBotConstants.AUTO_SHOOT_WAIT.toLong())
+            robot.ringLoadServo.position = ExtZoomBotConstants.RING_LOAD_SERVO_BACK
+            sleep(ExtZoomBotConstants.AUTO_SHOOT_WAIT.toLong())
+        }
+        robot.zoomWheel.velocity = 0.0
+
+        builder()
+                .strafeTo(Vector2d(11.0, (if (endingRegion == CENTER) 10.0 else 37.0) reverseIf RED))
                 .buildAndRun()
-
 
     }
 
