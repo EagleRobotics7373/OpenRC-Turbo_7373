@@ -14,8 +14,8 @@ constructor (private val pivotServo : Servo,
         GRAB(0.02),
         PERPENDICULAR(0.07),
         OVER_WALL(0.24),
-        VERTICAL(0.38),
-        YEET(0.48),
+        VERTICAL(0.48),
+        YEET(0.68),
         STORAGE(0.70)
     }
 
@@ -68,7 +68,7 @@ constructor (private val pivotServo : Servo,
                 prev = { GRAB_PREP },
                 next = { IN_AIR }),
         IN_AIR(
-                action = { it, _ -> it.pivot(PivotPosition.YEET); it.grab(GrabPosition.GRAB) },
+                action = { it, _ -> it.pivot(PivotPosition.VERTICAL); it.grab(GrabPosition.GRAB) },
                 prev = { GRAB },
                 next = { RELEASE }),
         RELEASE(

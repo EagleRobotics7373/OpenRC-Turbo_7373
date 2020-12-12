@@ -19,6 +19,8 @@ class RingContourPipeline() : ResolutionPipeline() {
     // Public variable allowing OpModes to access number of rings
     var numberOfRings : Int? = null
         private set
+    var ratio : Double? = null
+        private set
 
     // The mat that we will analyze, alone with the channel number we need to extract from HSV
     private var hlsMat: Mat = Mat()
@@ -111,10 +113,11 @@ class RingContourPipeline() : ResolutionPipeline() {
 
             numberOfRings = when (res) {
                 null -> 0
-                in 1.00..1.75 -> 4
-                in 1.75..3.00 -> 1
+                in 1.00..1.42 -> 4
+                in 1.42..3.00 -> 1
                 else -> 0
             }
+            ratio = res
             if (!shouldKeepTracking) tracking = false
             addLabels(drawingMat, res)
             return drawingMat

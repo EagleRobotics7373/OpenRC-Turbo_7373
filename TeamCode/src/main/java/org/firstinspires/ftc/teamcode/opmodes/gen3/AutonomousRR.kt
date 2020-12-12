@@ -97,6 +97,7 @@ class AutonomousRR : LinearOpMode() {
         val numRings = cvContainer.pipeline.numberOfRings
         cvContainer.pipeline.tracking = false
         telemetry.addData("Number of rings", numRings)
+        telemetry.addData("Ratio", cvContainer.pipeline.ratio)
         telemetry.update()
 
         doFullAuto(numRings)
@@ -114,7 +115,7 @@ class AutonomousRR : LinearOpMode() {
     }
 
     fun doFullAuto(numRings: Int?) {
-        sleep(delayBeforeStart.toLong())
+        sleep(delayBeforeStart.toLong().times(1000))
 //        thread { robot.intakeSystem.update() }
         // Create a static map of wobble goal drop-off positions for each number of rings
         val intoSquareDisp = 6.0
