@@ -28,6 +28,7 @@
             <!--            <Motor name="odometryRear" port="0"/>-->
             <!--            <Motor name="odometryLeft" port="1"/>-->
             <!--            <Servo name="ringDropServo" port="2"/>-->
+            <ContinuousRotationServo name="intakeStage2S" port="3"/>
             <RevBlinkinLedDriver name="blinkin" port="4"/>
             <!--            <AnalogInput name="liftPotentiometer" port="0" />-->
             <LynxEmbeddedIMU name="imuE" port="0" bus="0" />

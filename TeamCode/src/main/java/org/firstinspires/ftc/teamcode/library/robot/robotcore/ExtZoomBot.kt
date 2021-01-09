@@ -32,6 +32,7 @@ open class ExtZoomBot(_hardwareMap: HardwareMap) : BaseRobot(_hardwareMap) {
 
     @JvmField val ringLoadServo          : Servo                  = hwInit("ringLoadServo")
     @JvmField val ringTapperServo        : Servo                  = hwInit("ringTapperServo")
+    @JvmField val intakeStage2S          : CRServo                = hwInit("intakeStage2S")
 
     @JvmField val wobblePivotServo       : Servo                  = hwInit("wobblePivotServo")
     @JvmField val wobbleGrabServo        : Servo                  = hwInit("wobbleGrabServo")

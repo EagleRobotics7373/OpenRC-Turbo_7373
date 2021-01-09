@@ -18,6 +18,9 @@ import org.firstinspires.ftc.teamcode.library.vision.base.OpenCvContainer
 import org.firstinspires.ftc.teamcode.library.vision.base.VisionFactory
 import org.firstinspires.ftc.teamcode.library.vision.ultimategoal.IntakeRingViewingPipeline
 import kotlin.math.absoluteValue
+import kotlin.math.max
+import kotlin.math.min
+import kotlin.math.round
 
 @TeleOp(name="TeleOp RD Gen3", group="Gen3 Basic")
 open class TeleOpRD : OpMode() {
@@ -210,7 +213,7 @@ open class TeleOpRD : OpMode() {
             else -> 0.0
         }
         robot.intakeStage1.power = if (gamepad2.left_stick_y.absoluteValue > 0.05) gamepad2.left_stick_y.toDouble() else power
-        robot.intakeStage2.power = if (gamepad2.right_stick_y.absoluteValue > 0.05) gamepad2.right_stick_y.toDouble() else power
+        robot.intakeStage2.power = (if (gamepad2.right_stick_y.absoluteValue > 0.05) gamepad2.right_stick_y.toDouble() else power) * ExtZoomBotConstants.STAGE2_POWER_LIMIT
 
 //        robot.intakeStage1.power = gamepad2.left_stick_y.toDouble();
 //        robot.intakeStage2.power = gamepad2.right_stick_y.toDouble();
@@ -286,15 +289,30 @@ open class TeleOpRD : OpMode() {
 //
     }
 
+    var lastR = System.currentTimeMillis()
+    var lastE = 0.0
+    var lastRe = 0.0
     private fun controlTelemetry() {
+        val now = System.currentTimeMillis()
+        val nearbyFlywheelVelo = ((robot.zoomWheel.currentPosition - lastE)*1000/(now - lastR)).toInt()
+        val reportedFlywheelVelo = robot.zoomWheel.velocity.toInt()
+        val velocitiesAreSameSign = (nearbyFlywheelVelo xor reportedFlywheelVelo) > 0
+        val adjustmentFactor = (round(((nearbyFlywheelVelo / 32767) - (0.5 * (if (nearbyFlywheelVelo >= 0) 1 else -1)) / 2)) * 2 + (if (velocitiesAreSameSign) 0 else 1))
+        val adjustedFlywheelVelo = 32767 * adjustmentFactor + if (velocitiesAreSameSign) reportedFlywheelVelo else (-32767 - reportedFlywheelVelo * -1)
+
+
         telemetry.addData("TARGET flywheel velo", ExtZoomBotConstants.ZOOM_VELOCITY)
         telemetry.addData("CURRENT flywheel velo", robot.zoomWheel.velocity)
+        telemetry.addData("ADJUSTED flywheel velo", adjustedFlywheelVelo)
+        telemetry.addData("ADJUSTED flywheel velo(rot)", adjustedFlywheelVelo / 1440)
+        telemetry.addData("NEARBY flywheel velo", nearbyFlywheelVelo)
         telemetry.addData("PRESET of flywheel", when(ExtZoomBotConstants.ZOOM_VELOCITY) {
             ExtZoomBotConstants.VELO_PRESET_1 -> "POWER SHOT"
             ExtZoomBotConstants.VELO_PRESET_2 -> "HIGH GOAL"
             ExtZoomBotConstants.VELO_PRESET_3 -> "LONG RANGE"
             else -> "no preset"
         })
+        telemetry.addData("ADJUSTMENT factor", adjustmentFactor)
         telemetry.addLine()
         telemetry.addData("wobble grabber state", robot.wobbleGrabber.state)
         telemetry.addLine()
@@ -304,9 +322,19 @@ open class TeleOpRD : OpMode() {
         telemetry.addData("zoom motor enabled", robot.zoomWheel.mode)
         telemetry.addLine()
         telemetry.addData("zoom motor power", robot.zoomWheel.power)
-        telemetry.addData("zoom motor velo (rot)", (robot.zoomWheel.velocity / 28))
-        telemetry.addData("zoom motor velo (rpm)", (robot.zoomWheel.velocity / 28) * 60)
-        telemetry.addData("zoom motor velo (deg)", (robot.zoomWheel.velocity / 28) * 360)
+        telemetry.addData("zoom motor velo (rot)", (robot.zoomWheel.velocity / 1440))
+        telemetry.addData("zoom motor velo (rpm)", (robot.zoomWheel.velocity / 1440) * 60)
+//        telemetry.addLine()
+//        telemetry.addData("E4T velo", robot.intakeStage1.velocity)
+//        telemetry.addData("E4T velo (rot)", robot.intakeStage1.velocity / 1440)
+//        telemetry.addData("E4T velo (rpm)", (robot.intakeStage1.velocity / 1440)*60)
+//        telemetry.addData("E4T pos", (robot.intakeStage1.currentPosition))
+//        telemetry.addLine()
+//        telemetry.addData("REV velo", robot.intakeStage1.velocity)
+//        telemetry.addData("REV velo (rot)", robot.intakeStage1.velocity / 8196)
+//        telemetry.addData("REV velo (rpm)", (robot.intakeStage1.velocity / 8196)*60)
+//        telemetry.addData("REV pos", (robot.intakeStage1.currentPosition))
+//        telemetry.addData("REV velo man", (robot.intakeStage1.currentPosition - lastE)/(now - lastR))
         telemetry.addLine()
         telemetry.addData("original PID", originalPID)
         telemetry.addData("current PID", ExtZoomBotConstants.VELOCITY_PID)
@@ -317,6 +345,8 @@ open class TeleOpRD : OpMode() {
         telemetry.addData("robot heading (rad)", robot.imuControllerC.getHeading())
         telemetry.addData("robot heading (deg)", robot.imuControllerC.getHeading() * 180 / Math.PI)
         telemetry.update()
+        lastR = now
+        lastE = robot.zoomWheel.currentPosition.toDouble()
     }
 
     // functionality is explained throughout opmode; allows for encapsulation of button presses
