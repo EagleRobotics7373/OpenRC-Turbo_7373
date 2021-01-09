@@ -7,7 +7,8 @@
             <RevRoboticsCoreHexMotor name="intakeStage2" port="1"/>
             <Matrix12vMotor name="frontLeftMotor" port="2" />
             <Matrix12vMotor name="backLeftMotor" port="3" />
-            <Servo name="ringTapperServo" port="5"/>
+            <Servo name="ringTapperServo" port="4"/>
+            <Servo name="ringTapThruServo" port="5"/>
             <RevTouchSensor name="intakeTouchSensor" port="0" />
             <LynxEmbeddedIMU name="imuC" port="0" bus="0" />
         </LynxModule>

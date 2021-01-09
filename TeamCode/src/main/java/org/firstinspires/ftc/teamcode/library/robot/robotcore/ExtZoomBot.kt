@@ -33,6 +33,7 @@ open class ExtZoomBot(_hardwareMap: HardwareMap) : BaseRobot(_hardwareMap) {
     @JvmField val ringLoadServo          : Servo                  = hwInit("ringLoadServo")
     @JvmField val ringTapperServo        : Servo                  = hwInit("ringTapperServo")
     @JvmField val intakeStage2S          : CRServo                = hwInit("intakeStage2S")
+    @JvmField val ringTapThruServo       : Servo                  = hwInit("ringTapThruServo")
 
     @JvmField val wobblePivotServo       : Servo                  = hwInit("wobblePivotServo")
     @JvmField val wobbleGrabServo        : Servo                  = hwInit("wobbleGrabServo")
@@ -58,6 +59,7 @@ open class ExtZoomBot(_hardwareMap: HardwareMap) : BaseRobot(_hardwareMap) {
      override val holonomicRR             : HolonomicRR           = HolonomicRR(imuControllerC,
                                                                                  frontLeftMotor, backLeftMotor, backRightMotor, frontRightMotor,
                                                                                  TwoWheelOdometryLocalizer(odometryLeft, odometryRear, imuControllerC))
-    @JvmField val ringTapper           : RingTapper = RingTapper(ringTapperServo)
+    @JvmField val ringTapThru              : RingTapper = RingTapper(ringTapThruServo, 0.85, 0.55)
+    @JvmField val ringTapper              : RingTapper = RingTapper(ringTapperServo, 0.6, 0.45)
     @JvmField val wobbleGrabber           : WobbleGrabber = WobbleGrabber(wobblePivotServo, wobbleGrabServo)
 }
