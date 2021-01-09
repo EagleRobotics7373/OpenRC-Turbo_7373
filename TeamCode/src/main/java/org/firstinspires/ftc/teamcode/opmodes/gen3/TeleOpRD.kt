@@ -259,7 +259,7 @@ open class TeleOpRD : OpMode() {
             else -> ExtZoomBotConstants.RING_LOAD_SERVO_BACK
         }
 
-        robot.ringTapper.move(when {
+        robot.ringTapThru.move(when {
             gamepad2.x || (this.gamepad1CanControlIntakeOrientation && gamepad1.x) -> RingTapper.Position.TAP
             else -> RingTapper.Position.STORAGE
         })
