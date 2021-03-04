@@ -38,6 +38,14 @@ public class ExtZoomBotConstants {
     public static double AUTO_TEST_2 = 1000.0;
     public static double AUTO_TEST_ANG = 0.08;
 
+    public static double AUTO_SERVO_POS_1 = 0.60;
+    public static double AUTO_SERVO_SPEED_1 = 1200;
+    public static double AUTO_SERVO_POS_2 = 0.60;
+    public static double AUTO_SERVO_SPEED_2 = 1200;
+    public static double AUTO_SERVO_POS_3 = 0.60;
+    public static double AUTO_SERVO_SPEED_3 = 1250;
+    public static double AUTO_SERVO_WAIT = 500;
+
     public static double VELO_PRESET_1 = 1000.0;
     public static double VELO_PRESET_2 = 1100.0;
     public static double VELO_PRESET_3 = 1150.0;
