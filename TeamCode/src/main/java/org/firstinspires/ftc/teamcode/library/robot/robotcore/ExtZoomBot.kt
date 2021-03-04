@@ -7,6 +7,7 @@ import org.firstinspires.ftc.teamcode.library.robot.systems.drive.legacy.Odometr
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.*
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.constants.DriveConstantsRingPlace
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.constants.OdometryConstants
+import org.firstinspires.ftc.teamcode.library.robot.systems.intakegen3.MagazineRingSensor
 import org.firstinspires.ftc.teamcode.library.robot.systems.wrappedservos.BlinkinController
 import org.firstinspires.ftc.teamcode.library.robot.systems.wrappedservos.RingTapper
 import org.firstinspires.ftc.teamcode.library.robot.systems.wrappedservos.WobbleGrabber
@@ -44,6 +45,14 @@ open class ExtZoomBot(_hardwareMap: HardwareMap) : BaseRobot(_hardwareMap) {
     @JvmField val odometryLeft           : DcMotorEx              = this.intakeStage2
     @JvmField val odometryRear           : DcMotorEx              = hwInit("odometryRear")
 
+    @JvmField val magColorSensor1        : ColorSensor            = hwInit("mgcs1")
+    @JvmField val magColorSensor2        : ColorSensor            = hwInit("mgcs2")
+    @JvmField val magColorSensor3        : ColorSensor            = hwInit("mgcs3")
+
+    @JvmField val magColorSensor1D       : DistanceSensor         = hwInit("mgcs1")
+    @JvmField val magColorSensor2D       : DistanceSensor         = hwInit("mgcs2")
+    @JvmField val magColorSensor3D       : DistanceSensor         = hwInit("mgcs3")
+
 
     // Odometry module variables - these will be set once we determine plug-in locations on REV Hubs
     override val leftOdometryModule: Encoder?  = null
@@ -62,7 +71,11 @@ open class ExtZoomBot(_hardwareMap: HardwareMap) : BaseRobot(_hardwareMap) {
      override val holonomicRR             : HolonomicRR           = HolonomicRR(imuControllerC,
                                                                                  frontLeftMotor, backLeftMotor, backRightMotor, frontRightMotor,
                                                                                  TwoWheelOdometryLocalizer(odometryLeft, odometryRear, imuControllerC))
-    @JvmField val ringTapThru              : RingTapper = RingTapper(ringTapThruServo, 0.85, 0.55)
+    @JvmField val ringTapThru             : RingTapper = RingTapper(ringTapThruServo, 0.87, 0.55)
     @JvmField val ringTapper              : RingTapper = RingTapper(ringTapperServo, 0.6, 0.45)
     @JvmField val wobbleGrabber           : WobbleGrabber = WobbleGrabber(wobblePivotServo, wobbleGrabServo)
+
+    @JvmField val magazineRingSensor1     : MagazineRingSensor = MagazineRingSensor(magColorSensor1, magColorSensor1D)
+    @JvmField val magazineRingSensor2     : MagazineRingSensor = MagazineRingSensor(magColorSensor2, magColorSensor2D)
+    @JvmField val magazineRingSensor3     : MagazineRingSensor = MagazineRingSensor(magColorSensor3, magColorSensor3D)
 }
