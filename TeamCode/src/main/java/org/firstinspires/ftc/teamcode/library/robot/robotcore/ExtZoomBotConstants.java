@@ -13,6 +13,7 @@ public class ExtZoomBotConstants {
     public static double RING_LOAD_SERVO_BACK = 0.27; // was 0.18
     public static double LARGE_CHANGE = 100;
     public static int AUTO_SHOOT_WAIT = 350;
+    public static int TELEOP_SHOOT_WAIT = 150;
     public static int AUTO_POWER_WAIT = 350;
     public static double SMALL_CHANGE = 25;
     public static double ZOOM_POWER = 0.5;
