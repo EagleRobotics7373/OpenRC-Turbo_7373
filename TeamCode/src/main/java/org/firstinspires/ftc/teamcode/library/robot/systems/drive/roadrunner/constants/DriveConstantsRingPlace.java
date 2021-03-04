@@ -18,8 +18,6 @@ public class DriveConstantsRingPlace {
     public static double kA = 0.0;
     public static double kStatic = .014;
 
-    public static double kF = getMotorVelocityF();
-
     public static Pose2d globalPoseEstimate = null;
 
     public static boolean RUN_USING_ENCODER = true;
@@ -43,23 +41,5 @@ public class DriveConstantsRingPlace {
 
     public static double rpmToVelocity(double rpm) {
         return rpm * GEAR_RATIO * 2 * Math.PI * WHEEL_RADIUS / 60.0;
-    }
-
-    public static double getMaxRpm() {
-        return MAX_RPM * 0.85;
-    }
-
-    public static double encoderTicksToInches(double ticks) {
-        return WHEEL_RADIUS * 2 * Math.PI * GEAR_RATIO * ticks / 145.6;
-    }
-
-    public static double getTicksPerSec() {
-        // note: MotorConfigurationType#getAchieveableMaxTicksPerSecond() isn't quite what we want
-        return MAX_RPM * TICKS_PER_REV / 60.0;
-    }
-
-    public static double getMotorVelocityF() {
-        // see https://docs.google.com/document/d/1tyWrXDfMidwYyP_5H4mZyVgaEswhOC35gvdmP-V-5hA/edit#heading=h.61g9ixenznbx
-        return 32767 / getTicksPerSec();
     }
 }

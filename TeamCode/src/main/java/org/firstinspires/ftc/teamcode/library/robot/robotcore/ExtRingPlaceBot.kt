@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.library.robot.robotcore
 
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver
 import com.qualcomm.robotcore.hardware.*
+import org.firstinspires.ftc.teamcode.library.functions.roadrunnersupport.Encoder
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.legacy.OdometryModule
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.*
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.constants.DriveConstantsRingPlace
@@ -37,9 +38,9 @@ open class ExtRingPlaceBot(_hardwareMap: HardwareMap) : BaseRobot(_hardwareMap) 
 //    @JvmField val intakeDistanceSensor   : DistanceSensor         = hwInit("intakeColorSensor")
 
     // Odometry module variables - these will be set once we determine plug-in locations on REV Hubs
-    override val leftOdometryModule: OdometryModule?  = null
-    override val rightOdometryModule: OdometryModule? = null
-    override val rearOdometryModule: OdometryModule?  = null
+    override val leftOdometryModule: Encoder?  = null
+    override val rightOdometryModule: Encoder? = null
+    override val rearOdometryModule: Encoder?  = null
 
     // LED module - can be uncommented when installed on robot
     @JvmField val blinkin                 : RevBlinkinLedDriver = hwInit("blinkin")
@@ -58,3 +59,4 @@ open class ExtRingPlaceBot(_hardwareMap: HardwareMap) : BaseRobot(_hardwareMap) 
     @JvmField val wobbleGrabber           : WobbleGrabber         = WobbleGrabber(wobblePivotServo, wobbleGrabServo)
 
 }
+

@@ -65,7 +65,7 @@ dependencies {
      * External
      */
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    api('com.acmerobotics.dashboard:dashboard:0.3.10') {
+    api('com.acmerobotics.dashboard:dashboard:0.4.0') {
         exclude group: 'org.firstinspires.ftc'
     }
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"

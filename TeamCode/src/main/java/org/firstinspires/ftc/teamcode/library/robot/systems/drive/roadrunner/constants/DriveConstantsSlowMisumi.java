@@ -17,8 +17,6 @@ public class DriveConstantsSlowMisumi {
     public static double kA = 0.0;
     public static double kStatic = .014;
 
-    public static double kF = getMotorVelocityF();
-
     public static boolean RUN_USING_ENCODER = true;
     public static PIDCoefficients MOTOR_VELO_PID = new PIDCoefficients(50, 0.7, 30);
 
@@ -37,26 +35,4 @@ public class DriveConstantsSlowMisumi {
 
     public static PIDCoefficients HEADING_PID =
             new PIDCoefficients(4.7, 0.2, 0.15);
-
-    public static double rpmToVelocity(double rpm) {
-        return rpm * GEAR_RATIO * 2 * Math.PI * WHEEL_RADIUS / 60.0;
-    }
-
-    public static double getMaxRpm() {
-        return MAX_RPM * 0.85;
-    }
-
-    public static double encoderTicksToInches(double ticks) {
-        return WHEEL_RADIUS * 2 * Math.PI * GEAR_RATIO * ticks / 145.6;
-    }
-
-    public static double getTicksPerSec() {
-        // note: MotorConfigurationType#getAchieveableMaxTicksPerSecond() isn't quite what we want
-        return MAX_RPM * TICKS_PER_REV / 60.0;
-    }
-
-    public static double getMotorVelocityF() {
-        // see https://docs.google.com/document/d/1tyWrXDfMidwYyP_5H4mZyVgaEswhOC35gvdmP-V-5hA/edit#heading=h.61g9ixenznbx
-        return 32767 / getTicksPerSec();
-    }
 }

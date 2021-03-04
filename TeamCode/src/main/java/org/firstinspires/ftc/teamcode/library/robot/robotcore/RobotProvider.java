@@ -7,8 +7,7 @@ import java.lang.reflect.InvocationTargetException;
 
 @Config
 public class RobotProvider {
-    public static RobotType selectedRobot = RobotType.FLYWHEEL;
-    public static boolean useTwoWheelOdometry = true;
+    public static RobotType selectedRobot = RobotType.PUSHBOT;
 
     public static BaseRobot providePresetRobot(HardwareMap hardwareMap) {
         BaseRobot robot;
@@ -30,7 +29,8 @@ public class RobotProvider {
 
     public enum RobotType {
         RINGPLACE(ExtRingPlaceBot.class),
-        FLYWHEEL(ExtZoomBot.class);
+        FLYWHEEL(ExtZoomBot.class),
+        PUSHBOT(ExtPushBot202102.class);
 
         public Class<? extends BaseRobot> robotClass;
 

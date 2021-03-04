@@ -5,15 +5,16 @@ import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.constants.OdometryConstants.*
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit.INCH
+import org.firstinspires.ftc.teamcode.library.functions.roadrunnersupport.Encoder
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.RobotConstantsAccessor.leftOdometryPoseInches
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.RobotConstantsAccessor.rearOdometryPoseInches
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.RobotConstantsAccessor.rightOdometryPoseInches
 
 
 class ThreeWheelOdometryLocalizer(
-        leftModule : DcMotorEx,
-        rightModule: DcMotorEx,
-        rearModule : DcMotorEx
+        leftModule : Encoder,
+        rightModule: Encoder,
+        rearModule : Encoder
 )
     : ThreeTrackingWheelLocalizer(
         listOf(
@@ -26,27 +27,33 @@ class ThreeWheelOdometryLocalizer(
         )
 )
 {
+
     private val modules = listOf(leftModule, rightModule, rearModule)
 
     private val ticksPerRevolution = 8192
     private val wheelDiameterMm = INCH.fromMm(38.0)
 
-    init {
-        modules.forEach {
-            it.mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER
-            it.mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
-        }
-    }
-
     override fun getWheelPositions(): List<Double> {
         val wheelPositions = modules.map {
-            (if (reverseOutput) -1.0 else 1.0) * (it.currentPosition.toDouble() / ticksPerRevolution) * wheelDiameterMm * Math.PI
+            (if (reverseOutput) -1.0 else 1.0) * it.currentPosition.toDouble().encoderTicksToInches()
         }
 
-        print("%% @OdometryLocalizer_REVExt   LEFT=${wheelPositions[0]}    RIGHT=${wheelPositions[1]}    REAR=${wheelPositions[2]}")
+//        print("%% @OdometryLocalizer_REVExt POS     LEFT=${modules[0].currentPosition}    RIGHT=${modules[1].currentPosition}    REAR=${modules[2].currentPosition}")
 
         return wheelPositions
     }
+
+    override fun getWheelVelocities(): List<Double>? {
+        val wheelVelocities = modules.map {
+            (if (reverseOutput) -1.0 else 1.0) * it.correctedVelocity.toDouble().encoderTicksToInches()
+        }
+
+//        print("%% @OdometryLocalizer_REVExt VEL     LEFT=${modules[0].velocity}    RIGHT=${modules[1].velocity}    REAR=${modules[2].velocity}")
+
+        return wheelVelocities
+    }
+
+    private fun Double.encoderTicksToInches(): Double = (this / ticksPerRevolution) * wheelDiameterMm * Math.PI
 
 
 }

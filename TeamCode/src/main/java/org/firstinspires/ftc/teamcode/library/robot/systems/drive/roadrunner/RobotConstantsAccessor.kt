@@ -8,6 +8,7 @@ import org.firstinspires.ftc.teamcode.library.functions.convertUnit
 import org.firstinspires.ftc.teamcode.library.functions.toRadians
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.constants.DriveConstantsNew
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.constants.OdometryConstants
+import kotlin.math.absoluteValue
 
 
 object RobotConstantsAccessor {
@@ -39,7 +40,7 @@ object RobotConstantsAccessor {
     val kA              : Double            get() = loadedDriveClass.getDeclaredField("kA").getDouble(this)
     val kStatic         : Double            get() = loadedDriveClass.getDeclaredField("kStatic").getDouble(this)
 
-    val kF              : Double            get() = loadedDriveClass.getDeclaredField("kF").getDouble(this)
+    val kF              : Double            get() = getMotorVelocityF()
 
     val runUsingEncoder : Boolean           get() = loadedDriveClass.getDeclaredField("RUN_USING_ENCODER").getBoolean(this)
     val motorVelocityPID: PIDCoefficients?  get() = loadedDriveClass.getDeclaredField("MOTOR_VELO_PID").get(this) as PIDCoefficients?
@@ -80,4 +81,8 @@ object RobotConstantsAccessor {
             Pose2d(loadedOdometryClass.getDeclaredField("rearXcm").getDouble(this).convertUnit(DistanceUnit.CM, DistanceUnit.INCH),
                    loadedOdometryClass.getDeclaredField("rearYcm").getDouble(this).convertUnit(DistanceUnit.CM, DistanceUnit.INCH),
                    loadedOdometryClass.getDeclaredField("rearAngleDeg").getDouble(this).toRadians())
+    val odometryLateralDistance: Double
+        get() =
+            (loadedOdometryClass.getDeclaredField("leftYcm").getDouble(this) - loadedOdometryClass.getDeclaredField("rightYcm").getDouble(this))
+                    .absoluteValue
 }

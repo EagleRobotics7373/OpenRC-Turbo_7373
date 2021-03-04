@@ -1,12 +1,9 @@
 package org.firstinspires.ftc.teamcode.opmodes.util
 
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
-import com.qualcomm.robotcore.wifi.RobotControllerAccessPointAssistant
 import org.firstinspires.ftc.robotcontroller.internal.NetworkUtil
-import org.firstinspires.ftc.robotcore.internal.system.AppUtil
-import org.firstinspires.ftc.teamcode.opmodes.gen2.OpModeConfig
+import org.firstinspires.ftc.teamcode.opmodes.gen1b.OpModeConfig
 
 @TeleOp(name = "Wi-Fi Provisioning Tool", group = "Utilities")
 class WiFiProvisioner: LinearOpMode() {

@@ -11,7 +11,7 @@ class UltimateGoalOpenCvTest : OpMode() {
 
     lateinit var container : OpenCvContainer<RingContourPipeline>
 
-    var cameraType = VisionFactory.CameraType.WEBCAM
+    var cameraType = VisionFactory.CameraType.WEBCAM_MINUS
 
     override fun init() {
         container = VisionFactory.createOpenCv(cameraType, hardwareMap,

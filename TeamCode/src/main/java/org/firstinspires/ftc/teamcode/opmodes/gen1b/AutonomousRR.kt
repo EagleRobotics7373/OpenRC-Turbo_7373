@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.opmodes.gen3
+package org.firstinspires.ftc.teamcode.opmodes.gen1b
 
 import com.acmerobotics.dashboard.FtcDashboard
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry
@@ -15,8 +15,6 @@ import org.firstinspires.ftc.teamcode.library.functions.AllianceColor.*
 import org.firstinspires.ftc.teamcode.library.functions.StartingLine.*
 import org.firstinspires.ftc.teamcode.library.functions.telemetrymenu.kotlin.*
 import org.firstinspires.ftc.teamcode.library.robot.robotcore.ExtRingPlaceBot
-import org.firstinspires.ftc.teamcode.library.robot.robotcore.ExtZoomBot
-import org.firstinspires.ftc.teamcode.library.robot.robotcore.ExtZoomBotConstants
 import org.firstinspires.ftc.teamcode.library.robot.robotcore.IMUController
 import org.firstinspires.ftc.teamcode.library.robot.systems.intakegen2.FullIntakeSystem
 import org.firstinspires.ftc.teamcode.library.robot.systems.wrappedservos.RingDropper
@@ -25,21 +23,20 @@ import org.firstinspires.ftc.teamcode.library.vision.base.VisionFactory
 import org.firstinspires.ftc.teamcode.library.vision.base.OpenCvContainer
 import org.firstinspires.ftc.teamcode.library.vision.ultimategoal.RingContourPipeline
 import kotlin.math.PI
-import org.firstinspires.ftc.teamcode.opmodes.gen2.OpModeConfig
 
-@com.qualcomm.robotcore.eventloop.opmode.Autonomous(name = "DEMO: Ring Shoot Test", group = "Main")
-class RingShootTest : LinearOpMode() {
+@com.qualcomm.robotcore.eventloop.opmode.Autonomous(name = "Autonomous LM2 (Kotlin + RR)", group = "Main")
+class AutonomousRR : LinearOpMode() {
 
     /*
         VARIABLES: Hardware and Control
      */
-    private lateinit var robot           : ExtZoomBot
+    private lateinit var robot           : ExtRingPlaceBot
     private lateinit var imuController   : IMUController
 
     private          val telem           : MultipleTelemetry = MultipleTelemetry(telemetry, FtcDashboard.getInstance().telemetry)
     private lateinit var elapsedTime     : ElapsedTime
 
-//    private lateinit var cvContainer     : OpenCvContainer<RingContourPipeline>
+    private lateinit var cvContainer     : OpenCvContainer<RingContourPipeline>
 
     private lateinit var player          : ExtDirMusicPlayer
 
@@ -48,24 +45,21 @@ class RingShootTest : LinearOpMode() {
      */
     private val config = OpModeConfig(telemetry)
     private var allianceColor: AllianceColor by config.custom("Alliance Color", RED, BLUE)
-    private var startingLine: StartingLine by config.custom("Starting Line", FAR, CENTER)
-    private var endingRegion: StartingLine by config.custom("Ending Region", FAR, CENTER)
-    private var delayBeforeStart: Int by config.int("Delay Before Start", 0, 0..10 step 1)
+    private var startingLine: StartingLine by config.custom("Starting Line", CENTER, FAR)
 
     override fun runOpMode() {
         /*
             Main autonomous variable initialization
          */
-        robot = ExtZoomBot(hardwareMap)
+        robot = ExtRingPlaceBot(hardwareMap)
         imuController = robot.imuControllerC
-//        cvContainer = VisionFactory.createOpenCv(
-//                VisionFactory.CameraType.WEBCAM,
-//                hardwareMap,
-//                RingContourPipeline())
-//        cvContainer.pipeline.shouldKeepTracking = true
-//        cvContainer.pipeline.tracking = true
-        robot.zoomWheel.mode = DcMotor.RunMode.RUN_USING_ENCODER
-        robot.zoomWheel.velocity = 0.0
+        cvContainer = VisionFactory.createOpenCv(
+                VisionFactory.CameraType.WEBCAM_MINUS,
+                hardwareMap,
+                RingContourPipeline())
+        cvContainer.pipeline.shouldKeepTracking = true
+        cvContainer.pipeline.tracking = true
+        robot.intakeLiftMotor.mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER
 
 
         /*
@@ -87,36 +81,124 @@ class RingShootTest : LinearOpMode() {
 
 
         elapsedTime = ElapsedTime()
-        robot.ringLoadServo.position = ExtZoomBotConstants.RING_LOAD_SERVO_BACK
-        robot.zoomWheel.velocity = ExtZoomBotConstants.AUTO_TEST_1
-        wait(3000) {updateVelocityToTelemetry()}
 
-        robot.zoomWheel.velocity = ExtZoomBotConstants.AUTO_TEST_2
-        wait(1000) {updateVelocityToTelemetry()}
 
-        for (i in 1..3) {
-            robot.ringLoadServo.position = ExtZoomBotConstants.RING_LOAD_SERVO_PUSH
-            wait(ExtZoomBotConstants.AUTO_SHOOT_WAIT.toLong()) {updateVelocityToTelemetry()}
-            robot.ringLoadServo.position = ExtZoomBotConstants.RING_LOAD_SERVO_BACK
-            wait(ExtZoomBotConstants.AUTO_SHOOT_WAIT.toLong()) {updateVelocityToTelemetry()}
-        }
-        robot.zoomWheel.velocity = 0.0
 
         /*
             Perform actions
          */
 
-//        val numRings = cvContainer.pipeline.numberOfRings
-//        cvContainer.pipeline.tracking = false
-//        telemetry.addData("Number of rings", numRings)
-//        telemetry.update()
+        val numRings = cvContainer.pipeline.numberOfRings
+        cvContainer.pipeline.tracking = false
+        telemetry.addData("Number of rings", numRings)
+        telemetry.update()
 
-//        doFullAuto(numRings)
+        doFullAuto(numRings)
 
         /*
             OpMode actions have finished. Wait until OpMode is stopped, then close resources.
          */
         while (opModeIsActive()) robot.holonomicRR.update()
+
+        Thread {
+            cvContainer.stop()
+//            cvContainer.camera.closeCameraDevice()
+        }.start()
+
+    }
+
+    fun doFullAuto(numRings: Int?) {
+
+//        thread { robot.intakeSystem.update() }
+        robot.ringDropper.pivot(RingDropper.DropperPosition.HOLD_RING)
+
+        // Create a static map of wobble goal drop-off positions for each number of rings
+        val intoSquareDisp = 6.0
+        val wobbleDropoffs = mapOf(
+                0 to Vector2d(-6.5 + intoSquareDisp, -60.0 reverseIf BLUE),
+                1 to Vector2d(16.0 + intoSquareDisp, -36.0 reverseIf BLUE),
+                4 to Vector2d(40.0 + intoSquareDisp, -60.0 reverseIf BLUE)
+        )
+
+        // Set the robot starting position within RoadRunner
+        robot.holonomicRR.poseEstimate = Pose2d(
+                -63.0,
+                (if (startingLine == CENTER) -24.0 else -48.0) reverseIf BLUE,
+                0.0
+        )
+
+        // Do the initial movement to wobble drop-off location
+        builder(PI.div(4) reverseIf BLUE reverseIf FAR)
+                // Spline to drive around and preserve the starter stack
+                .splineToConstantHeading(
+                        endPosition = Vector2d(
+                                x = -24.0,
+                                y = robot.holonomicRR.poseEstimate.y.plus(6.0 reverseIf FAR reverseIf BLUE)
+                        ),
+                        endTangent = 0.0
+                )
+                // Spline to the wobble drop-off position
+                .splineToConstantHeading(
+                        endPosition = wobbleDropoffs[numRings] ?: error("Incorrect number of rings set"),
+                        endTangent = if (startingLine == CENTER) -PI.div(2) reverseIf BLUE else 0.0
+                )
+                .buildAndRun()
+
+        robot.wobbleGrabber.move(pivot = WobbleGrabber.PivotPosition.PERPENDICULAR)
+        sleep(1500)
+        robot.wobbleGrabber.move(grab = WobbleGrabber.GrabPosition.STORAGE)
+        sleep(500)
+        robot.wobbleGrabber.move(pivot = WobbleGrabber.PivotPosition.STORAGE)
+        sleep(2500)
+
+
+
+        // Do subsequent movement to the ring drop-off
+//        builder(5*PI/4 reverseIf RED)
+//                // Motion to avoid the placed wobble goal. This will be different based on whether wobble is in pos A/C or B
+//                .addDisplacementMarker(MarkerCallback { robot.intakeSystem.moveIntake(FullIntakeSystem.IntakePosition.SCORE) })
+//                .run {
+//                    if (numRings == 1)
+//                        splineToConstantHeading(Vector2d(24.0, 13.0 reverseIf RED), -PI/4)
+//                                .splineToConstantHeading(Vector2d(45.0, 16.0 reverseIf RED), (-20.0 reverseIf BLUE).toRadians())
+//                    else
+//                        splineToConstantHeading(
+//                                Vector2d(
+//                                        x = robot.holonomicRR.poseEstimate.x,
+//                                        y = 37.0 reverseIf RED ),
+//                                endTangent = (-PI/4) reverseIf RED)
+//                }
+//                // Spline to ring drop-off
+//                .splineToConstantHeading(Vector2d(60.0, 37.0 reverseIf RED), (PI/4) reverseIf RED)
+//                .buildAndRun()
+
+        robot.intakeSystem.moveIntake(FullIntakeSystem.IntakePosition.SCORE)
+        if (numRings == 1) {
+            builder()
+                    .strafeTo(Vector2d(24.0, 13.0 reverseIf RED)).buildAndRun()
+            builder().strafeTo(Vector2d(45.0, 16.0 reverseIf RED)).buildAndRun()
+        } else {
+            builder().strafeTo(
+                    Vector2d(
+                            x = robot.holonomicRR.poseEstimate.x,
+                            y = 37.0 reverseIf RED ))
+                    .buildAndRun()
+        }
+        builder().strafeTo(Vector2d(58.5, 37.0 reverseIf RED)).buildAndRun()
+
+        sleep(500)
+        robot.ringIntakeMotor.power = -1.0
+        sleep(3000)
+        robot.ringIntakeMotor.power = 0.0
+
+        // Move to parking line
+        builder(-PI)
+                // Single spline onto the starting line, closest to center while still on alliance side
+                .splineToConstantHeading(Vector2d(45.0, 16.0 reverseIf RED), (-200.0 reverseIf BLUE).toRadians())
+                .splineToConstantHeading(Vector2d(12.0, 12.0 reverseIf RED), -PI)
+                .addDisplacementMarker(0.5, 0.0, MarkerCallback { robot.intakeSystem.moveIntake(FullIntakeSystem.IntakePosition.GROUND) })
+                .buildAndRun()
+
 
     }
 
@@ -124,16 +206,6 @@ class RingShootTest : LinearOpMode() {
      * Creates and operates [ReflectiveTelemetryMenu] before the init period.
      * Controls code until [isStopRequested] or [isStarted] is true.
      */
-
-    fun updateVelocityToTelemetry() {
-        telemetry.addData("vel", robot.zoomWheel.velocity)
-        telemetry.update()
-    }
-
-    fun wait(timeMs: Long, and: ()->Unit) {
-        val start = System.currentTimeMillis()
-        while (System.currentTimeMillis() < start + timeMs) and()
-    }
 
     fun operateMenu() {
 
@@ -197,13 +269,13 @@ class RingShootTest : LinearOpMode() {
      * Reverses input number if [testColor] matches [allianceColor]
      */
     private infix fun Double.reverseIf(testColor: AllianceColor) : Double =
-            if (this@RingShootTest.allianceColor==testColor) -this else this
+            if (this@AutonomousRR.allianceColor==testColor) -this else this
 
     /**
      * Reverses input number if [testLine] matches [startingLine]
      */
     private infix fun Double.reverseIf(testLine: StartingLine): Double =
-            if (this@RingShootTest.startingLine==testLine) -this else this
+            if (this@AutonomousRR.startingLine==testLine) -this else this
 
     private fun builder() = robot.holonomicRR.trajectoryBuilder()
     private fun builder(tangent: Double) = robot.holonomicRR.trajectoryBuilder(tangent)

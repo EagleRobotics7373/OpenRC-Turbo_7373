@@ -102,14 +102,7 @@ constructor (
 
 //        Thread { while (!Thread.interrupted()) updatePoseEstimate() }.start()
 
-        motorsExt.forEach {
-            it.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
-            it.direction = DcMotorSimple.Direction.FORWARD
-            if (runUsingEncoder) {
-                it.mode = DcMotor.RunMode.RUN_USING_ENCODER
-                if (motorVelocityPID != null) setPIDCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, motorVelocityPID as PIDCoefficients)
-            }
-        }
+        doMotorConfig()
 
         super.localizer = localizer ?: MecanumLocalizer(this)
     }
@@ -126,6 +119,17 @@ constructor (
             Mode.TURN               -> Pose2d(0.0, 0.0, turnController.lastError)
             else                    -> Pose2d()
         }
+
+    private fun doMotorConfig() {
+        motorsExt.forEach {
+            it.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
+            it.direction = DcMotorSimple.Direction.FORWARD
+            if (runUsingEncoder) {
+                it.mode = DcMotor.RunMode.RUN_USING_ENCODER
+                if (motorVelocityPID != null) setPIDCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, motorVelocityPID as PIDCoefficients)
+            }
+        }
+    }
 
     /**
      * Updates the current pose estimate and report to FtcDashboard
@@ -258,6 +262,9 @@ constructor (
      * @param waypointActions List of actions to accomplish at a certain percentage (from 0.0 to 1.0) of movement completion
      */
     @JvmOverloads fun followTrajectory(trajectory: Trajectory, waypointActions: List<Pair<Double, ()->Unit>> = emptyList()) {
+
+        doMotorConfig()
+
         follower.followTrajectory(trajectory)
         lastReadTime = System.currentTimeMillis()
 //        driveSignalUpdateThread = Thread(driveSignalUpdateRunnable)
@@ -284,6 +291,9 @@ constructor (
      * @param angle The angle at which to turn, in degrees
      */
     fun turn(angle: Double) {
+
+        doMotorConfig()
+
         val heading = poseEstimate.heading
 
         turnProfile = MotionProfileGenerator.generateSimpleMotionProfile(
@@ -312,8 +322,10 @@ constructor (
     /**
      * Wait until the robot mode is IDLE
      */
-    fun waitForIdle() {
-        while (!Thread.currentThread().isInterrupted && isBusy()) update()
+    private fun waitForIdle() {
+        while (!Thread.currentThread().isInterrupted && isBusy()) {
+            update()
+        }
     }
 
     /**
@@ -388,11 +400,13 @@ constructor (
      * Sets motor powers to each of the four motors
      */
     override fun setMotorPowers(frontLeft: Double, rearLeft: Double, rearRight: Double, frontRight: Double) {
-        frontLeftExt .power =  frontLeft
-        backLeftExt  .power =  rearLeft
-        backRightExt .power = -rearRight
-        frontRightExt.power = -frontRight
+        frontLeftExt .power =  frontLeft * reversedMotorMultiplier(frontLeftExt)
+        backLeftExt  .power =  rearLeft * reversedMotorMultiplier(backLeftExt)
+        backRightExt .power = -rearRight * reversedMotorMultiplier(backRightExt)
+        frontRightExt.power = -frontRight * reversedMotorMultiplier(frontRightExt)
     }
+
+    private fun reversedMotorMultiplier(motor: DcMotorEx) = if (motor.direction == DcMotorSimple.Direction.REVERSE) -1 else 1
 
     /**
      * Redefine the drive parameters with new values from [RobotConstantsAccessor]

@@ -39,7 +39,7 @@ class ExceptionTest : LinearOpMode() {
     lateinit var container: OpenCvContainer<IntakeRingViewingPipeline>
 
     override fun runOpMode() {
-        container = VisionFactory.createOpenCv(VisionFactory.CameraType.WEBCAM, hardwareMap, IntakeRingViewingPipeline())
+        container = VisionFactory.createOpenCv(VisionFactory.CameraType.WEBCAM_MINUS, hardwareMap, IntakeRingViewingPipeline())
 
         dpadUpWatch = ToggleButtonWatcher {gamepad1.dpad_up}
         dpadDownWatch = ToggleButtonWatcher {gamepad1.dpad_down}

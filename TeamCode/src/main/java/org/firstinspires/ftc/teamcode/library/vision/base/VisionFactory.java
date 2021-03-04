@@ -30,14 +30,14 @@ public class VisionFactory {
             case PHONE_FRONT:
                 parameters.cameraDirection = VuforiaLocalizer.CameraDirection.FRONT;
                 break;
-            case WEBCAM:
+            case WEBCAM_MINUS:
                 parameters.cameraName = hardwareMap.get(WebcamName.class, webcamName);
         }
         return ClassFactory.getInstance().createVuforia(parameters);
     }
 
     public static VuforiaLocalizer createVuforia(HardwareMap hardwareMap) {
-        return createVuforia(hardwareMap, CameraType.WEBCAM);
+        return createVuforia(hardwareMap, CameraType.WEBCAM_MINUS);
     }
 
     public static TFObjectDetector attachTFOD(HardwareMap hardwareMap, VuforiaLocalizer vuforia) {
@@ -54,10 +54,10 @@ public class VisionFactory {
         ImageResolution resolution = ImageResolution.R_1280x720;
         OpenCvCameraRotation rotation = OpenCvCameraRotation.UPRIGHT;
 
-        if (cameraType == CameraType.WEBCAM) {
+        if (cameraType == CameraType.WEBCAM_MINUS || cameraType == CameraType.WEBCAM_PLUS) {
             camera =
                     OpenCvCameraFactory.getInstance().createWebcam(
-                            hardwareMap.get(WebcamName.class, webcamName),
+                            hardwareMap.get(WebcamName.class, webcamName+(cameraType==CameraType.WEBCAM_MINUS?"-":"+")),
                             getCameraMonitorViewId(hardwareMap));
             resolution = UltimateGoalVisionConstants.RESOLUTION;
         }
@@ -76,6 +76,6 @@ public class VisionFactory {
     }
 
     public enum CameraType {
-        WEBCAM, PHONE_REAR, PHONE_FRONT
+        WEBCAM_MINUS, WEBCAM_PLUS, PHONE_REAR, PHONE_FRONT
     }
 }

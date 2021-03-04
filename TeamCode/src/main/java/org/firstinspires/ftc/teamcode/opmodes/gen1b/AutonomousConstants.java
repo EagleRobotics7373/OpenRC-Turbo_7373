@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.opmodes.gen2;
+package org.firstinspires.ftc.teamcode.opmodes.gen1b;
 
 import com.acmerobotics.dashboard.config.Config;
 

@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.library.robot.robotcore
 
 import com.qualcomm.hardware.lynx.LynxModule
 import com.qualcomm.robotcore.hardware.*
+import org.firstinspires.ftc.teamcode.library.functions.roadrunnersupport.Encoder
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.legacy.Holonomic
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.legacy.HolonomicImpl
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.legacy.OdometryModule
@@ -22,9 +23,9 @@ abstract class BaseRobot(protected val hardwareMap: HardwareMap) {
 
      abstract val holonomicRR           : HolonomicRR
 
-     abstract val leftOdometryModule             : OdometryModule?
-     abstract val rightOdometryModule            : OdometryModule?
-     abstract val rearOdometryModule             : OdometryModule?
+     abstract val leftOdometryModule             : Encoder?
+     abstract val rightOdometryModule            : Encoder?
+     abstract val rearOdometryModule             : Encoder?
 
      protected inline fun <reified T> hwInit(name:String): T = hardwareMap.get(T::class.java, name)
 

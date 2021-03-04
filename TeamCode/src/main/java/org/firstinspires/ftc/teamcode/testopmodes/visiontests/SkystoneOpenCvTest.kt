@@ -28,7 +28,7 @@ class SkystoneOpenCvTest : OpMode() {
     }
 
     override fun init_loop() {
-        if (gamepad1.x) cameraType = VisionFactory.CameraType.WEBCAM
+        if (gamepad1.x) cameraType = VisionFactory.CameraType.WEBCAM_MINUS
         else if (gamepad1.a) cameraType = VisionFactory.CameraType.PHONE_FRONT
         else if (gamepad1.b) cameraType = VisionFactory.CameraType.PHONE_REAR
 

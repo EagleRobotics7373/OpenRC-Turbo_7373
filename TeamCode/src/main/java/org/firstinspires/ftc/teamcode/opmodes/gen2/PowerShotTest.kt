@@ -2,8 +2,6 @@ package org.firstinspires.ftc.teamcode.opmodes.gen2
 
 import com.acmerobotics.dashboard.FtcDashboard
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry
-import com.acmerobotics.roadrunner.geometry.Pose2d
-import com.acmerobotics.roadrunner.geometry.Vector2d
 import com.acmerobotics.roadrunner.trajectory.BaseTrajectoryBuilder
 import com.acmerobotics.roadrunner.trajectory.TrajectoryBuilder
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
@@ -17,14 +15,10 @@ import org.firstinspires.ftc.teamcode.library.robot.robotcore.ExtZoomBot
 import org.firstinspires.ftc.teamcode.library.robot.robotcore.ExtZoomBotConstants
 import org.firstinspires.ftc.teamcode.library.robot.robotcore.IMUController
 import org.firstinspires.ftc.teamcode.library.robot.systems.wrappedservos.WobbleGrabber
-import org.firstinspires.ftc.teamcode.library.vision.base.VisionFactory
-import org.firstinspires.ftc.teamcode.library.vision.base.OpenCvContainer
-import org.firstinspires.ftc.teamcode.library.vision.ultimategoal.RingContourPipeline
-import kotlin.math.PI
 import org.firstinspires.ftc.teamcode.opmodes.gen1b.OpModeConfig
 
-@com.qualcomm.robotcore.eventloop.opmode.Autonomous(name = "Autonomous LT (Kotlin + RR)", group = "Main")
-class AutonomousRR : LinearOpMode() {
+@com.qualcomm.robotcore.eventloop.opmode.Autonomous(name = "DEMO: Power Shot Auto Test", group = "Main")
+class PowerShotTest : LinearOpMode() {
 
     /*
         VARIABLES: Hardware and Control
@@ -35,7 +29,7 @@ class AutonomousRR : LinearOpMode() {
     private          val telem           : MultipleTelemetry = MultipleTelemetry(telemetry, FtcDashboard.getInstance().telemetry)
     private lateinit var elapsedTime     : ElapsedTime
 
-    private lateinit var cvContainer     : OpenCvContainer<RingContourPipeline>
+//    private lateinit var cvContainer     : OpenCvContainer<RingContourPipeline>
 
     private lateinit var player          : ExtDirMusicPlayer
 
@@ -45,11 +39,6 @@ class AutonomousRR : LinearOpMode() {
     private val config = OpModeConfig(telemetry)
     private var allianceColor: AllianceColor by config.custom("Alliance Color", RED, BLUE)
     private var startingLine: StartingLine by config.custom("Starting Line", FAR, CENTER)
-    private var endingRegion: StartingLine by config.custom("Ending Region", FAR, CENTER)
-    private var delayBeforeStart: Int by config.int("Delay Before Start", 0, 0..10 step 1)
-    private var delayBeforePark: Int by config.int("Delay Before Park", 7, 0..10 step 1)
-    private var sleepBeforeShoot: Int by config.int("Delay Before Shoot (ms)", 0, 0..1000 step 100)
-    private var darBots: Boolean by config.boolean("Darbots Mode", false)
 
     override fun runOpMode() {
         /*
@@ -57,15 +46,14 @@ class AutonomousRR : LinearOpMode() {
          */
         robot = ExtZoomBot(hardwareMap)
         imuController = robot.imuControllerC
-        cvContainer = VisionFactory.createOpenCv(
-                VisionFactory.CameraType.WEBCAM_MINUS,
-                hardwareMap,
-                RingContourPipeline())
-        cvContainer.pipeline.shouldKeepTracking = true
-        cvContainer.pipeline.tracking = true
+//        cvContainer = VisionFactory.createOpenCv(
+//                VisionFactory.CameraType.WEBCAM,
+//                hardwareMap,
+//                RingContourPipeline())
+//        cvContainer.pipeline.shouldKeepTracking = true
+//        cvContainer.pipeline.tracking = true
         robot.zoomWheel.mode = DcMotor.RunMode.RUN_USING_ENCODER
         robot.zoomWheel.velocity = 0.0
-
 
 
         /*
@@ -86,126 +74,58 @@ class AutonomousRR : LinearOpMode() {
         robot.holonomicRR.redefine()
 
 
-        elapsedTime = ElapsedTime()
 
+        robot.zoomWheel.velocity = ExtZoomBotConstants.AUTO_TEST_2
+        wait(2000) {updateVelocityToTelemetry()}
 
+        hit()
+        robot.holonomicRR.turnSync(ExtZoomBotConstants.AUTO_TEST_ANG)
+        sleep(ExtZoomBotConstants.AUTO_POWER_WAIT.toLong())
+        hit()
+        robot.holonomicRR.turnSync(ExtZoomBotConstants.AUTO_TEST_ANG)
+        sleep(ExtZoomBotConstants.AUTO_POWER_WAIT.toLong())
+        hit()
+        robot.zoomWheel.velocity = 0.0
 
         /*
             Perform actions
          */
 
-        val numRings = cvContainer.pipeline.numberOfRings
-        cvContainer.pipeline.tracking = false
-        telemetry.addData("Number of rings", numRings)
-        telemetry.addData("Ratio", cvContainer.pipeline.ratio)
-        telemetry.update()
+//        val numRings = cvContainer.pipeline.numberOfRings
+//        cvContainer.pipeline.tracking = false
+//        telemetry.addData("Number of rings", numRings)
+//        telemetry.update()
 
-        doFullAuto(numRings)
+//        doFullAuto(numRings)
 
         /*
             OpMode actions have finished. Wait until OpMode is stopped, then close resources.
          */
         while (opModeIsActive()) robot.holonomicRR.update()
 
-//        Thread {
-//            cvContainer.stop()
-//            cvContainer.camera.closeCameraDevice()
-//        }.start()
-
     }
 
-    fun doFullAuto(numRings: Int?) {
-        sleep(delayBeforeStart.toLong().times(1000))
-//        thread { robot.intakeSystem.update() }
-        // Create a static map of wobble goal drop-off positions for each number of rings
-        val intoSquareDisp = 6.0
-        val wobbleDropoffs = mapOf(
-                0 to Vector2d(-6.5 + intoSquareDisp, -60.0 reverseIf BLUE),
-                1 to Vector2d(16.0 + intoSquareDisp, -36.0 reverseIf BLUE),
-                4 to Vector2d(40.0 + intoSquareDisp, -60.0 reverseIf BLUE)
-        )
-
-        // Set the robot starting position within RoadRunner
-        robot.holonomicRR.poseEstimate = Pose2d(
-                -63.0,
-                (if (startingLine == CENTER) -24.0 else -48.0) reverseIf BLUE,
-                PI
-        )
-
-        // Do the initial movement to wobble drop-off location
-        builder(PI.div(4) reverseIf BLUE reverseIf FAR)
-                // Spline to drive around and preserve the starter stack
-                .splineToConstantHeading(
-                        endPosition = Vector2d(
-                                x = -24.0,
-                                y = robot.holonomicRR.poseEstimate.y.plus(6.0 reverseIf FAR reverseIf BLUE)
-                        ),
-                        endTangent = 0.0
-                )
-                // Spline to the wobble drop-off position
-                .splineToConstantHeading(
-                        endPosition = wobbleDropoffs[numRings] ?: error("Incorrect number of rings set"),
-                        endTangent = if (startingLine == CENTER) -PI.div(2) reverseIf BLUE else 0.0
-                )
-                .buildAndRun()
-
-        robot.wobbleGrabber.move(pivot = WobbleGrabber.PivotPosition.PERPENDICULAR)
-        sleep(1500)
-        robot.wobbleGrabber.move(grab = WobbleGrabber.GrabPosition.STORAGE)
-        sleep(500)
-        robot.wobbleGrabber.move(pivot = WobbleGrabber.PivotPosition.VERTICAL)
-        sleep(2500)
-
-        val shootVector = Vector2d(-3.0, if (allianceColor == BLUE) 34.5 else -37.0)
-        robot.zoomWheel.velocity = 1100.0
-
-        if (numRings == 0) {
-            builder(PI.div(2) reverseIf BLUE)
-                    .splineToConstantHeading(
-                            endPosition = shootVector,
-                            endTangent = 0.0
-                    )
-                    .buildAndRun()
-        } else {
-            builder()
-                    .strafeTo(shootVector)
-                    .buildAndRun()
-        }
-
-//        robot.zoomWheel.velocity = 1100.0
-        sleep(sleepBeforeShoot.toLong())
-
-        for (i in 1..3) {
-            robot.ringLoadServo.position = ExtZoomBotConstants.RING_LOAD_SERVO_PUSH
-            sleep(ExtZoomBotConstants.AUTO_SHOOT_WAIT.toLong())
-            robot.ringLoadServo.position = ExtZoomBotConstants.RING_LOAD_SERVO_BACK
-            sleep(ExtZoomBotConstants.AUTO_SHOOT_WAIT.toLong())
-        }
-        robot.zoomWheel.velocity = 0.0
-
-        if (darBots) {
-
-            builder(tangent = (-PI/2) reverseIf RED)
-                    .splineToConstantHeading(Vector2d(11.0, (-11.0) reverseIf BLUE), 0.0)
-                    .splineToConstantHeading(Vector2d(58.0, (-11.0) reverseIf BLUE), 0.0)
-                    .buildAndRun()
-
-            val runtime = System.currentTimeMillis()
-            val beforePark = runtime + delayBeforePark * 1000
-
-            while (System.currentTimeMillis() < beforePark && opModeIsActive());
-        }
-
-        builder()
-                .strafeTo(Vector2d(11.0, (if (endingRegion == CENTER) 10.0 else 37.0) reverseIf RED))
-                .buildAndRun()
-
+    fun hit() {
+        robot.ringLoadServo.position = ExtZoomBotConstants.RING_LOAD_SERVO_PUSH
+        wait(ExtZoomBotConstants.AUTO_SHOOT_WAIT.toLong()) {updateVelocityToTelemetry()}
+        robot.ringLoadServo.position = ExtZoomBotConstants.RING_LOAD_SERVO_BACK
+        wait(ExtZoomBotConstants.AUTO_SHOOT_WAIT.toLong()) {updateVelocityToTelemetry()}
     }
 
     /**
      * Creates and operates [ReflectiveTelemetryMenu] before the init period.
      * Controls code until [isStopRequested] or [isStarted] is true.
      */
+
+    fun updateVelocityToTelemetry() {
+        telemetry.addData("vel", robot.zoomWheel.velocity)
+        telemetry.update()
+    }
+
+    fun wait(timeMs: Long, and: ()->Unit) {
+        val start = System.currentTimeMillis()
+        while (System.currentTimeMillis() < start + timeMs) and()
+    }
 
     fun operateMenu() {
 
@@ -269,13 +189,13 @@ class AutonomousRR : LinearOpMode() {
      * Reverses input number if [testColor] matches [allianceColor]
      */
     private infix fun Double.reverseIf(testColor: AllianceColor) : Double =
-            if (this@AutonomousRR.allianceColor==testColor) -this else this
+            if (this@PowerShotTest.allianceColor==testColor) -this else this
 
     /**
      * Reverses input number if [testLine] matches [startingLine]
      */
     private infix fun Double.reverseIf(testLine: StartingLine): Double =
-            if (this@AutonomousRR.startingLine==testLine) -this else this
+            if (this@PowerShotTest.startingLine==testLine) -this else this
 
     private fun builder() = robot.holonomicRR.trajectoryBuilder()
     private fun builder(tangent: Double) = robot.holonomicRR.trajectoryBuilder(tangent)
