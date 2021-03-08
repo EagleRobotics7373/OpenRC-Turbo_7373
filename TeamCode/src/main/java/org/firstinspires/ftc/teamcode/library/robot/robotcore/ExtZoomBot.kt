@@ -3,8 +3,9 @@ package org.firstinspires.ftc.teamcode.library.robot.robotcore
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver
 import com.qualcomm.robotcore.hardware.*
 import org.firstinspires.ftc.teamcode.library.functions.roadrunnersupport.Encoder
-import org.firstinspires.ftc.teamcode.library.robot.systems.drive.legacy.OdometryModule
-import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.*
+import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.HolonomicRR
+import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.RobotConstantsAccessor
+import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.TwoWheelOdometryLocalizer
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.constants.DriveConstantsRingPlace
 import org.firstinspires.ftc.teamcode.library.robot.systems.drive.roadrunner.constants.OdometryConstants
 import org.firstinspires.ftc.teamcode.library.robot.systems.intakegen3.MagazineRingSensor
@@ -69,11 +70,15 @@ open class ExtZoomBot(_hardwareMap: HardwareMap) : BaseRobot(_hardwareMap) {
 
     // RoadRunner holonomic drivetrain controller and other multi-component systems
      override val holonomicRR             : HolonomicRR           = HolonomicRR(imuControllerC,
-                                                                                 frontLeftMotor, backLeftMotor, backRightMotor, frontRightMotor,
-                                                                                 TwoWheelOdometryLocalizer(odometryLeft, odometryRear, imuControllerC))
+            frontLeftMotor, backLeftMotor, backRightMotor, frontRightMotor,
+            TwoWheelOdometryLocalizer(odometryLeft, odometryRear, imuControllerC))
     @JvmField val ringTapThru             : RingTapper = RingTapper(ringTapThruServo, 0.87, 0.55)
     @JvmField val ringTapper              : RingTapper = RingTapper(ringTapperServo, 0.6, 0.45)
     @JvmField val wobbleGrabber           : WobbleGrabber = WobbleGrabber(wobblePivotServo, wobbleGrabServo)
+
+    @JvmField val intakeTouchSensor       : DigitalChannel     = hwInit("intakeTouchSensor")
+
+    init { intakeTouchSensor.mode = DigitalChannel.Mode.INPUT }
 
     @JvmField val magazineRingSensor1     : MagazineRingSensor = MagazineRingSensor(magColorSensor1, magColorSensor1D)
     @JvmField val magazineRingSensor2     : MagazineRingSensor = MagazineRingSensor(magColorSensor2, magColorSensor2D)

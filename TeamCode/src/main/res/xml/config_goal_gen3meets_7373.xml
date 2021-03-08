@@ -10,11 +10,11 @@
             <Matrix12vMotor name="backLeftMotor" port="3" />
             <Servo name="ringTapperServo" port="4"/>
             <Servo name="ringTapThruServo" port="5"/>
-            <RevTouchSensor name="intakeTouchSensor" port="0" />
             <LynxEmbeddedIMU name="imuC" port="0" bus="0" />
             <LynxColorSensor name="mgcs1" bus="1" port="0"/>
             <LynxColorSensor name="mgcs2" bus="2" port="0"/>
             <LynxColorSensor name="mgcs3" bus="3" port="0"/>
+            <DigitalDevice name="intakeTouchSensor" port="1" />
         </LynxModule>
 
     </LynxUsbDevice>
